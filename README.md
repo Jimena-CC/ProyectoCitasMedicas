@@ -1,2 +1,2 @@
-# Sistema-de-gesti-n-de-citas-m-dicas
+# Sistema de gestión de citas médicas
 Aplicación de escritorio en Java para la gestión unipersonal de agendamiento y reserva de citas médicas.
