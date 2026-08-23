@@ -1,0 +1,75 @@
+name: Desktop CI & Release Generation
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags:
+      - 'v*.*.*' # Se dispara al subir tags como v1.0.0, v1.1.0
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'desktop/**'
+
+jobs:
+  build-and-test:
+    name: Compilar y Probar Cliente Desktop
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Compilar y Probar Lógica
+        run: |
+          cd desktop
+          mvn clean test
+
+      # Empaqueta el ejecutable .jar en la carpeta desktop/target/
+      - name: Construir Paquete JAR
+        run: |
+          cd desktop
+          mvn package -DskipTests
+
+      # Guarda el .jar para entregarlo al siguiente paso (Release)
+      - name: Guardar Artifact (.jar)
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-app-jar
+          path: desktop/target/*.jar
+
+  create-release:
+    name: Publicar Release en GitHub
+    needs: build-and-test
+    if: startsWith(github.ref, 'refs/tags/v') # Condición: Solo si se subió un TAG
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Permiso para publicar en la sección Releases de GitHub
+
+    steps:
+      - name: Descargar Artifact (.jar)
+        uses: actions/download-artifact@v4
+        with:
+          name: desktop-app-jar
+          path: release-build/
+
+      - name: Publicar GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release-build/*.jar
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## Novedades de la Versión ${{ github.ref_name }}
+            - Ejecutable distribuible de la aplicación de escritorio (`ProyectoCitasMedicas-Desktop.jar`).
+            - Asegúrate de tener la API y la base de datos PostgreSQL en ejecución.
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
