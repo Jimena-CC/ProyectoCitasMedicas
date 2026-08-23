@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # Servicio de Base de Datos PostgreSQL
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: citas_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: citas_medicas_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docs/base-de-datos/script_inicial.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # Servicio de la API Backend
+  api-service:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: citas_api
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/citas_medicas_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgrespassword
+    depends_on:
+      - postgres-db
+
+volumes:
+  postgres_data:

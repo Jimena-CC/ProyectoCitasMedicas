@@ -1,0 +1,58 @@
+# ==========================================
+# Archivos de Compilación de Java y Build
+# ==========================================
+target/
+build/
+.gradle/
+out/
+bin/
+*.class
+*.jar
+*.war
+*.ear
+
+# ==========================================
+# Configuración de Entornos e IDEs
+# ==========================================
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+
+# NetBeans
+/nbproject/private/
+/build/
+/nbdist/
+.nb-gradle/
+
+# Visual Studio Code
+.vscode/
+
+# ==========================================
+# Logs y Archivos OS
+# ==========================================
+*.log
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# Variables de Entorno y Credenciales
+# ==========================================
+.env
+application-local.properties
+application-local.yml
+
+# ==========================================
+# Base de Datos (PostgreSQL dumps / data local)
+# ==========================================
+*.sql.bak
+*.dump
+data-pg/
