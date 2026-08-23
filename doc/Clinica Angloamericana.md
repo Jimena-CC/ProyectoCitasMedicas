@@ -1,4 +1,3 @@
-Aquí tienes la información estructurada y formateada visualmente para facilitar su lectura y escaneo rápido:
 
 # Perfil Institucional: Clínica Anglo Americana
 
