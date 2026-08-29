@@ -3,8 +3,10 @@ name: Desktop CI & Release Generation
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      - 'desktop/**'
     tags:
-      - 'v*.*.*' # Se dispara al subir tags como v1.0.0, v1.1.0
+      - 'v*.*.*'
   pull_request:
     branches: [ main, develop ]
     paths:
@@ -19,26 +21,31 @@ jobs:
       - name: Checkout del código
         uses: actions/checkout@v4
 
+      - name: Verificar si existe el proyecto en desktop
+        id: check_files
+        run: |
+          if [ -f "desktop/pom.xml" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "La carpeta desktop aún no tiene código o pom.xml. Saltando build."
+          fi
+
       - name: Configurar Java 17
+        if: steps.check_files.outputs.exists == 'true'
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Compilar y Probar Lógica
-        run: |
-          cd desktop
-          mvn clean test
+      - name: Compilar, Probar y Empaquetar
+        if: steps.check_files.outputs.exists == 'true'
+        run: mvn clean package
+        working-directory: desktop
 
-      # Empaqueta el ejecutable .jar en la carpeta desktop/target/
-      - name: Construir Paquete JAR
-        run: |
-          cd desktop
-          mvn package -DskipTests
-
-      # Guarda el .jar para entregarlo al siguiente paso (Release)
       - name: Guardar Artifact (.jar)
+        if: steps.check_files.outputs.exists == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: desktop-app-jar
@@ -47,11 +54,11 @@ jobs:
   create-release:
     name: Publicar Release en GitHub
     needs: build-and-test
-    if: startsWith(github.ref, 'refs/tags/v') # Condición: Solo si se subió un TAG
+    if: startsWith(github.ref, 'refs/tags/v') && needs.build-and-test.result == 'success'
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write # Permiso para publicar en la sección Releases de GitHub
+      contents: write
 
     steps:
       - name: Descargar Artifact (.jar)
@@ -68,7 +75,6 @@ jobs:
           body: |
             ## Novedades de la Versión ${{ github.ref_name }}
             - Ejecutable distribuible de la aplicación de escritorio (`ProyectoCitasMedicas-Desktop.jar`).
-            - Asegúrate de tener la API y la base de datos PostgreSQL en ejecución.
           draft: false
           prerelease: false
         env:
