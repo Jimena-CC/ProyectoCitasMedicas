@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="99px" preserveAspectRatio="none" style="width:332px;height:99px;" version="1.1" viewBox="0 0 332 99" width="332px" zoomAndPan="magnify"><defs><filter height="300%" id="f1hbtkrr3mu276" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[a24ab22cd0721cba63912cb1a2e0552a]
+entity P1--><polygon fill="#FFFFFF" filter="url(#f1hbtkrr3mu276)" points="49.0442,19.4459,47.8715,21.0482,46.4845,23.3951,44.5008,24.9767,42.4163,25.8415,40.7542,25.9166,38.618,24.8349,36.6023,24.1283,35.0724,22.6936,34.2699,21.0511,33.7939,19.7433,33.3277,18.0351,32.5709,16.5651,33.1525,15.1298,33.662,13.5576,35.574,12.3142,36.9192,10.7008,38.5843,10.165,40.5637,9.7037,43.1021,9.9778,44.4924,10.6335,46.1089,10.9307,48.0743,12.9443,48.7595,15.0701,49.0571,16.5206,48.72,18.9108" style="stroke: #000000; stroke-width: 1.5;"/><path d="M41,25.5 L41.1868,25.5 L40.6317,30.9 L41.1718,36.3 L41.3553,41.7 L40.3659,47.1 L41,52.5 M28,33.5 L28,33.4309 L33.2,33.1209 L38.4,33.1591 L43.6,33.4394 L48.8,32.8854 L54,33.5 M41,52.5 L41.3719,52.8223 L37.9766,55.1331 L35.6672,58.3849 L33.4901,61.7515 L30.5424,64.4501 L28,67.5 M41,52.5 L41.0458,52.5397 L43.5785,55.4814 L46.3199,58.6039 L48.9606,61.6392 L51.7934,64.841 L54,67.5 " fill="none" filter="url(#f1hbtkrr3mu276)" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="70" x="6" y="85.9951">Persona 1</text><!--MD5=[363690bfff83d946e49026b48e74bf54]
+entity P2--><polygon fill="#FFFFFF" filter="url(#f1hbtkrr3mu276)" points="293.0442,19.4459,291.8715,21.0482,290.4845,23.3951,288.5008,24.9767,286.4163,25.8415,284.7542,25.9166,282.618,24.8349,280.6023,24.1283,279.0724,22.6936,278.2699,21.0511,277.7939,19.7433,277.3277,18.0351,276.5709,16.5651,277.1525,15.1298,277.662,13.5576,279.574,12.3142,280.9192,10.7008,282.5843,10.165,284.5637,9.7037,287.1021,9.9778,288.4924,10.6335,290.1089,10.9307,292.0743,12.9443,292.7595,15.0701,293.0571,16.5206,292.72,18.9108" style="stroke: #000000; stroke-width: 1.5;"/><path d="M285,25.5 L285.1868,25.5 L284.6317,30.9 L285.1718,36.3 L285.3553,41.7 L284.3659,47.1 L285,52.5 M272,33.5 L272,33.4309 L277.2,33.1209 L282.4,33.1591 L287.6,33.4394 L292.8,32.8854 L298,33.5 M285,52.5 L285.3719,52.8223 L281.9766,55.1331 L279.6672,58.3849 L277.4901,61.7515 L274.5424,64.4501 L272,67.5 M285,52.5 L285.0458,52.5397 L287.5785,55.4814 L290.3199,58.6039 L292.9606,61.6392 L295.7934,64.841 L298,67.5 " fill="none" filter="url(#f1hbtkrr3mu276)" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="70" x="250" y="85.9951">Persona 2</text><!--MD5=[4f47c6dc96a5b632210bd0d1331acc4d]
+link P1 to P2--><path d="M76.22,48.5 L76.22,48.7802 L86.43,47.9476 L96.64,48.7577 L106.85,49.0329 L117.06,47.5488 L127.27,48.3964 L137.48,47.9313 L147.69,47.9887 L157.9,48.4091 L168.11,47.5782 L178.32,49.2382 L188.53,47.6596 L198.74,48.2363 L208.95,49.0759 L219.16,48.3856 L229.37,48.591 L239.58,48.4574 L249.79,48.5 " fill="none" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="137" x="94.5" y="41.5669">se toman de la mano</text><!--MD5=[8083b16bb26181de9b82363546070185]
+@startuml
+skinparam handwritten true
+skinparam backgroundcolor transparent
+skinparam actor {
+    BackgroundColor White
+    BorderColor Black
+}
+
+actor "Persona 1" as P1
+actor "Persona 2" as P2
+
+P1 -right- P2 : "se toman de la mano"
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 17.0.20.1+1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: null
+--></g></svg>
