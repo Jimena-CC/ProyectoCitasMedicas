@@ -1,0 +1,3 @@
+Esta carpeta contiene todo el código relacionado con la interfaz de usuario y el desarrollo del frontend del proyecto.
+El objetivo de esta sección es centralizar los archivos necesarios para construir, ejecutar y mantener la aplicación del lado del cliente, incluyendo componentes visuales, páginas, estilos, recursos y configuraciones específicas del frontend.
+La organización interna y tecnologías usadas de esta carpeta dependerán de las necesidades del proyecto y los requerimientos planteados en la documentación. 
