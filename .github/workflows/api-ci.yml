@@ -11,38 +11,39 @@ on:
       - 'api/**'
 
 jobs:
-  build-and-test-api:
-    name: Compilar, Probar y Validar Docker de API
+  test-api:
+    name: Compilar y Probar API
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Trae el código del repositorio a la máquina virtual de GitHub
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      # Verifica que existan archivos mínimos para no dar error si la carpeta está vacía
-      - name: Verificar si existe el proyecto en api
-        id: check_files
-        run: |
-          if [ -f "api/pom.xml" ]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-            echo "La carpeta api aún no tiene código o pom.xml. Saltando build."
-          fi
-
+      # 2. Instala Java 17 Temurin y activa caché de Maven para ir más rápido
       - name: Configurar Java 17
-        if: steps.check_files.outputs.exists == 'true'
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
 
+      # 3. Corre las pruebas unitarias creadas en Java (JUnit / Mockito)
       - name: Ejecutar Pruebas Unitarias
-        if: steps.check_files.outputs.exists == 'true'
-        run: mvn clean test
-        working-directory: api
+        run: |
+          cd api
+          mvn clean test
 
+  docker-check:
+    name: Validar Imagen Docker de la API
+    needs: test-api # Solo si las pruebas pasan exitosamente
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # 4. Verifica que el Dockerfile de la API compile sin errores
       - name: Construir Imagen Docker
-        if: steps.check_files.outputs.exists == 'true' && hashFiles('api/Dockerfile') != ''
-        run: docker build -t citas-medicas-api:latest ./api
+        run: |
+          docker build -t citas-medicas-api:latest ./api
