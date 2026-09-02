@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="825px" preserveAspectRatio="none" style="width:987px;height:825px;" version="1.1" viewBox="0 0 987 825" width="987px" zoomAndPan="magnify"><defs><filter height="300%" id="f1p8zzleelchtt" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><text fill="#000000" font-family="sans-serif" font-size="18" lengthAdjust="spacingAndGlyphs" textLength="400" x="297" y="16.708">Diagrama Entidad-Relación - MediCitas Anglo</text><!--MD5=[8f42d3c59cd42d6d28b2958d190e4ba9]
+class paciente--><rect fill="#FEFECE" filter="url(#f1p8zzleelchtt)" height="129.6016" id="paciente" style="stroke: #A80036; stroke-width: 1.5;" width="271" x="6" y="330.9531"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="55" x="114" y="347.0918">Paciente</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="7" x2="276" y1="354.9219" y2="354.9219"/><ellipse cx="17" cy="365.9219" fill="#000000" rx="3" ry="3" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="126" x="26" y="369.1323">id_paciente : INT «PK»</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="7" x2="276" y1="375.7266" y2="375.7266"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="175" x="12" y="389.937">tipo_documento : VARCHAR(20)</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="259" x="12" y="402.7417">numero_documento : VARCHAR(20) «UNIQUE»</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="143" x="12" y="415.5464">nombres : VARCHAR(100)</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="143" x="12" y="428.3511">apellidos : VARCHAR(100)</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="131" x="12" y="441.1558">telefono : VARCHAR(20)</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="129" x="12" y="453.9604">correo : VARCHAR(100)</text><!--MD5=[8526b838bd43d9c95a529d06ec509f62]
+class aseguradora--><rect fill="#FEFECE" filter="url(#f1p8zzleelchtt)" height="78.3828" id="aseguradora" style="stroke: #A80036; stroke-width: 1.5;" width="227" x="312" y="356.9531"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="81" x="385" y="373.0918">Aseguradora</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="313" x2="538" y1="380.9219" y2="380.9219"/><ellipse cx="323" cy="391.9219" fill="#000000" rx="3" ry="3" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="151" x="332" y="395.1323">id_aseguradora : INT «PK»</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="313" x2="538" y1="401.7266" y2="401.7266"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="215" x="318" y="415.937">nombre_aseguradora : VARCHAR(100)</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="103" x="318" y="428.7417">ruc : VARCHAR(11)</text><!--MD5=[24e43ab896272762fcf64508ff6f0a18]
+class pac_aseg--><rect fill="#FEFECE" filter="url(#f1p8zzleelchtt)" height="91.1875" id="pac_aseg" style="stroke: #A80036; stroke-width: 1.5;" width="197" x="78" y="533.9531"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="142" x="105.5" y="550.0918">Paciente_Aseguradora</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="79" x2="274" y1="557.9219" y2="557.9219"/><ellipse cx="89" cy="568.9219" fill="#000000" rx="3" ry="3" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="125" x="98" y="572.1323">id_paciente : INT «FK»</text><ellipse cx="89" cy="581.7266" fill="#000000" rx="3" ry="3" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="150" x="98" y="584.937">id_aseguradora : INT «FK»</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="79" x2="274" y1="591.5313" y2="591.5313"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="167" x="84" y="605.7417">numero_poliza : VARCHAR(50)</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="185" x="84" y="618.5464">estado_cobertura : VARCHAR(20)</text><!--MD5=[6b2393c25500a3d1aea5aa1e12ae0b58]
+class especialidad--><rect fill="#FEFECE" filter="url(#f1p8zzleelchtt)" height="78.3828" id="especialidad" style="stroke: #A80036; stroke-width: 1.5;" width="225" x="751" y="28.9531"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="79" x="824" y="45.0918">Especialidad</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="752" x2="975" y1="52.9219" y2="52.9219"/><ellipse cx="762" cy="63.9219" fill="#000000" rx="3" ry="3" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="149" x="771" y="67.1323">id_especialidad : INT «PK»</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="752" x2="975" y1="73.7266" y2="73.7266"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="213" x="757" y="87.937">nombre_especialidad : VARCHAR(100)</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="105" x="757" y="100.7417">descripcion : TEXT</text><!--MD5=[eaa722cdcd485344f84df8d953668f03]
+class sede--><rect fill="#FEFECE" filter="url(#f1p8zzleelchtt)" height="78.3828" id="sede" style="stroke: #A80036; stroke-width: 1.5;" width="182" x="555.5" y="179.9531"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="32" x="630.5" y="196.0918">Sede</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="556.5" x2="736.5" y1="203.9219" y2="203.9219"/><ellipse cx="566.5" cy="214.9219" fill="#000000" rx="3" ry="3" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="106" x="575.5" y="218.1323">id_sede : INT «PK»</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="556.5" x2="736.5" y1="224.7266" y2="224.7266"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="170" x="561.5" y="238.937">nombre_sede : VARCHAR(100)</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="143" x="561.5" y="251.7417">direccion : VARCHAR(200)</text><!--MD5=[39f9e2c0672e7861cca7b68143efad0d]
+class medico--><rect fill="#FEFECE" filter="url(#f1p8zzleelchtt)" height="103.9922" id="medico" style="stroke: #A80036; stroke-width: 1.5;" width="182" x="772.5" y="166.9531"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="44" x="841.5" y="183.0918">Médico</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="773.5" x2="953.5" y1="190.9219" y2="190.9219"/><ellipse cx="783.5" cy="201.9219" fill="#000000" rx="3" ry="3" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="119" x="792.5" y="205.1323">id_medico : INT «PK»</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="773.5" x2="953.5" y1="211.7266" y2="211.7266"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="170" x="778.5" y="225.937">cmp : VARCHAR(20) «UNIQUE»</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="143" x="778.5" y="238.7417">nombres : VARCHAR(100)</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="143" x="778.5" y="251.5464">apellidos : VARCHAR(100)</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="148" x="778.5" y="264.3511">id_especialidad : INT «FK»</text><!--MD5=[18ea37cc777b53a9a640e4076cf5a7d7]
+class horario--><rect fill="#FEFECE" filter="url(#f1p8zzleelchtt)" height="129.6016" id="horario" style="stroke: #A80036; stroke-width: 1.5;" width="145" x="574" y="330.9531"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="117" x="588" y="347.0918">Horario_Disponible</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="575" x2="718" y1="354.9219" y2="354.9219"/><ellipse cx="585" cy="365.9219" fill="#000000" rx="3" ry="3" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="119" x="594" y="369.1323">id_horario : INT «PK»</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="575" x2="718" y1="375.7266" y2="375.7266"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="118" x="580" y="389.937">id_medico : INT «FK»</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="105" x="580" y="402.7417">id_sede : INT «FK»</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="72" x="580" y="415.5464">fecha : DATE</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="99" x="580" y="428.3511">hora_inicio : TIME</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="84" x="580" y="441.1558">hora_fin : TIME</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="124" x="580" y="453.9604">disponible : BOOLEAN</text><!--MD5=[096ea422ab6519387255aee81f0476fe]
+class cita--><rect fill="#FEFECE" filter="url(#f1p8zzleelchtt)" height="116.7969" id="cita" style="stroke: #A80036; stroke-width: 1.5;" width="162" x="344.5" y="520.9531"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="24" x="413.5" y="537.0918">Cita</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="345.5" x2="505.5" y1="544.9219" y2="544.9219"/><ellipse cx="355.5" cy="555.9219" fill="#000000" rx="3" ry="3" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="98" x="364.5" y="559.1323">id_cita : INT «PK»</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="345.5" x2="505.5" y1="565.7266" y2="565.7266"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="125" x="350.5" y="579.937">id_paciente : INT «FK»</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="118" x="350.5" y="592.7417">id_horario : INT «FK»</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="150" x="350.5" y="605.5464">id_aseguradora : INT «FK»</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="148" x="350.5" y="618.3511">fecha_reserva : DATETIME</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="124" x="350.5" y="631.1558">estado : VARCHAR(20)</text><!--MD5=[7533dd4a4a1fe83fa2b5ffaa2e427979]
+class notificacion--><rect fill="#FEFECE" filter="url(#f1p8zzleelchtt)" height="116.7969" id="notificacion" style="stroke: #A80036; stroke-width: 1.5;" width="168" x="341.5" y="697.9531"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="73" x="389" y="714.0918">Notificación</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="342.5" x2="508.5" y1="721.9219" y2="721.9219"/><ellipse cx="352.5" cy="732.9219" fill="#000000" rx="3" ry="3" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="142" x="361.5" y="736.1323">id_notificacion : INT «PK»</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="342.5" x2="508.5" y1="742.7266" y2="742.7266"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="97" x="347.5" y="756.937">id_cita : INT «FK»</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="106" x="347.5" y="769.7417">tipo : VARCHAR(30)</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="134" x="347.5" y="782.5464">fecha_envio : DATETIME</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="115" x="347.5" y="795.3511">canal : VARCHAR(20)</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="124" x="347.5" y="808.1558">estado : VARCHAR(20)</text><!--MD5=[0e9ce6df5b8205fa3c94ed60aa73539a]
+class usuario--><rect fill="#FEFECE" filter="url(#f1p8zzleelchtt)" height="103.9922" id="usuario" style="stroke: #A80036; stroke-width: 1.5;" width="216" x="755.5" y="343.9531"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="48" x="839.5" y="360.0918">Usuario</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="756.5" x2="970.5" y1="367.9219" y2="367.9219"/><ellipse cx="766.5" cy="378.9219" fill="#000000" rx="3" ry="3" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="121" x="775.5" y="382.1323">id_usuario : INT «PK»</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="756.5" x2="970.5" y1="388.7266" y2="388.7266"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="204" x="761.5" y="402.937">username : VARCHAR(50) «UNIQUE»</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="182" x="761.5" y="415.7417">password_hash : VARCHAR(255)</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="100" x="761.5" y="428.5464">rol : VARCHAR(30)</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="118" x="761.5" y="441.3511">id_medico : INT «FK»</text><!--MD5=[3035a2e28f1886439c76ededfda12216]
+class auditoria--><rect fill="#FEFECE" filter="url(#f1p8zzleelchtt)" height="103.9922" id="auditoria" style="stroke: #A80036; stroke-width: 1.5;" width="180" x="773.5" y="527.4531"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="56" x="835.5" y="543.5918">Auditoría</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="774.5" x2="952.5" y1="551.4219" y2="551.4219"/><ellipse cx="784.5" cy="562.4219" fill="#000000" rx="3" ry="3" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="128" x="793.5" y="565.6323">id_auditoria : INT «PK»</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="774.5" x2="952.5" y1="572.2266" y2="572.2266"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="120" x="779.5" y="586.437">id_usuario : INT «FK»</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="128" x="779.5" y="599.2417">accion : VARCHAR(100)</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="168" x="779.5" y="612.0464">tabla_afectada : VARCHAR(50)</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="149" x="779.5" y="624.8511">fecha_registro : DATETIME</text><!--MD5=[9e87d9902a843b2c9a3dd765958f59f2]
+link paciente to pac_aseg--><path d="M176.5,469.1631 C176.5,469.1631 176.5,525.7431 176.5,525.7431 " fill="none" id="paciente-pac_aseg" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="176.5" x2="182.5" y1="525.7431" y2="533.7431"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="176.5" x2="170.5" y1="525.7431" y2="533.7431"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="176.5" x2="176.5" y1="525.7431" y2="533.7431"/><ellipse cx="176.5" cy="519.7431" fill="none" rx="4" ry="4" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="172.5" x2="180.5" y1="465.1631" y2="465.1631"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="172.5" x2="180.5" y1="468.1631" y2="468.1631"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="176.5" x2="176.5" y1="469.1631" y2="461.1631"/><!--MD5=[e1650ae19a40a1dc3167e9eae01bddf6]
+link aseguradora to pac_aseg--><path d="M326.75,442.9731 C326.75,442.9731 326.75,579.9531 326.75,579.9531 C326.75,579.9531 283.04,579.9531 283.04,579.9531 " fill="none" id="aseguradora-pac_aseg" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="283.04" x2="275.04" y1="579.9531" y2="585.9531"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="283.04" x2="275.04" y1="579.9531" y2="573.9531"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="283.04" x2="275.04" y1="579.9531" y2="579.9531"/><ellipse cx="289.04" cy="579.9531" fill="none" rx="4" ry="4" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="322.75" x2="330.75" y1="438.9731" y2="438.9731"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="322.75" x2="330.75" y1="441.9731" y2="441.9731"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="326.75" x2="326.75" y1="442.9731" y2="434.9731"/><!--MD5=[ba97ea2e2076f11742ea3ead3623c1da]
+link paciente to cita--><path d="M285.13,443.9531 C285.13,443.9531 385,443.9531 385,443.9531 C385,443.9531 385,512.8131 385,512.8131 " fill="none" id="paciente-cita" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="385" x2="391" y1="512.8131" y2="520.8131"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="385" x2="379" y1="512.8131" y2="520.8131"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="385" x2="385" y1="512.8131" y2="520.8131"/><ellipse cx="385" cy="506.8131" fill="none" rx="4" ry="4" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="281.13" x2="281.13" y1="447.9531" y2="439.9531"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="284.13" x2="284.13" y1="447.9531" y2="439.9531"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="285.13" x2="277.13" y1="443.9531" y2="443.9531"/><!--MD5=[704d3ad99a1e7677b3d1de8033f4900f]
+link aseguradora to cita--><path d="M425.5,443.3231 C425.5,443.3231 425.5,512.6231 425.5,512.6231 " fill="none" id="aseguradora-cita" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="425.5" x2="431.5" y1="512.6231" y2="520.6231"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="425.5" x2="419.5" y1="512.6231" y2="520.6231"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="425.5" x2="425.5" y1="512.6231" y2="520.6231"/><ellipse cx="425.5" cy="506.6231" fill="none" rx="4" ry="4" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="421.5" x2="429.5" y1="439.3231" y2="439.3231"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="421.5" x2="429.5" y1="442.3231" y2="442.3231"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="425.5" x2="425.5" y1="443.3231" y2="435.3231"/><!--MD5=[36d20453c842d448e76186c7fa718e3a]
+link horario to cita--><path d="M565.86,452.9531 C565.86,452.9531 466,452.9531 466,452.9531 C466,452.9531 466,512.6431 466,512.6431 " fill="none" id="horario-cita" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="466" x2="466" y1="509.6431" y2="520.6431"/><ellipse cx="466" cy="509.6431" fill="none" rx="4" ry="4" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="470" x2="462" y1="516.6431" y2="516.6431"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="569.86" x2="569.86" y1="448.9531" y2="456.9531"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="566.86" x2="566.86" y1="448.9531" y2="456.9531"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="565.86" x2="573.86" y1="452.9531" y2="452.9531"/><!--MD5=[e3a191f341c29e55688791707aa8bf6e]
+link especialidad to medico--><path d="M863.5,115.2331 C863.5,115.2331 863.5,158.7931 863.5,158.7931 " fill="none" id="especialidad-medico" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="863.5" x2="869.5" y1="158.7931" y2="166.7931"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="863.5" x2="857.5" y1="158.7931" y2="166.7931"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="863.5" x2="863.5" y1="158.7931" y2="166.7931"/><ellipse cx="863.5" cy="152.7931" fill="none" rx="4" ry="4" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="859.5" x2="867.5" y1="111.2331" y2="111.2331"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="859.5" x2="867.5" y1="114.2331" y2="114.2331"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="863.5" x2="863.5" y1="115.2331" y2="107.2331"/><!--MD5=[554184e596d0cbe7b3a9d26a60c9fca2]
+link medico to horario--><path d="M764.45,264.9531 C764.45,264.9531 670.67,264.9531 670.67,264.9531 C670.67,264.9531 670.67,322.8331 670.67,322.8331 " fill="none" id="medico-horario" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="670.67" x2="676.67" y1="322.8331" y2="330.8331"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="670.67" x2="664.67" y1="322.8331" y2="330.8331"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="670.67" x2="670.67" y1="322.8331" y2="330.8331"/><ellipse cx="670.67" cy="316.8331" fill="none" rx="4" ry="4" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="768.45" x2="768.45" y1="260.9531" y2="268.9531"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="765.45" x2="765.45" y1="260.9531" y2="268.9531"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="764.45" x2="772.45" y1="264.9531" y2="264.9531"/><!--MD5=[30f099304e095fa130cb266f9dd8a8eb]
+link sede to horario--><path d="M622.33,266.2331 C622.33,266.2331 622.33,322.7131 622.33,322.7131 " fill="none" id="sede-horario" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="622.33" x2="628.33" y1="322.7131" y2="330.7131"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="622.33" x2="616.33" y1="322.7131" y2="330.7131"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="622.33" x2="622.33" y1="322.7131" y2="330.7131"/><ellipse cx="622.33" cy="316.7131" fill="none" rx="4" ry="4" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="618.33" x2="626.33" y1="262.2331" y2="262.2331"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="618.33" x2="626.33" y1="265.2331" y2="265.2331"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="622.33" x2="622.33" y1="266.2331" y2="258.2331"/><!--MD5=[26275058be0819a899c49e169c748764]
+link cita to notificacion--><path d="M425.5,646.3931 C425.5,646.3931 425.5,689.7731 425.5,689.7731 " fill="none" id="cita-notificacion" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="425.5" x2="431.5" y1="689.7731" y2="697.7731"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="425.5" x2="419.5" y1="689.7731" y2="697.7731"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="425.5" x2="425.5" y1="689.7731" y2="697.7731"/><ellipse cx="425.5" cy="683.7731" fill="none" rx="4" ry="4" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="421.5" x2="429.5" y1="642.3931" y2="642.3931"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="421.5" x2="429.5" y1="645.3931" y2="645.3931"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="425.5" x2="425.5" y1="646.3931" y2="638.3931"/><!--MD5=[813c2566ecbe160798bc78d966d926a6]
+link usuario to auditoria--><path d="M863.5,456.0431 C863.5,456.0431 863.5,519.2331 863.5,519.2331 " fill="none" id="usuario-auditoria" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="863.5" x2="869.5" y1="519.2331" y2="527.2331"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="863.5" x2="857.5" y1="519.2331" y2="527.2331"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="863.5" x2="863.5" y1="519.2331" y2="527.2331"/><ellipse cx="863.5" cy="513.2331" fill="none" rx="4" ry="4" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="859.5" x2="867.5" y1="452.0431" y2="452.0431"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="859.5" x2="867.5" y1="455.0431" y2="455.0431"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="863.5" x2="863.5" y1="456.0431" y2="448.0431"/><!--MD5=[a299cf294de15a4ee56a81a6ed28389d]
+link medico to usuario--><path d="M863.5,279.1031 C863.5,279.1031 863.5,335.8731 863.5,335.8731 " fill="none" id="medico-usuario" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="863.5" x2="863.5" y1="332.8731" y2="343.8731"/><ellipse cx="863.5" cy="332.8731" fill="none" rx="4" ry="4" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="867.5" x2="859.5" y1="339.8731" y2="339.8731"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="863.5" x2="863.5" y1="282.1031" y2="271.1031"/><ellipse cx="863.5" cy="282.1031" fill="none" rx="4" ry="4" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="859.5" x2="867.5" y1="275.1031" y2="275.1031"/><!--MD5=[851363c0032f0857b7c694f2b5c57f26]
+@startuml
+title Diagrama Entidad-Relación - MediCitas Anglo
+
+hide circle
+skinparam linetype ortho
+
+entity "Paciente" as paciente {
+  * id_paciente : INT <<PK>>
+  - -
+  tipo_documento : VARCHAR(20)
+  numero_documento : VARCHAR(20) <<UNIQUE>>
+  nombres : VARCHAR(100)
+  apellidos : VARCHAR(100)
+  telefono : VARCHAR(20)
+  correo : VARCHAR(100)
+}
+
+entity "Aseguradora" as aseguradora {
+  * id_aseguradora : INT <<PK>>
+  - -
+  nombre_aseguradora : VARCHAR(100)
+  ruc : VARCHAR(11)
+}
+
+entity "Paciente_Aseguradora" as pac_aseg {
+  * id_paciente : INT <<FK>>
+  * id_aseguradora : INT <<FK>>
+  - -
+  numero_poliza : VARCHAR(50)
+  estado_cobertura : VARCHAR(20)
+}
+
+entity "Especialidad" as especialidad {
+  * id_especialidad : INT <<PK>>
+  - -
+  nombre_especialidad : VARCHAR(100)
+  descripcion : TEXT
+}
+
+entity "Sede" as sede {
+  * id_sede : INT <<PK>>
+  - -
+  nombre_sede : VARCHAR(100)
+  direccion : VARCHAR(200)
+}
+
+entity "Médico" as medico {
+  * id_medico : INT <<PK>>
+  - -
+  cmp : VARCHAR(20) <<UNIQUE>>
+  nombres : VARCHAR(100)
+  apellidos : VARCHAR(100)
+  id_especialidad : INT <<FK>>
+}
+
+entity "Horario_Disponible" as horario {
+  * id_horario : INT <<PK>>
+  - -
+  id_medico : INT <<FK>>
+  id_sede : INT <<FK>>
+  fecha : DATE
+  hora_inicio : TIME
+  hora_fin : TIME
+  disponible : BOOLEAN
+}
+
+entity "Cita" as cita {
+  * id_cita : INT <<PK>>
+  - -
+  id_paciente : INT <<FK>>
+  id_horario : INT <<FK>>
+  id_aseguradora : INT <<FK>>
+  fecha_reserva : DATETIME
+  estado : VARCHAR(20)
+}
+
+entity "Notificación" as notificacion {
+  * id_notificacion : INT <<PK>>
+  - -
+  id_cita : INT <<FK>>
+  tipo : VARCHAR(30)
+  fecha_envio : DATETIME
+  canal : VARCHAR(20)
+  estado : VARCHAR(20)
+}
+
+entity "Usuario" as usuario {
+  * id_usuario : INT <<PK>>
+  - -
+  username : VARCHAR(50) <<UNIQUE>>
+  password_hash : VARCHAR(255)
+  rol : VARCHAR(30)
+  id_medico : INT <<FK>>
+}
+
+entity "Auditoría" as auditoria {
+  * id_auditoria : INT <<PK>>
+  - -
+  id_usuario : INT <<FK>>
+  accion : VARCHAR(100)
+  tabla_afectada : VARCHAR(50)
+  fecha_registro : DATETIME
+}
+
+paciente ||- -o{ pac_aseg
+aseguradora ||- -o{ pac_aseg
+
+paciente ||- -o{ cita
+aseguradora ||- -o{ cita
+horario ||- -o| cita
+
+especialidad ||- -o{ medico
+medico ||- -o{ horario
+sede ||- -o{ horario
+
+cita ||- -o{ notificacion
+usuario ||- -o{ auditoria
+medico |o- -o| usuario
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 17.0.20.1+1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: null
+--></g></svg>

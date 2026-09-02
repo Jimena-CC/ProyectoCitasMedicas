@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1278px" preserveAspectRatio="none" style="width:792px;height:1278px;" version="1.1" viewBox="0 0 792 1278" width="792px" zoomAndPan="magnify"><defs><filter height="300%" id="f1qqkrpindykxk" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><text fill="#000000" font-family="sans-serif" font-size="18" lengthAdjust="spacingAndGlyphs" textLength="438" x="188.5" y="16.708">02 - Diagrama de Casos de Uso - MediCitas Anglo</text><!--MD5=[8e900d8fcb7e15072159b0bca8d74a98]
+cluster MediCitas Anglo--><rect fill="#FFFFFF" filter="url(#f1qqkrpindykxk)" height="1125" style="stroke: #000000; stroke-width: 1.5;" width="591" x="190" y="45.4531"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="126" x="422.5" y="60.4482">MediCitas Anglo</text><!--MD5=[3c4c53fd9774f7c05cf58a60bbca9c64]
+cluster Fase 1 - Autoatención--><polygon fill="#FFFFFF" filter="url(#f1qqkrpindykxk)" points="214,88.4531,393,88.4531,400,110.75,757,110.75,757,680.4531,214,680.4531,214,88.4531" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="214" x2="400" y1="110.75" y2="110.75"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="173" x="218" y="103.4482">Fase 1 - Autoatención</text><!--MD5=[6ffe0b922c4f787720de8e8a5b4b215a]
+cluster Fase 2 - Gestión Interna--><polygon fill="#FFFFFF" filter="url(#f1qqkrpindykxk)" points="226,704.4531,422,704.4531,429,726.75,432,726.75,432,1146.4531,226,1146.4531,226,704.4531" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="226" x2="429" y1="726.75" y2="726.75"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="190" x="230" y="719.4482">Fase 2 - Gestión Interna</text><ellipse cx="328.5262" cy="420.4584" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="78.0262" ry="18.0052" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="126" x="265.5262" y="425.1068">Registrar paciente</text><ellipse cx="328.7133" cy="492.2958" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="79.7133" ry="18.3427" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="130" x="263.7133" y="496.9442">Identificar paciente</text><ellipse cx="328.4259" cy="565.2383" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="84.4259" ry="19.2852" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="141" x="257.9259" y="569.8867">Asociar aseguradora</text><ellipse cx="328.6147" cy="642.5761" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="98.6147" ry="22.1229" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="173" x="242.1147" y="647.2245">Consultar especialidades</text><ellipse cx="328.5638" cy="145.2659" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="94.5638" ry="21.3128" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="164" x="246.5638" y="149.9143">Consultar disponibilidad</text><ellipse cx="328.3339" cy="217.5199" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="63.3339" ry="15.0668" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="89" x="283.8339" y="222.1683">Reservar cita</text><ellipse cx="328.7002" cy="285.2932" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="74.7002" ry="17.34" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="118" x="269.7002" y="289.9416">Reprogramar cita</text><ellipse cx="328.7046" cy="352.4768" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="53.2046" ry="14.5236" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="71" x="293.2046" y="357.1252">Anular cita</text><ellipse cx="659.9883" cy="392.5508" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="80.9883" ry="18.5977" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="133" x="593.4883" y="397.1992">Enviar confirmación</text><ellipse cx="659.7901" cy="549.2111" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="79.2901" ry="18.258" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="129" x="595.2901" y="553.8596">Enviar recordatorio</text><ellipse cx="328.6672" cy="755.5866" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="68.6672" ry="16.1334" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="103" x="277.1672" y="760.235">Gestionar citas</text><ellipse cx="328.2712" cy="825.3074" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="82.2712" ry="18.8542" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="136" x="260.2712" y="829.9558">Validar aseguradora</text><ellipse cx="328.3548" cy="897.6241" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="76.3548" ry="17.671" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="122" x="267.3548" y="902.2725">Consultar agenda</text><ellipse cx="328.3427" cy="969.2217" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="81.8427" ry="18.7685" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="135" x="260.8427" y="973.8701">Registrar asistencia</text><ellipse cx="328.7133" cy="1042.2958" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="79.7133" ry="18.3427" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="130" x="263.7133" y="1046.9442">Gestionar usuarios</text><ellipse cx="328.6576" cy="1113.3846" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="72.6576" ry="16.9315" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="113" x="272.1576" y="1118.0331">Revisar auditoría</text><!--MD5=[4b4be03e54178c9ead917d59e65d8b01]
+entity Paciente--><ellipse cx="80.5" cy="355.4531" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="8" ry="8" style="stroke: #A80036; stroke-width: 1.5;"/><path d="M80.5,363.4531 L80.5,390.4531 M67.5,371.4531 L93.5,371.4531 M80.5,390.4531 L67.5,405.4531 M80.5,390.4531 L93.5,405.4531 " fill="none" filter="url(#f1qqkrpindykxk)" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="60" x="50.5" y="423.9482">Paciente</text><!--MD5=[c4d2babf7449b49301d3d69a3045c3ff]
+entity Mensajeria--><ellipse cx="328.5" cy="1196.4531" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="8" ry="8" style="stroke: #A80036; stroke-width: 1.5;"/><path d="M328.5,1204.4531 L328.5,1231.4531 M315.5,1212.4531 L341.5,1212.4531 M328.5,1231.4531 L315.5,1246.4531 M328.5,1231.4531 L341.5,1246.4531 " fill="none" filter="url(#f1qqkrpindykxk)" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="153" x="252" y="1264.9482">Servicio de Mensajería</text><!--MD5=[9656beda4dfe32417d164e38b0969508]
+entity Admision--><ellipse cx="80.5" cy="764.4531" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="8" ry="8" style="stroke: #A80036; stroke-width: 1.5;"/><path d="M80.5,772.4531 L80.5,799.4531 M67.5,780.4531 L93.5,780.4531 M80.5,799.4531 L67.5,814.4531 M80.5,799.4531 L93.5,814.4531 " fill="none" filter="url(#f1qqkrpindykxk)" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="149" x="6" y="832.9482">Personal de Admisión</text><!--MD5=[5f5169c78fc3705eb8becdd82156f160]
+entity Médico--><ellipse cx="80.5" cy="907.4531" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="8" ry="8" style="stroke: #A80036; stroke-width: 1.5;"/><path d="M80.5,915.4531 L80.5,942.4531 M67.5,923.4531 L93.5,923.4531 M80.5,942.4531 L67.5,957.4531 M80.5,942.4531 L93.5,957.4531 " fill="none" filter="url(#f1qqkrpindykxk)" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="50" x="55.5" y="975.9482">Médico</text><!--MD5=[2e903384ba6a94be9c906ea46910cc3f]
+entity Administrador--><ellipse cx="80.5" cy="1050.4531" fill="#FEFECE" filter="url(#f1qqkrpindykxk)" rx="8" ry="8" style="stroke: #A80036; stroke-width: 1.5;"/><path d="M80.5,1058.4531 L80.5,1085.4531 M67.5,1066.4531 L93.5,1066.4531 M80.5,1085.4531 L67.5,1100.4531 M80.5,1085.4531 L93.5,1100.4531 " fill="none" filter="url(#f1qqkrpindykxk)" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="95" x="33" y="1118.9482">Administrador</text><!--MD5=[08eedb055ee4b1c95aa977c849e848ee]
+link Paciente to UC01--><!--MD5=[139e0e8394630919bdb9e450180da6f1]
+link Paciente to UC02--><!--MD5=[34232b9be475eedecdcc8bce077082cd]
+link Paciente to UC03--><!--MD5=[48519543cd551f7a28712dd298f33d40]
+link Paciente to UC04--><path d="M85.28,427.0131 C94.91,518.5631 124.02,732.6031 185,723.4531 C186.88,723.1731 185.58,665.4031 185.13,647.6031 " fill="none" id="Paciente-&gt;UC04" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="185,642.5131,181.2327,651.613,185.1285,647.5115,189.23,651.4073,185,642.5131" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[7465b827f3e8dfc1be8b0da97fc1ca8f]
+link Paciente to UC05--><!--MD5=[6929e6a2eb100e5520bf9754a2ea1777]
+link Paciente to UC06--><!--MD5=[8054315d95a25f6609ee0ef612116cc0]
+link Paciente to UC07--><!--MD5=[42055761b00539111196d08903050ecb]
+link Paciente to UC08--><!--MD5=[24705bf0bf5202ca53413869c3e33680]
+link UC06 to UC09--><path d="M374.65,227.8131 C395.1,233.2931 419.28,240.8831 440,250.4531 C514.02,284.6431 592.19,340.9331 632.1,371.3531 " fill="none" id="UC06-&gt;UC09" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="636.3,374.5731,631.5887,365.9242,632.331,371.5322,626.7231,372.2746,636.3,374.5731" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="61" x="487" y="273.52">«include»</text><!--MD5=[b6dae104ba7e6c09193f49b3b7f9ca36]
+link UC06 to UC10--><path d="M383.87,224.8531 C403.19,229.6431 424.07,237.5131 440,250.4531 C473.33,277.5431 462.17,299.7131 486,335.4531 C535.47,409.6731 604.8,489.4531 638.71,527.2131 " fill="none" id="UC06-&gt;UC10" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="642.27,531.1731,639.2225,521.8076,638.9252,527.4567,633.2761,527.1593,642.27,531.1731" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="61" x="487" y="331.52">«include»</text><!--MD5=[96af5b9d51f53f1176a821f0c621a324]
+link Mensajeria to UC09--><path d="M401.08,1186.7631 C415.84,1175.4231 429.94,1161.9031 440,1146.4531 C479.29,1086.1131 550.95,579.7731 579,513.4531 C594.7,476.3331 622.04,438.3331 640.32,415.0631 " fill="none" id="Mensajeria-&gt;UC09" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="643.63,410.8931,634.8964,415.4456,640.517,414.8058,641.1567,420.4264,643.63,410.8931" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[16881aa777d1f2515a254634e94ef49d]
+link Mensajeria to UC10--><path d="M398.15,1186.8031 C413.48,1175.2731 428.56,1161.6631 440,1146.4531 C584.15,954.8231 641.34,658.6131 655.37,573.2331 " fill="none" id="Mensajeria-&gt;UC10" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="656.19,568.1431,650.8034,576.3884,655.3911,573.0789,658.7007,577.6666,656.19,568.1431" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[951cc444d6ba785eda940a1d73b04ac9]
+link Admision to UC11--><path d="M155.02,803.8631 C166.4,801.6631 177.01,797.0031 185,788.4531 C185.93,787.4631 185.48,769.7831 185.19,760.7231 " fill="none" id="Admision-&gt;UC11" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="185,755.5431,181.3107,764.6749,185.1713,760.5402,189.306,764.4008,185,755.5431" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[d5c373c42b9e6ba69fe74a815b737ca9]
+link Admision to UC12--><!--MD5=[574a563da8cc4ed2155ece94b982581c]
+link Médico to UC13--><path d="M105.91,945.3931 C129.75,950.5031 165.23,953.3931 185,932.4531 C186,931.3931 185.5,912.2731 185.19,902.7531 " fill="none" id="Médico-&gt;UC13" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="185,897.5531,181.3368,906.6954,185.1856,902.5497,189.3313,906.3985,185,897.5531" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[5e341de22c013c54f6dd3d8a33bbad51]
+link Médico to UC14--><!--MD5=[84f8d2915e29f43a4e8cc0c937d06728]
+link Administrador to UC15--><path d="M128.26,1093.2531 C148.44,1095.3731 170.66,1093.2131 185,1078.4531 C186.05,1077.3631 185.51,1057.3031 185.19,1047.6131 " fill="none" id="Administrador-&gt;UC15" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="185,1042.5531,181.3378,1051.6958,185.1861,1047.5497,189.3322,1051.398,185,1042.5531" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[7e4034f1821b7710787dc33aa787d90a]
+link Administrador to UC16--><!--MD5=[1ca151b5c01d475daf52bd761ae05c8d]
+@startuml
+title 02 - Diagrama de Casos de Uso - MediCitas Anglo
+
+left to right direction
+
+actor Paciente
+actor "Servicio de Mensajería" as Mensajeria
+
+actor "Personal de Admisión" as Admision
+actor Médico
+actor Administrador
+
+rectangle "MediCitas Anglo" {
+
+  package "Fase 1 - Autoatención" {
+
+    usecase "Registrar paciente" as UC01
+    usecase "Identificar paciente" as UC02
+    usecase "Asociar aseguradora" as UC03
+    usecase "Consultar especialidades" as UC04
+    usecase "Consultar disponibilidad" as UC05
+    usecase "Reservar cita" as UC06
+    usecase "Reprogramar cita" as UC07
+    usecase "Anular cita" as UC08
+    usecase "Enviar confirmación" as UC09
+    usecase "Enviar recordatorio" as UC10
+  }
+
+  package "Fase 2 - Gestión Interna" {
+
+    usecase "Gestionar citas" as UC11
+    usecase "Validar aseguradora" as UC12
+    usecase "Consultar agenda" as UC13
+    usecase "Registrar asistencia" as UC14
+    usecase "Gestionar usuarios" as UC15
+    usecase "Revisar auditoría" as UC16
+  }
+}
+
+Paciente - -> UC01
+Paciente - -> UC02
+Paciente - -> UC03
+Paciente - -> UC04
+Paciente - -> UC05
+Paciente - -> UC06
+Paciente - -> UC07
+Paciente - -> UC08
+
+UC06 - -> UC09 : <<include>>
+UC06 - -> UC10 : <<include>>
+
+Mensajeria - -> UC09
+Mensajeria - -> UC10
+
+Admision - -> UC11
+Admision - -> UC12
+
+Médico - -> UC13
+Médico - -> UC14
+
+Administrador - -> UC15
+Administrador - -> UC16
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 17.0.20.1+1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: null
+--></g></svg>
