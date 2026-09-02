@@ -1,0 +1,64 @@
+@startuml
+title 02 - Diagrama de Casos de Uso - MediCitas Anglo
+
+left to right direction
+
+actor Paciente
+actor "Servicio de Mensajería" as Mensajeria
+
+actor "Personal de Admisión" as Admision
+actor Médico
+actor Administrador
+
+rectangle "MediCitas Anglo" {
+
+  package "Fase 1 - Autoatención" {
+
+    usecase "Registrar paciente" as UC01
+    usecase "Identificar paciente" as UC02
+    usecase "Asociar aseguradora" as UC03
+    usecase "Consultar especialidades" as UC04
+    usecase "Consultar disponibilidad" as UC05
+    usecase "Reservar cita" as UC06
+    usecase "Reprogramar cita" as UC07
+    usecase "Anular cita" as UC08
+    usecase "Enviar confirmación" as UC09
+    usecase "Enviar recordatorio" as UC10
+  }
+
+  package "Fase 2 - Gestión Interna" {
+
+    usecase "Gestionar citas" as UC11
+    usecase "Validar aseguradora" as UC12
+    usecase "Consultar agenda" as UC13
+    usecase "Registrar asistencia" as UC14
+    usecase "Gestionar usuarios" as UC15
+    usecase "Revisar auditoría" as UC16
+  }
+}
+
+Paciente --> UC01
+Paciente --> UC02
+Paciente --> UC03
+Paciente --> UC04
+Paciente --> UC05
+Paciente --> UC06
+Paciente --> UC07
+Paciente --> UC08
+
+UC06 --> UC09 : <<include>>
+UC06 --> UC10 : <<include>>
+
+Mensajeria --> UC09
+Mensajeria --> UC10
+
+Admision --> UC11
+Admision --> UC12
+
+Médico --> UC13
+Médico --> UC14
+
+Administrador --> UC15
+Administrador --> UC16
+
+@enduml

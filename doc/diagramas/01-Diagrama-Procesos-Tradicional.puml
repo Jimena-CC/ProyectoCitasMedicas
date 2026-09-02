@@ -1,0 +1,37 @@
+@startuml
+title Proceso de Reserva de Cita - Atención Personal
+
+|Paciente|
+start
+:Solicitar cita;
+
+|Enfermera / Personal de Atención|
+:Identificar paciente;
+
+if (¿Paciente registrado?) then (No)
+  :Registrar paciente;
+endif
+
+:Validar aseguradora;
+:Consultar especialidad;
+:Consultar disponibilidad;
+
+if (¿Hay disponibilidad?) then (No)
+  :Informar falta de cupos;
+  stop
+else (Sí)
+  :Seleccionar horario;
+endif
+
+:Registrar cita;
+
+|Paciente|
+:Confirmar cita;
+
+|Enfermera / Personal de Atención|
+:Confirmar reserva;
+
+|Paciente|
+stop
+
+@enduml
