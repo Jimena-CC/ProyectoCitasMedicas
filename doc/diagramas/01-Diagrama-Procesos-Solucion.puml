@@ -1,0 +1,67 @@
+@startuml
+title Proceso de Reserva de Cita - Autoatención
+
+|Paciente|
+start
+:Ingresar documento;
+
+|Software de Autoatención|
+:Identificar paciente;
+
+if (¿Paciente registrado?) then (No)
+  |Paciente|
+  :Ingresar datos;
+
+  |Software de Autoatención|
+  :Registrar paciente;
+endif
+
+|Paciente|
+:Seleccionar aseguradora;
+:Seleccionar especialidad;
+:Seleccionar sede;
+:Seleccionar fecha;
+
+|Software de Autoatención|
+:Mostrar disponibilidad;
+
+|Paciente|
+:Seleccionar horario;
+
+|Software de Autoatención|
+:Validar cupo;
+
+if (¿Cupo disponible?) then (No)
+  :Rechazar reserva;
+
+  |Paciente|
+  :Elegir otro horario;
+  stop
+endif
+
+|Software de Autoatención|
+:Validar cita duplicada;
+
+if (¿Cita duplicada?) then (Sí)
+  :Rechazar reserva;
+
+  |Paciente|
+  :Elegir otro horario;
+  stop
+endif
+
+|Software de Autoatención|
+:Registrar cita;
+:Enviar confirmación;
+
+|Servicio de Mensajería|
+:Enviar notificación;
+
+|Software de Autoatención|
+:Registrar estado;
+
+|Paciente|
+:Recibir confirmación;
+stop
+
+@enduml

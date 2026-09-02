@@ -1,0 +1,165 @@
+@startuml
+title Diagrama de Clases - MediCitas Anglo
+
+' Configuración visual
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+' Enumeraciones
+enum EstadoCita {
+  RESERVADA
+  REPROGRAMADA
+  ANULADA
+  ATENDIDA
+  RECHAZADA
+}
+
+enum TipoNotificacion {
+  CONFIRMACION
+  RECORDATORIO
+}
+
+enum RolUsuario {
+  ADMINISTRADOR
+  ADMISION
+  MEDICO
+}
+
+' Clases Principales
+class Paciente {
+  - idPaciente : int
+  - tipoDocumento : String
+  - numeroDocumento : String
+  - nombres : String
+  - apellidos : String
+  - telefono : String
+  - correo : String
+  + registrarDatos() : void
+  + identificar(doc: String) : boolean
+  + asociarAseguradora(aseguradora: Aseguradora, poliza: String) : void
+  + consultarDisponibilidad(especialidad: Especialidad, fecha: Date) : List<HorarioDisponible>
+  + reservarCita(horario: HorarioDisponible) : Cita
+  + reprogramarCita(cita: Cita, nuevoHorario: HorarioDisponible) : void
+  + anularCita(cita: Cita) : void
+}
+
+class Aseguradora {
+  - idAseguradora : int
+  - nombre : String
+  - ruc : String
+  + validarCobertura(paciente: Paciente) : boolean
+}
+
+class PacienteAseguradora {
+  - numeroPoliza : String
+  - estadoCobertura : String
+  + verificarPoliza() : boolean
+}
+
+class Especialidad {
+  - idEspecialidad : int
+  - nombre : String
+  - descripcion : String
+  + obtenerMedicos() : List<Medico>
+}
+
+class Sede {
+  - idSede : int
+  - nombre : String
+  - direccion : String
+}
+
+class Medico {
+  - idMedico : int
+  - cmp : String
+  - nombres : String
+  - apellidos : String
+  + consultarAgenda() : List<Cita>
+  + registrarAsistencia(cita: Cita) : void
+}
+
+class HorarioDisponible {
+  - idHorario : int
+  - fecha : Date
+  - horaInicio : Time
+  - horaFin : Time
+  - disponible : boolean
+  + validarCupo() : boolean
+  + bloquearHorario() : void
+  + liberarHorario() : void
+}
+
+class Cita {
+  - idCita : int
+  - fechaReserva : DateTime
+  - estado : EstadoCita
+  + confirmar() : void
+  + reprogramar(nuevoHorario: HorarioDisponible) : void
+  + anular() : void
+  + validarDuplicada(paciente: Paciente, fecha: Date) : boolean
+}
+
+class Notificacion {
+  - idNotificacion : int
+  - tipo : TipoNotificacion
+  - fechaEnvio : DateTime
+  - canal : String
+  - estado : String
+  + enviar() : boolean
+}
+
+class ServicioMensajeria {
+  + enviarConfirmacion(cita: Cita) : boolean
+  + enviarRecordatorio(cita: Cita) : boolean
+}
+
+class Usuario {
+  - idUsuario : int
+  - username : String
+  - passwordHash : String
+  - rol : RolUsuario
+  + autenticar(pass: String) : boolean
+  + cambiarPassword(nuevaPass: String) : void
+}
+
+class PersonalAdmision {
+  + gestionarCita(cita: Cita) : void
+  + validarAseguradora(paciente: Paciente) : boolean
+}
+
+class Administrador {
+  + gestionarUsuarios(usuario: Usuario) : void
+  + revisarAuditoria() : List<Auditoria>
+}
+
+class Auditoria {
+  - idAuditoria : int
+  - accion : String
+  - tablaAfectada : String
+  - fechaRegistro : DateTime
+  + registrarAccion(usuario: Usuario, accion: String) : void
+}
+
+' Herencia
+Usuario <|-- PersonalAdmision
+Usuario <|-- Administrador
+
+' Relaciones y Multiplicidades
+Paciente "1" -- "0..*" PacienteAseguradora
+Aseguradora "1" -- "0..*" PacienteAseguradora
+
+Paciente "1" -- "0..*" Cita : solicita >
+Aseguradora "0..1" -- "0..*" Cita : cubre >
+
+Especialidad "1" -- "1..*" Medico : agrupa >
+Medico "1" -- "0..*" HorarioDisponible : programa >
+Sede "1" -- "0..*" HorarioDisponible : alberga >
+
+HorarioDisponible "1" -- "0..1" Cita : asignado a >
+Cita "1" *-- "0..*" Notificacion : genera >
+
+ServicioMensajeria ..> Notificacion : procesa >
+Usuario "1" -- "0..*" Auditoria : realiza >
+Medico "0..1" -- "0..1" Usuario : posee >
+
+@enduml

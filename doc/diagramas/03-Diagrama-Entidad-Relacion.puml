@@ -1,0 +1,122 @@
+@startuml
+title Diagrama Entidad-Relación - MediCitas Anglo
+
+' Configuración de estilo básico para ERD
+hide circle
+skinparam linetype ortho
+
+entity "Paciente" as paciente {
+  * id_paciente : INT <<PK>>
+  --
+  tipo_documento : VARCHAR(20)
+  numero_documento : VARCHAR(20) <<UNIQUE>>
+  nombres : VARCHAR(100)
+  apellidos : VARCHAR(100)
+  telefono : VARCHAR(20)
+  correo : VARCHAR(100)
+}
+
+entity "Aseguradora" as aseguradora {
+  * id_aseguradora : INT <<PK>>
+  --
+  nombre_aseguradora : VARCHAR(100)
+  ruc : VARCHAR(11)
+}
+
+entity "Paciente_Aseguradora" as pac_aseg {
+  * id_paciente : INT <<FK>>
+  * id_aseguradora : INT <<FK>>
+  --
+  numero_poliza : VARCHAR(50)
+  estado_cobertura : VARCHAR(20)
+}
+
+entity "Especialidad" as especialidad {
+  * id_especialidad : INT <<PK>>
+  --
+  nombre_especialidad : VARCHAR(100)
+  descripcion : TEXT
+}
+
+entity "Sede" as sede {
+  * id_sede : INT <<PK>>
+  --
+  nombre_sede : VARCHAR(100)
+  direccion : VARCHAR(200)
+}
+
+entity "Médico" as medico {
+  * id_medico : INT <<PK>>
+  --
+  cmp : VARCHAR(20) <<UNIQUE>>
+  nombres : VARCHAR(100)
+  apellidos : VARCHAR(100)
+  id_especialidad : INT <<FK>>
+}
+
+entity "Horario_Disponible" as horario {
+  * id_horario : INT <<PK>>
+  --
+  id_medico : INT <<FK>>
+  id_sede : INT <<FK>>
+  fecha : DATE
+  hora_inicio : TIME
+  hora_fin : TIME
+  disponible : BOOLEAN
+}
+
+entity "Cita" as cita {
+  * id_cita : INT <<PK>>
+  --
+  id_paciente : INT <<FK>>
+  id_horario : INT <<FK>>
+  id_aseguradora : INT <<FK>>
+  fecha_reserva : DATETIME
+  estado : VARCHAR(20)
+}
+
+entity "Notificación" as notificacion {
+  * id_notificacion : INT <<PK>>
+  --
+  id_cita : INT <<FK>>
+  tipo : VARCHAR(30)
+  fecha_envio : DATETIME
+  canal : VARCHAR(20)
+  estado : VARCHAR(20)
+}
+
+entity "Usuario" as usuario {
+  * id_usuario : INT <<PK>>
+  --
+  username : VARCHAR(50) <<UNIQUE>>
+  password_hash : VARCHAR(255)
+  rol : VARCHAR(30)
+  id_medico : INT <<FK>>
+}
+
+entity "Auditoría" as auditoria {
+  * id_auditoria : INT <<PK>>
+  --
+  id_usuario : INT <<FK>>
+  accion : VARCHAR(100)
+  tabla_afectada : VARCHAR(50)
+  fecha_registro : DATETIME
+}
+
+' Relaciones entre entidades
+paciente ||--o{ pac_aseg
+aseguradora ||--o{ pac_aseg
+
+paciente ||--o{ cita
+aseguradora ||--o{ cita
+horario ||--o| cita
+
+especialidad ||--o{ medico
+medico ||--o{ horario
+sede ||--o{ horario
+
+cita ||--o{ notificacion
+usuario ||--o{ auditoria
+medico |o--o| usuario
+
+@enduml
