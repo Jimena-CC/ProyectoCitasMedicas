@@ -1,0 +1,66 @@
+@startuml
+title 07 - Proceso propuesto (TO-BE) - Envío de confirmaciones y recordatorios
+
+skinparam shadowing false
+skinparam roundCorner 10
+skinparam defaultFontName "Helvetica"
+skinparam defaultFontSize 12
+skinparam ArrowColor #2F5D56
+skinparam SwimlaneBorderColor #A9C4BD
+skinparam SwimlaneTitleFontColor #0C6E5F
+skinparam SwimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #13917D
+  FontColor #17302B
+  DiamondBackgroundColor #E3F4EF
+  DiamondBorderColor #13917D
+  StartColor #0C6E5F
+  EndColor #0C6E5F
+}
+skinparam note {
+  BackgroundColor #FFF8E6
+  BorderColor #D9B45A
+  FontColor #3D3321
+}
+
+|Tarea programada (API)|
+start
+:Ejecutar cada 5 minutos;
+:Buscar notificaciones PENDIENTE
+con programada_para <= ahora;
+
+while (¿Quedan notificaciones por procesar?) is (Sí)
+  :Tomar la siguiente notificación;
+  if (¿La cita sigue RESERVADA?) then (No)
+    :Marcar CANCELADA;
+  else (Sí)
+    :Armar mensaje con código, médico,
+    sede, fecha y hora de la cita;
+    |Servicio de Mensajería|
+    :Recibir solicitud de envío (correo / SMS);
+    |Tarea programada (API)|
+    if (¿Respuesta exitosa?) then (Sí)
+      :Marcar ENVIADA;
+      :Guardar enviada_en e id_mensaje_proveedor;
+    else (Error o tiempo agotado)
+      :Incrementar intentos;
+      :Guardar detalle_error;
+      if (¿intentos < 3?) then (Sí)
+        :Reprogramar en 10 minutos
+        (sigue PENDIENTE);
+      else (No)
+        :Marcar FALLIDA;
+        note right
+          Visible para Admisión en la Fase 2.
+          La cita no cambia de estado (RF-14).
+        end note
+      endif
+    endif
+  endif
+endwhile (No)
+
+:Registrar resumen de la ejecución en el log;
+stop
+
+@enduml

@@ -1,0 +1,88 @@
+@startuml
+title 06 - Proceso propuesto (TO-BE) - Reprogramar una cita desde el Kiosko
+
+skinparam shadowing false
+skinparam roundCorner 10
+skinparam defaultFontName "Helvetica"
+skinparam defaultFontSize 12
+skinparam ArrowColor #2F5D56
+skinparam SwimlaneBorderColor #A9C4BD
+skinparam SwimlaneTitleFontColor #0C6E5F
+skinparam SwimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #13917D
+  FontColor #17302B
+  DiamondBackgroundColor #E3F4EF
+  DiamondBorderColor #13917D
+  StartColor #0C6E5F
+  EndColor #0C6E5F
+}
+skinparam note {
+  BackgroundColor #FFF8E6
+  BorderColor #D9B45A
+  FontColor #3D3321
+}
+
+' Orden de los carriles
+|Paciente|
+|Kiosko (JavaFX)|
+|API MediCitas|
+|Servicio de Mensajería|
+
+|Paciente|
+start
+:Identificarse con su documento;
+
+|Kiosko (JavaFX)|
+:Abrir "Mis citas";
+
+|API MediCitas|
+:Listar citas RESERVADA futuras
+GET /pacientes/{id}/citas;
+
+if (¿Tiene citas activas?) then (No)
+  |Kiosko (JavaFX)|
+  :Ofrecer reservar una nueva cita;
+  stop
+else (Sí)
+endif
+
+|Paciente|
+:Seleccionar la cita y elegir "Reprogramar";
+
+repeat
+  |API MediCitas|
+  :Consultar cupos LIBRE de la misma
+  especialidad y sede (RF-05);
+  |Paciente|
+  :Elegir nuevo horario;
+  |Kiosko (JavaFX)|
+  :Enviar PATCH /citas/{id}/reprogramacion;
+  |API MediCitas|
+  :Validar que la cita esté RESERVADA
+  y que aún no haya iniciado;
+  :Tomar el cupo nuevo actualizando su versión (RF-07);
+  :Verificar cruce con otra cita del paciente (RF-08);
+repeat while (¿Cupo tomado o cita duplicada? → 409) is (Sí, elegir otro horario)
+->No;
+
+:Liberar el cupo original (RF-09);
+:Incrementar veces_reprogramada;
+:Registrar evento REPROGRAMACION
+con cupo anterior y nuevo;
+:Cancelar recordatorio pendiente
+y programar uno para la nueva fecha;
+:Programar notificación REPROGRAMACION;
+
+|Kiosko (JavaFX)|
+:Mostrar la cita con su nueva fecha y hora;
+
+|Servicio de Mensajería|
+:Entregar aviso de reprogramación;
+
+|Paciente|
+:Recibir aviso por correo / SMS;
+stop
+
+@enduml

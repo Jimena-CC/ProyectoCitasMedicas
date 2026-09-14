@@ -1,64 +1,115 @@
 @startuml
-title Proceso de Reserva de Cita - Autoatención
+title 01 - Proceso propuesto (TO-BE) - Reserva de cita en el Kiosko de Autoatención
+
+skinparam shadowing false
+skinparam roundCorner 10
+skinparam defaultFontName "Helvetica"
+skinparam defaultFontSize 12
+skinparam ArrowColor #2F5D56
+skinparam SwimlaneBorderColor #A9C4BD
+skinparam SwimlaneTitleFontColor #0C6E5F
+skinparam SwimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #13917D
+  FontColor #17302B
+  DiamondBackgroundColor #E3F4EF
+  DiamondBorderColor #13917D
+  StartColor #0C6E5F
+  EndColor #0C6E5F
+}
+skinparam note {
+  BackgroundColor #FFF8E6
+  BorderColor #D9B45A
+  FontColor #3D3321
+}
 
 |Paciente|
 start
-:Ingresar documento;
+:Ingresar tipo y número de documento;
 
-|Software de Autoatención|
-:Identificar paciente;
+|Kiosko (JavaFX)|
+:Consultar paciente
+GET /pacientes?tipoDocumento&numeroDocumento;
+
+|API MediCitas|
+:Buscar por documento (RF-02);
 
 if (¿Paciente registrado?) then (No)
   |Paciente|
-  :Ingresar datos;
-
-  |Software de Autoatención|
-  :Registrar paciente;
+  :Completar datos personales y de contacto;
+  |Kiosko (JavaFX)|
+  :Validar formato (DNI de 8 dígitos, correo, celular);
+  |API MediCitas|
+  :Registrar paciente
+  POST /pacientes (RF-01);
+  if (¿Documento ya existe?) then (Sí)
+    :Responder 409 DOCUMENTO_DUPLICADO;
+    |Kiosko (JavaFX)|
+    :Recuperar el perfil existente;
+  endif
 endif
 
 |Paciente|
-:Seleccionar aseguradora;
-:Seleccionar especialidad;
-:Seleccionar sede;
-:Seleccionar fecha;
-
-|Software de Autoatención|
-:Mostrar disponibilidad;
+:Elegir aseguradora y plan, o atención particular;
+|API MediCitas|
+:Asociar seguro al paciente (RF-03);
 
 |Paciente|
-:Seleccionar horario;
+:Elegir especialidad y sede;
+|API MediCitas|
+:Listar especialidades activas por sede (RF-04);
 
-|Software de Autoatención|
-:Validar cupo;
-
-if (¿Cupo disponible?) then (No)
-  :Rechazar reserva;
-
+repeat
   |Paciente|
-  :Elegir otro horario;
-  stop
-endif
-
-|Software de Autoatención|
-:Validar cita duplicada;
-
-if (¿Cita duplicada?) then (Sí)
-  :Rechazar reserva;
-
+  :Elegir fecha en la franja de 14 días;
+  |API MediCitas|
+  :Consultar cupos LIBRE del rango (RF-05);
+  note right: Respuesta ≤ 3 s (RNF-04)
+  |Kiosko (JavaFX)|
+  :Mostrar horarios agrupados por médico;
   |Paciente|
-  :Elegir otro horario;
-  stop
-endif
+  :Seleccionar horario e indicar motivo de consulta;
+  :Confirmar reserva;
+  |Kiosko (JavaFX)|
+  :Enviar POST /citas con Idempotency-Key;
+  |API MediCitas|
+  :Abrir transacción;
+  :Tomar cupo actualizando su versión (RF-07);
+  :Verificar cruce con otra cita del paciente (RF-08);
+  |API MediCitas|
+repeat while (¿Cupo tomado o cita duplicada? → 409) is (Sí, elegir otro horario)
+->No;
 
-|Software de Autoatención|
-:Registrar cita;
-:Enviar confirmación;
+|API MediCitas|
+:Crear cita RESERVADA con código único;
+:Marcar cupo como RESERVADO;
+:Registrar evento RESERVA en historial;
+:Programar notificaciones
+CONFIRMACION (inmediata) y RECORDATORIO (24 h antes) (RF-12);
+:Confirmar transacción y responder 201;
 
-|Servicio de Mensajería|
-:Enviar notificación;
-
-|Software de Autoatención|
-:Registrar estado;
+fork
+  |Kiosko (JavaFX)|
+  :Mostrar código de cita, médico, sede, fecha y hora;
+  |Paciente|
+  :Revisar el resumen de su cita;
+fork again
+  |API MediCitas|
+  :Enviar confirmación al proveedor (RF-11);
+  |Servicio de Mensajería|
+  :Entregar correo / SMS;
+  |API MediCitas|
+  if (¿Proveedor respondió OK?) then (Sí)
+    :Notificación ENVIADA (RF-13);
+  else (No)
+    :Notificación FALLIDA con detalle del error;
+    note right
+      La cita sigue RESERVADA (RF-14).
+      Se reintenta según el proceso 07.
+    end note
+  endif
+end fork
 
 |Paciente|
 :Recibir confirmación;
