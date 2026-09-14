@@ -1,122 +1,290 @@
 @startuml
-title Diagrama Entidad-Relación - MediCitas Anglo
+title 03 - Diagrama Entidad-Relación - MediCitas Anglo (PostgreSQL 15)
 
-' Configuración de estilo básico para ERD
+' ---------------------------------------------------------------
+' Convenciones
+'  *  campo obligatorio (NOT NULL)
+'  PK llave primaria · FK llave foránea · UK restricción única
+'  Tipos expresados en PostgreSQL. Fechas con zona horaria de Lima (UTC-5).
+' ---------------------------------------------------------------
+
 hide circle
+hide empty methods
 skinparam linetype ortho
-
-entity "Paciente" as paciente {
-  * id_paciente : INT <<PK>>
-  --
-  tipo_documento : VARCHAR(20)
-  numero_documento : VARCHAR(20) <<UNIQUE>>
-  nombres : VARCHAR(100)
-  apellidos : VARCHAR(100)
-  telefono : VARCHAR(20)
-  correo : VARCHAR(100)
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam defaultFontName "Helvetica"
+skinparam defaultFontSize 12
+skinparam ArrowColor #2F5D56
+skinparam ArrowThickness 1.2
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #13917D
+  HeaderBackgroundColor #E3F4EF
+  FontColor #17302B
+  AttributeFontColor #17302B
+  StereotypeFontColor #5A6E69
+}
+skinparam package {
+  BackgroundColor #F4F8F7
+  BorderColor #A9C4BD
+  FontColor #0C6E5F
+  FontStyle bold
+}
+skinparam note {
+  BackgroundColor #FFF8E6
+  BorderColor #D9B45A
+  FontColor #3D3321
 }
 
-entity "Aseguradora" as aseguradora {
-  * id_aseguradora : INT <<PK>>
-  --
-  nombre_aseguradora : VARCHAR(100)
-  ruc : VARCHAR(11)
+package "Catálogo de la clínica" {
+
+  entity "sede" as sede {
+    * id_sede : BIGSERIAL <<PK>>
+    --
+    * codigo : VARCHAR(10) <<UK>>
+    * nombre : VARCHAR(100)
+    * direccion : VARCHAR(200)
+    * distrito : VARCHAR(60)
+    telefono : VARCHAR(20)
+    * activa : BOOLEAN = true
+  }
+
+  entity "especialidad" as especialidad {
+    * id_especialidad : BIGSERIAL <<PK>>
+    --
+    * nombre : VARCHAR(120) <<UK>>
+    descripcion : TEXT
+    * duracion_cita_min : SMALLINT = 20
+    * activa : BOOLEAN = true
+  }
+
+  entity "sede_especialidad" as sede_esp {
+    * id_sede : BIGINT <<PK, FK>>
+    * id_especialidad : BIGINT <<PK, FK>>
+    --
+    * activa : BOOLEAN = true
+  }
+
+  entity "medico" as medico {
+    * id_medico : BIGSERIAL <<PK>>
+    --
+    * cmp : VARCHAR(10) <<UK>>
+    rne : VARCHAR(10)
+    * nombres : VARCHAR(100)
+    * apellidos : VARCHAR(100)
+    * id_especialidad : BIGINT <<FK>>
+    * activo : BOOLEAN = true
+  }
 }
 
-entity "Paciente_Aseguradora" as pac_aseg {
-  * id_paciente : INT <<FK>>
-  * id_aseguradora : INT <<FK>>
-  --
-  numero_poliza : VARCHAR(50)
-  estado_cobertura : VARCHAR(20)
+package "Pacientes y seguros" {
+
+  entity "paciente" as paciente {
+    * id_paciente : BIGSERIAL <<PK>>
+    --
+    * tipo_documento : VARCHAR(3)
+    * numero_documento : VARCHAR(12)
+    * nombres : VARCHAR(100)
+    * apellidos : VARCHAR(100)
+    * fecha_nacimiento : DATE
+    sexo : CHAR(1)
+    * telefono : VARCHAR(15)
+    * correo : VARCHAR(120)
+    * acepta_notificaciones : BOOLEAN = true
+    * fecha_registro : TIMESTAMPTZ
+    ..
+    UK (tipo_documento, numero_documento)
+    tipo_documento: DNI · CE · PAS
+  }
+
+  entity "aseguradora" as aseguradora {
+    * id_aseguradora : BIGSERIAL <<PK>>
+    --
+    * nombre : VARCHAR(100) <<UK>>
+    * ruc : CHAR(11) <<UK>>
+    * tipo : VARCHAR(15)
+    * activa : BOOLEAN = true
+  }
+
+  entity "plan_seguro" as plan {
+    * id_plan : BIGSERIAL <<PK>>
+    --
+    * id_aseguradora : BIGINT <<FK>>
+    * nombre : VARCHAR(80)
+    copago_consulta : NUMERIC(8,2)
+    * activo : BOOLEAN = true
+    ..
+    UK (id_aseguradora, nombre)
+  }
+
+  entity "paciente_seguro" as pac_seg {
+    * id_paciente_seguro : BIGSERIAL <<PK>>
+    --
+    * id_paciente : BIGINT <<FK>>
+    * id_plan : BIGINT <<FK>>
+    numero_poliza : VARCHAR(30)
+    * estado_cobertura : VARCHAR(12)
+    vigente_hasta : DATE
+    ..
+    UK (id_paciente, id_plan)
+    estado_cobertura: VIGENTE · SUSPENDIDA · VENCIDA
+    Cita sin seguro = atención particular
+  }
 }
 
-entity "Especialidad" as especialidad {
-  * id_especialidad : INT <<PK>>
-  --
-  nombre_especialidad : VARCHAR(100)
-  descripcion : TEXT
+package "Agenda y citas" {
+
+  entity "cupo" as cupo {
+    * id_cupo : BIGSERIAL <<PK>>
+    --
+    * id_medico : BIGINT <<FK>>
+    * id_sede : BIGINT <<FK>>
+    * fecha : DATE
+    * hora_inicio : TIME
+    * hora_fin : TIME
+    consultorio : VARCHAR(20)
+    * estado : VARCHAR(10) = 'LIBRE'
+    * version : INTEGER = 0
+    ..
+    UK (id_medico, fecha, hora_inicio)
+    CHECK (hora_fin > hora_inicio)
+  }
+
+  entity "cita" as cita {
+    * id_cita : BIGSERIAL <<PK>>
+    --
+    * codigo : VARCHAR(12) <<UK>>
+    * id_paciente : BIGINT <<FK>>
+    * id_cupo : BIGINT <<FK>>
+    id_paciente_seguro : BIGINT <<FK>>
+    * motivo_consulta : VARCHAR(250)
+    * estado : VARCHAR(12) = 'RESERVADA'
+    * canal_origen : VARCHAR(10)
+    * clave_idempotencia : UUID <<UK>>
+    * veces_reprogramada : SMALLINT = 0
+    * fecha_reserva : TIMESTAMPTZ
+    * fecha_actualizacion : TIMESTAMPTZ
+  }
+
+  entity "historial_cita" as historial {
+    * id_historial : BIGSERIAL <<PK>>
+    --
+    * id_cita : BIGINT <<FK>>
+    * evento : VARCHAR(15)
+    estado_anterior : VARCHAR(12)
+    * estado_nuevo : VARCHAR(12)
+    id_cupo_anterior : BIGINT <<FK>>
+    id_cupo_nuevo : BIGINT <<FK>>
+    id_usuario : BIGINT <<FK>>
+    detalle : VARCHAR(250)
+    * fecha_evento : TIMESTAMPTZ
+  }
 }
 
-entity "Sede" as sede {
-  * id_sede : INT <<PK>>
-  --
-  nombre_sede : VARCHAR(100)
-  direccion : VARCHAR(200)
+package "Notificaciones" {
+
+  entity "notificacion" as notificacion {
+    * id_notificacion : BIGSERIAL <<PK>>
+    --
+    * id_cita : BIGINT <<FK>>
+    * tipo : VARCHAR(15)
+    * canal : VARCHAR(5)
+    * destino : VARCHAR(120)
+    * programada_para : TIMESTAMPTZ
+    enviada_en : TIMESTAMPTZ
+    * estado : VARCHAR(10) = 'PENDIENTE'
+    * intentos : SMALLINT = 0
+    id_mensaje_proveedor : VARCHAR(80)
+    detalle_error : VARCHAR(250)
+  }
 }
 
-entity "Médico" as medico {
-  * id_medico : INT <<PK>>
-  --
-  cmp : VARCHAR(20) <<UNIQUE>>
-  nombres : VARCHAR(100)
-  apellidos : VARCHAR(100)
-  id_especialidad : INT <<FK>>
+package "Seguridad y auditoría (Ley 29733)" {
+
+  entity "usuario" as usuario {
+    * id_usuario : BIGSERIAL <<PK>>
+    --
+    * username : VARCHAR(50) <<UK>>
+    * password_hash : VARCHAR(72)
+    * rol : VARCHAR(15)
+    id_medico : BIGINT <<FK, UK>>
+    * activo : BOOLEAN = true
+    ultimo_acceso : TIMESTAMPTZ
+    ..
+    rol: ADMINISTRADOR · ADMISION · MEDICO
+    password_hash con BCrypt
+  }
+
+  entity "auditoria" as auditoria {
+    * id_auditoria : BIGSERIAL <<PK>>
+    --
+    id_usuario : BIGINT <<FK>>
+    * accion : VARCHAR(60)
+    * entidad : VARCHAR(40)
+    id_entidad : BIGINT
+    detalle : TEXT
+    ip_origen : VARCHAR(45)
+    * fecha_registro : TIMESTAMPTZ
+  }
 }
 
-entity "Horario_Disponible" as horario {
-  * id_horario : INT <<PK>>
-  --
-  id_medico : INT <<FK>>
-  id_sede : INT <<FK>>
-  fecha : DATE
-  hora_inicio : TIME
-  hora_fin : TIME
-  disponible : BOOLEAN
-}
+' ---------------------------------------------------------------
+' Relaciones
+' ---------------------------------------------------------------
+sede ||--o{ sede_esp : ofrece
+especialidad ||--o{ sede_esp : se atiende en
+especialidad ||--o{ medico : agrupa
 
-entity "Cita" as cita {
-  * id_cita : INT <<PK>>
-  --
-  id_paciente : INT <<FK>>
-  id_horario : INT <<FK>>
-  id_aseguradora : INT <<FK>>
-  fecha_reserva : DATETIME
-  estado : VARCHAR(20)
-}
+medico ||--o{ cupo : atiende
+sede ||--o{ cupo : alberga
 
-entity "Notificación" as notificacion {
-  * id_notificacion : INT <<PK>>
-  --
-  id_cita : INT <<FK>>
-  tipo : VARCHAR(30)
-  fecha_envio : DATETIME
-  canal : VARCHAR(20)
-  estado : VARCHAR(20)
-}
+aseguradora ||--|{ plan : comercializa
+plan ||--o{ pac_seg : cubre
+paciente ||--o{ pac_seg : afilia
 
-entity "Usuario" as usuario {
-  * id_usuario : INT <<PK>>
-  --
-  username : VARCHAR(50) <<UNIQUE>>
-  password_hash : VARCHAR(255)
-  rol : VARCHAR(30)
-  id_medico : INT <<FK>>
-}
+paciente ||--o{ cita : solicita
+cupo ||--o{ cita : ocupa
+pac_seg |o--o{ cita : financia
 
-entity "Auditoría" as auditoria {
-  * id_auditoria : INT <<PK>>
-  --
-  id_usuario : INT <<FK>>
-  accion : VARCHAR(100)
-  tabla_afectada : VARCHAR(50)
-  fecha_registro : DATETIME
-}
+cita ||--|{ historial : registra
+cita ||--o{ notificacion : genera
 
-' Relaciones entre entidades
-paciente ||--o{ pac_aseg
-aseguradora ||--o{ pac_aseg
+medico |o--o| usuario : accede como
+usuario |o--o{ auditoria : realiza
+usuario |o--o{ historial : ejecuta
 
-paciente ||--o{ cita
-aseguradora ||--o{ cita
-horario ||--o| cita
+' ---------------------------------------------------------------
+' Dominios y reglas de negocio
+' ---------------------------------------------------------------
+note bottom of cupo
+  <b>estado</b>: LIBRE · RESERVADO · BLOQUEADO
+  <b>version</b>: bloqueo optimista. Si dos reservas
+  llegan a la vez, solo una actualiza la fila
+  y la otra recibe 409 CUPO_NO_DISPONIBLE (RF-07).
+end note
 
-especialidad ||--o{ medico
-medico ||--o{ horario
-sede ||--o{ horario
+note bottom of cita
+  <b>estado</b>: RESERVADA · ANULADA · ATENDIDA · NO_ASISTIO
+  <b>canal_origen</b>: KIOSKO · ADMISION
+  Un paciente no puede tener dos citas RESERVADA
+  que se crucen en fecha y hora (RF-08).
+  <b>clave_idempotencia</b>: el reintento de una misma
+  reserva devuelve la cita ya creada (RNF-07).
+end note
 
-cita ||--o{ notificacion
-usuario ||--o{ auditoria
-medico |o--o| usuario
+note bottom of notificacion
+  <b>tipo</b>: CONFIRMACION · RECORDATORIO · REPROGRAMACION · ANULACION
+  <b>canal</b>: EMAIL · SMS
+  <b>estado</b>: PENDIENTE · ENVIADA · FALLIDA · CANCELADA (RF-13)
+  Un fallo del proveedor no altera la cita (RF-14).
+end note
+
+note bottom of historial
+  <b>evento</b>: RESERVA · REPROGRAMACION
+  ANULACION · ASISTENCIA
+  id_usuario es nulo cuando actúa el paciente
+  desde el kiosko.
+end note
 
 @enduml
