@@ -47,7 +47,28 @@ El sistema sigue una arquitectura de n-capas distribuida:
 
 ---
 
-## 4. Estructura de Directorios del Repositorio
+## 4. Cómo ejecutar el proyecto
+
+Ambos scripts compilan la primera vez y luego arrancan **una sola JVM** por módulo, con la memoria acotada. Ejecutarlos con `mvn spring-boot:run` / `mvn javafx:run` deja encendida además la JVM de Maven y duplica el consumo (≈590 MB frente a ≈300 MB).
+
+```bash
+./scripts/run-api.sh        # API en http://localhost:8080/api/v1 (base en memoria con datos de demostración)
+./scripts/run-kiosk.sh      # Kiosko conectado a esa API
+```
+
+Opciones útiles del kiosko:
+
+| Opción | Para qué sirve |
+| :--- | :--- |
+| `--demo-stub` | Datos simulados dentro de la app: no necesita API ni base de datos. |
+| `--kiosk` | Pantalla completa, como en el kiosko físico. |
+| `--build` | Fuerza recompilar antes de arrancar. |
+
+Documentos de prueba: **45871236** (Lucía Paredes, con seguro Rímac y una cita reservada) y **70123456** (Diego Salazar, atención particular).
+
+Para levantar la base de datos PostgreSQL real en lugar de la base en memoria: `docker compose up`.
+
+## 5. Estructura de Directorios del Repositorio
 
 El directorio raíz `ProyectoCitasMedicas` estará estructurado de la siguiente manera:
 
@@ -63,23 +84,26 @@ ProyectoCitasMedicas/
 │       └── desktop-ci.yml
 ├── docs/
 │   ├── README.md
-│   ├── arquitectura.md
-│   ├── base-de-datos/
-│   │   ├── script_inicial.sql
-│   │   └── modelo_er.png
-│   └── manuales/
+│   ├── api-contract.md
+│   ├── database/
+│   │   └── initial_schema.sql
+│   ├── diagrams/
+│   ├── prototype/
+│   ├── screens.md
+│   └── screens/
+│       └── img/
 ├── api/
 │   ├── README.md
 │   ├── pom.xml
 │   └── src/
-│       ├── main/java/com/citasmedicas/api/
-│       └── test/java/com/citasmedicas/api/
+│       ├── main/java/com/medicitas/api/
+│       └── test/java/com/medicitas/api/
 ├── desktop/
 │   ├── README.md
 │   ├── pom.xml
 │   └── src/
-│       ├── main/java/com/citasmedicas/desktop/
-│       └── test/java/com/citasmedicas/desktop/
+│       ├── main/java/com/medicitas/kiosk/
+│       └── test/java/com/medicitas/kiosk/
 ├── .gitignore
 └── README.md
 ```
@@ -107,7 +131,7 @@ ProyectoCitasMedicas/
 
 ---
 
-## 5. Convenciones de Commits (Conventional Commits)
+## 6. Convenciones de Commits (Conventional Commits)
 
 Todos los mensajes de commit deben seguir la sintaxis estandarizada:
 
@@ -127,7 +151,7 @@ Todos los mensajes de commit deben seguir la sintaxis estandarizada:
 
 ---
 
-## 6. Estrategia de Ramificación (GitFlow Simplificado)
+## 7. Estrategia de Ramificación (GitFlow Simplificado)
 
 Queda **estrictamente prohibido** hacer `commit` o `push` directo en la rama `main` o `develop`.
 
@@ -139,7 +163,7 @@ Queda **estrictamente prohibido** hacer `commit` o `push` directo en la rama `ma
 
 ---
 
-## 7. Reglas de Pull Requests (PR) y Issues
+## 8. Reglas de Pull Requests (PR) y Issues
 
 1. **Creación de PR:**
    - Las ramas deben solicitar fusionarse hacia `develop`.
@@ -156,7 +180,7 @@ Queda **estrictamente prohibido** hacer `commit` o `push` directo en la rama `ma
 
 ---
 
-## 8. Integración Continua (CI) y Despliegue Continuo (CD)
+## 9. Integración Continua (CI) y Despliegue Continuo (CD)
 
 ### Integración Continua (CI)
 
@@ -174,7 +198,7 @@ A través de **GitHub Actions**, se ejecutarán los siguientes flujos de trabajo
 
 ---
 
-## 9. Reglas de Calidad de Código en Java
+## 10. Reglas de Calidad de Código en Java
 
 1. **Nombrado:**
    - Clases e Interfaces: `PascalCase` (ej. `CitaMedicaController`).

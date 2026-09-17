@@ -1,0 +1,290 @@
+@startuml
+title 03 - Entity Relationship Diagram - MediCitas Anglo (PostgreSQL 15)
+
+' ---------------------------------------------------------------
+' Conventions
+'  *  mandatory column (NOT NULL)
+'  PK primary key · FK foreign key · UK unique constraint
+'  PostgreSQL types. Timestamps use the Lima time zone (UTC-5).
+' ---------------------------------------------------------------
+
+hide circle
+hide empty methods
+skinparam linetype ortho
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam defaultFontName "Helvetica"
+skinparam defaultFontSize 12
+skinparam ArrowColor #0B4FB0
+skinparam ArrowThickness 1.2
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1069E5
+  HeaderBackgroundColor #E4EEFD
+  FontColor #0F1E33
+  AttributeFontColor #0F1E33
+  StereotypeFontColor #56698A
+}
+skinparam package {
+  BackgroundColor #F4F7FC
+  BorderColor #B6C9E4
+  FontColor #0B4FB0
+  FontStyle bold
+}
+skinparam note {
+  BackgroundColor #FFF8E6
+  BorderColor #D9B45A
+  FontColor #3D3321
+}
+
+package "Clinic catalog" {
+
+  entity "location" as location {
+    * id : BIGSERIAL <<PK>>
+    --
+    * code : VARCHAR(10) <<UK>>
+    * name : VARCHAR(100)
+    * address : VARCHAR(200)
+    * district : VARCHAR(60)
+    phone : VARCHAR(20)
+    * active : BOOLEAN = true
+  }
+
+  entity "specialty" as specialty {
+    * id : BIGSERIAL <<PK>>
+    --
+    * name : VARCHAR(120) <<UK>>
+    description : TEXT
+    * appointment_minutes : SMALLINT = 20
+    * active : BOOLEAN = true
+  }
+
+  entity "location_specialty" as location_specialty {
+    * location_id : BIGINT <<PK, FK>>
+    * specialty_id : BIGINT <<PK, FK>>
+    --
+    * active : BOOLEAN = true
+  }
+
+  entity "doctor" as doctor {
+    * id : BIGSERIAL <<PK>>
+    --
+    * license : VARCHAR(10) <<UK>>
+    specialist_registry : VARCHAR(10)
+    * first_names : VARCHAR(100)
+    * last_names : VARCHAR(100)
+    * specialty_id : BIGINT <<FK>>
+    * active : BOOLEAN = true
+  }
+}
+
+package "Patients and insurance" {
+
+  entity "patient" as patient {
+    * id : BIGSERIAL <<PK>>
+    --
+    * document_type : VARCHAR(3)
+    * document_number : VARCHAR(12)
+    * first_names : VARCHAR(100)
+    * last_names : VARCHAR(100)
+    * birth_date : DATE
+    sex : CHAR(1)
+    * phone : VARCHAR(15)
+    * email : VARCHAR(120)
+    * accepts_notifications : BOOLEAN = true
+    * registered_at : TIMESTAMPTZ
+    ..
+    UK (document_type, document_number)
+    document_type: DNI · CE · PAS
+  }
+
+  entity "insurer" as insurer {
+    * id : BIGSERIAL <<PK>>
+    --
+    * name : VARCHAR(100) <<UK>>
+    * ruc : CHAR(11) <<UK>>
+    * type : VARCHAR(15)
+    * active : BOOLEAN = true
+  }
+
+  entity "insurance_plan" as plan {
+    * id : BIGSERIAL <<PK>>
+    --
+    * insurer_id : BIGINT <<FK>>
+    * name : VARCHAR(80)
+    consultation_copay : NUMERIC(8,2)
+    * active : BOOLEAN = true
+    ..
+    UK (insurer_id, name)
+  }
+
+  entity "patient_insurance" as patient_insurance {
+    * id : BIGSERIAL <<PK>>
+    --
+    * patient_id : BIGINT <<FK>>
+    * plan_id : BIGINT <<FK>>
+    policy_number : VARCHAR(30)
+    * coverage_status : VARCHAR(12)
+    valid_until : DATE
+    ..
+    UK (patient_id, plan_id)
+    coverage_status: ACTIVE · SUSPENDED · EXPIRED
+    An appointment with no insurance is self-paid
+  }
+}
+
+package "Schedule and appointments" {
+
+  entity "slot" as slot {
+    * id : BIGSERIAL <<PK>>
+    --
+    * doctor_id : BIGINT <<FK>>
+    * location_id : BIGINT <<FK>>
+    * date : DATE
+    * start_time : TIME
+    * end_time : TIME
+    room : VARCHAR(20)
+    * status : VARCHAR(10) = 'FREE'
+    * version : INTEGER = 0
+    ..
+    UK (doctor_id, date, start_time)
+    CHECK (end_time > start_time)
+  }
+
+  entity "appointment" as appointment {
+    * id : BIGSERIAL <<PK>>
+    --
+    * code : VARCHAR(12) <<UK>>
+    * patient_id : BIGINT <<FK>>
+    * slot_id : BIGINT <<FK>>
+    patient_insurance_id : BIGINT <<FK>>
+    * visit_reason : VARCHAR(250)
+    * status : VARCHAR(12) = 'BOOKED'
+    * booking_channel : VARCHAR(10)
+    * idempotency_key : UUID <<UK>>
+    * reschedule_count : SMALLINT = 0
+    * booked_at : TIMESTAMPTZ
+    * updated_at : TIMESTAMPTZ
+  }
+
+  entity "appointment_history" as history {
+    * id : BIGSERIAL <<PK>>
+    --
+    * appointment_id : BIGINT <<FK>>
+    * event : VARCHAR(15)
+    previous_status : VARCHAR(12)
+    * new_status : VARCHAR(12)
+    previous_slot_id : BIGINT <<FK>>
+    new_slot_id : BIGINT <<FK>>
+    user_id : BIGINT <<FK>>
+    detail : VARCHAR(250)
+    * event_at : TIMESTAMPTZ
+  }
+}
+
+package "Notifications" {
+
+  entity "notification" as notification {
+    * id : BIGSERIAL <<PK>>
+    --
+    * appointment_id : BIGINT <<FK>>
+    * type : VARCHAR(15)
+    * channel : VARCHAR(5)
+    * destination : VARCHAR(120)
+    * scheduled_for : TIMESTAMPTZ
+    sent_at : TIMESTAMPTZ
+    * status : VARCHAR(10) = 'PENDING'
+    * attempts : SMALLINT = 0
+    provider_message_id : VARCHAR(80)
+    error_detail : VARCHAR(250)
+  }
+}
+
+package "Security and audit (Law 29733)" {
+
+  entity "app_user" as app_user {
+    * id : BIGSERIAL <<PK>>
+    --
+    * username : VARCHAR(50) <<UK>>
+    * password_hash : VARCHAR(72)
+    * role : VARCHAR(15)
+    doctor_id : BIGINT <<FK, UK>>
+    * active : BOOLEAN = true
+    last_access : TIMESTAMPTZ
+    ..
+    role: ADMIN · FRONT_DESK · DOCTOR
+    password_hash uses BCrypt
+  }
+
+  entity "audit_log" as audit_log {
+    * id : BIGSERIAL <<PK>>
+    --
+    user_id : BIGINT <<FK>>
+    * action : VARCHAR(60)
+    * entity : VARCHAR(40)
+    entity_id : BIGINT
+    detail : TEXT
+    source_ip : VARCHAR(45)
+    * registered_at : TIMESTAMPTZ
+  }
+}
+
+' ---------------------------------------------------------------
+' Relationships
+' ---------------------------------------------------------------
+location ||--o{ location_specialty : offers
+specialty ||--o{ location_specialty : is offered at
+specialty ||--o{ doctor : groups
+
+doctor ||--o{ slot : serves
+location ||--o{ slot : hosts
+
+insurer ||--|{ plan : sells
+plan ||--o{ patient_insurance : covers
+patient ||--o{ patient_insurance : enrolls in
+
+patient ||--o{ appointment : requests
+slot ||--o{ appointment : is taken by
+patient_insurance |o--o{ appointment : pays for
+
+appointment ||--|{ history : records
+appointment ||--o{ notification : triggers
+
+doctor |o--o| app_user : signs in as
+app_user |o--o{ audit_log : performs
+app_user |o--o{ history : executes
+
+' ---------------------------------------------------------------
+' Domains and business rules
+' ---------------------------------------------------------------
+note bottom of slot
+  <b>status</b>: FREE · BOOKED · BLOCKED
+  <b>version</b>: optimistic lock. When two bookings arrive
+  at the same time only one updates the row; the other
+  gets 409 SLOT_NOT_AVAILABLE (RF-07).
+end note
+
+note bottom of appointment
+  <b>status</b>: BOOKED · CANCELLED · ATTENDED · NO_SHOW
+  <b>booking_channel</b>: KIOSK · FRONT_DESK
+  A patient cannot hold two BOOKED appointments
+  that overlap in date and time (RF-08).
+  <b>idempotency_key</b>: retrying the same booking
+  returns the appointment already created (RNF-07).
+end note
+
+note bottom of notification
+  <b>type</b>: CONFIRMATION · REMINDER · RESCHEDULE · CANCELLATION
+  <b>channel</b>: EMAIL · SMS
+  <b>status</b>: PENDING · SENT · FAILED · CANCELLED (RF-13)
+  A provider failure never changes the appointment (RF-14).
+end note
+
+note bottom of history
+  <b>event</b>: BOOKING · RESCHEDULE
+  CANCELLATION · ATTENDANCE
+  user_id is null when the patient acts
+  from the kiosk.
+end note
+
+@enduml

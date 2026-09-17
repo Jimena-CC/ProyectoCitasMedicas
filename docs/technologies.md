@@ -33,7 +33,7 @@ Java en ambos módulos, con dos proyectos Maven independientes que no comparten 
 | Herramienta | Uso |
 | :--- | :--- |
 | **Visual Studio Code** | IDE del equipo. Extensiones: *Extension Pack for Java*, *Spring Boot Extension Pack* y *Docker*. |
-| **PlantUML** | Diagramas como código. Los `.puml` en `doc/diagramas` generan PNG y SVG automáticamente vía GitHub Actions. Conviene previsualizarlos en el servidor web de PlantUML antes de subirlos. |
+| **PlantUML** | Diagramas como código. Los `.puml` en `docs/diagrams` generan PNG y SVG automáticamente vía GitHub Actions. Conviene previsualizarlos en el servidor web de PlantUML antes de subirlos. |
 | **GitHub Actions** | Integración continua. Compila y prueba ambos módulos en cada PR hacia `develop`. |
 
 La interfaz se construye **en código Java**, no con archivos FXML. Se evita así depender de Scene Builder, que es una aplicación externa a VS Code, y se reducen los conflictos de Git: el XML autogenerado produce merges difíciles cuando varias personas editan la misma pantalla.

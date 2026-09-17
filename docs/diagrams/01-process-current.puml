@@ -1,0 +1,88 @@
+@startuml
+title 01 - Proceso actual (AS-IS) - Reserva de cita con atención personal
+
+skinparam shadowing false
+skinparam roundCorner 10
+skinparam defaultFontName "Helvetica"
+skinparam defaultFontSize 12
+skinparam ArrowColor #5A6E69
+skinparam SwimlaneBorderColor #A9C4BD
+skinparam SwimlaneTitleFontColor #17302B
+skinparam SwimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #7A8C88
+  FontColor #17302B
+  DiamondBackgroundColor #F4F8F7
+  DiamondBorderColor #7A8C88
+  StartColor #17302B
+  EndColor #17302B
+}
+skinparam note {
+  BackgroundColor #FDECEA
+  BorderColor #B4413C
+  FontColor #5A1F1C
+}
+
+|Paciente|
+start
+:Acude a ventanilla o llama a la central de citas;
+note right
+  <b>Problema:</b> depende del horario
+  de atención y genera colas
+end note
+
+|Personal de Admisión / Central de Citas|
+:Solicitar número de documento;
+:Buscar al paciente en el sistema interno;
+
+if (¿Paciente registrado?) then (No)
+  |Paciente|
+  :Dictar datos personales;
+  |Personal de Admisión / Central de Citas|
+  :Registrar paciente manualmente;
+  note right
+    <b>Problema:</b> errores de digitación
+    y registros duplicados
+  end note
+endif
+
+|Paciente|
+:Indicar aseguradora y especialidad;
+
+|Personal de Admisión / Central de Citas|
+:Validar cobertura con la aseguradora;
+:Consultar agenda de médicos por sede;
+
+if (¿Hay cupos disponibles?) then (No)
+  :Informar falta de cupos;
+  |Paciente|
+  :Volver a llamar otro día;
+  stop
+else (Sí)
+endif
+
+|Personal de Admisión / Central de Citas|
+:Ofrecer horarios de forma verbal;
+
+|Paciente|
+:Elegir horario;
+
+|Personal de Admisión / Central de Citas|
+:Registrar la cita en la agenda;
+note right
+  <b>Problema recurrente:</b> doble agendamiento
+  cuando otro operador toma el mismo cupo
+  al mismo tiempo
+end note
+:Comunicar fecha, hora y sede de forma verbal;
+
+|Paciente|
+:Anotar los datos de la cita;
+note right
+  <b>Problema:</b> no recibe confirmación
+  ni recordatorio escrito → ausentismo
+end note
+stop
+
+@enduml
