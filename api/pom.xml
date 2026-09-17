@@ -8,11 +8,11 @@
 		<version>4.1.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.apiclinica</groupId>
+	<groupId>com.medicitas</groupId>
 	<artifactId>api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>api</name>
+	<description>API REST de MediCitas Anglo: reserva de citas médicas para el Kiosko de Autoatención</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -28,7 +28,24 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<springdoc.version>3.1.0</springdoc.version>
+		<embedded-postgres.version>2.1.0</embedded-postgres.version>
+		<embedded-postgres-binaries.version>15.13.0</embedded-postgres-binaries.version>
 	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- Binarios de PostgreSQL 15 para validar el esquema en las pruebas sin Docker -->
+			<dependency>
+				<groupId>io.zonky.test.postgres</groupId>
+				<artifactId>embedded-postgres-binaries-bom</artifactId>
+				<version>${embedded-postgres-binaries.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -42,12 +59,24 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>${springdoc.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		<!-- H2 en memoria: perfil por defecto para la demo sin Docker y para las pruebas -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
@@ -64,14 +93,36 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-    		<groupId>org.springdoc</groupId>
-    		<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-    		<version>2.5.0</version>
+			<groupId>io.zonky.test</groupId>
+			<artifactId>embedded-postgres</artifactId>
+			<version>${embedded-postgres.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-    		<groupId>com.h2database</groupId>
-    		<artifactId>h2</artifactId>
-    		<scope>test</scope>
+			<groupId>io.zonky.test.postgres</groupId>
+			<artifactId>embedded-postgres-binaries-linux-amd64</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.zonky.test.postgres</groupId>
+			<artifactId>embedded-postgres-binaries-darwin-arm64v8</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Binarios para el resto de equipos del grupo (Windows, Mac Intel, Linux ARM) -->
+		<dependency>
+			<groupId>io.zonky.test.postgres</groupId>
+			<artifactId>embedded-postgres-binaries-windows-amd64</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.zonky.test.postgres</groupId>
+			<artifactId>embedded-postgres-binaries-darwin-amd64</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.zonky.test.postgres</groupId>
+			<artifactId>embedded-postgres-binaries-linux-arm64v8</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
