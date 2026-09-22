@@ -5,7 +5,7 @@ on:
     branches:
       - develop
     paths:
-      - 'doc/diagramas/**/*.puml'
+      - 'docs/diagrams/**/*.puml'
   workflow_dispatch:
 
 jobs:
@@ -26,16 +26,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y plantuml graphviz
 
-      - name: Generar imágenes en doc/diagramas/img/
+      - name: Generar imágenes en docs/diagrams/img/
         run: |
-          mkdir -p doc/diagramas/img
-          plantuml -tsvg -o img "doc/diagramas/**/*.puml"
-          plantuml -tpng -o img "doc/diagramas/**/*.puml"
+          mkdir -p docs/diagrams/img
+          plantuml -tsvg -o img "docs/diagrams/**/*.puml"
+          plantuml -tpng -o img "docs/diagrams/**/*.puml"
 
       - name: Hacer Commit y Push a la rama origen del PR
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add doc/diagramas/img/
+          git add docs/diagrams/img/
           git status
-          git diff-index --quiet HEAD || (git commit -m "chore(docs): actualizar imágenes en doc/diagramas/img/" && git push)
+          git diff-index --quiet HEAD || (git commit -m "chore(docs): actualizar imágenes en docs/diagrams/img/" && git push)

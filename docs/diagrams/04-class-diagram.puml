@@ -1,0 +1,239 @@
+@startuml
+title 04 - Class Diagram - MediCitas Anglo
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName "Helvetica"
+skinparam defaultFontSize 12
+skinparam ArrowColor #0B4FB0
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1069E5
+  HeaderBackgroundColor #E4EEFD
+  FontColor #0F1E33
+  AttributeFontColor #0F1E33
+}
+skinparam package {
+  BackgroundColor #F4F7FC
+  BorderColor #B6C9E4
+  FontColor #0B4FB0
+  FontStyle bold
+}
+
+enum AppointmentStatus {
+  BOOKED
+  CANCELLED
+  ATTENDED
+  NO_SHOW
+}
+
+enum SlotStatus {
+  FREE
+  BOOKED
+  BLOCKED
+}
+
+enum NotificationType {
+  CONFIRMATION
+  REMINDER
+  RESCHEDULE
+  CANCELLATION
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+enum CoverageStatus {
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+}
+
+enum UserRole {
+  ADMIN
+  FRONT_DESK
+  DOCTOR
+}
+
+package "Domain" {
+
+  class Patient {
+    - id : Long
+    - documentType : DocumentType
+    - documentNumber : String
+    - firstNames : String
+    - lastNames : String
+    - birthDate : LocalDate
+    - phone : String
+    - email : String
+    + fullName() : String
+  }
+
+  class PatientInsurance {
+    - id : Long
+    - policyNumber : String
+    - coverageStatus : CoverageStatus
+    - validUntil : LocalDate
+    + isActive(on: LocalDate) : boolean
+  }
+
+  class Insurer {
+    - id : Long
+    - name : String
+    - taxId : String
+  }
+
+  class InsurancePlan {
+    - id : Long
+    - name : String
+    - consultationCopay : BigDecimal
+  }
+
+  class Specialty {
+    - id : Long
+    - name : String
+    - appointmentMinutes : int
+  }
+
+  class Location {
+    - id : Long
+    - code : String
+    - name : String
+    - address : String
+  }
+
+  class Doctor {
+    - id : Long
+    - license : String
+    - firstNames : String
+    - lastNames : String
+    + fullName() : String
+  }
+
+  class Slot {
+    - id : Long
+    - date : LocalDate
+    - startTime : LocalTime
+    - endTime : LocalTime
+    - room : String
+    - status : SlotStatus
+    - version : int
+    + startsAt() : LocalDateTime
+    + overlaps(other: Slot) : boolean
+  }
+
+  class Appointment {
+    - id : Long
+    - code : String
+    - status : AppointmentStatus
+    - visitReason : String
+    - idempotencyKey : UUID
+    - rescheduleCount : int
+    - bookedAt : Instant
+    + rescheduleTo(slot: Slot) : void
+    + cancel() : void
+    + isModifiable(now: LocalDateTime) : boolean
+  }
+
+  class AppointmentHistory {
+    - id : Long
+    - event : AppointmentEvent
+    - previousStatus : AppointmentStatus
+    - newStatus : AppointmentStatus
+    - occurredAt : Instant
+  }
+
+  class Notification {
+    - id : Long
+    - type : NotificationType
+    - channel : NotificationChannel
+    - destination : String
+    - scheduledFor : Instant
+    - status : NotificationStatus
+    - attempts : int
+    + markSent(providerMessageId: String) : void
+    + markFailed(detail: String) : void
+  }
+
+  class AppUser {
+    - id : Long
+    - username : String
+    - passwordHash : String
+    - role : UserRole
+  }
+
+  class AuditLog {
+    - id : Long
+    - action : String
+    - entity : String
+    - recordedAt : Instant
+  }
+}
+
+package "Application services" {
+
+  class AppointmentService {
+    + book(request: NewAppointment, key: UUID) : Appointment
+    + reschedule(id: Long, newSlotId: Long) : Appointment
+    + cancel(id: Long, reason: String) : Appointment
+    + listUpcoming(patientId: Long) : List<Appointment>
+  }
+
+  class AvailabilityService {
+    + search(specialtyId: Long, locationId: Long, from: LocalDate, to: LocalDate) : Availability
+  }
+
+  class PatientService {
+    + findByDocument(type: DocumentType, number: String) : Patient
+    + register(request: NewPatient) : Patient
+    + updateInsurance(patientId: Long, planId: Long, policyNumber: String) : Patient
+  }
+
+  class NotificationService {
+    + scheduleForBooking(appointment: Appointment) : List<Long>
+    + processDue() : void
+  }
+
+  interface MessagingClient {
+    + send(message: OutboundMessage) : String
+  }
+
+  class SimulatedMessagingClient implements MessagingClient {
+    - simulateFailure : boolean
+    + send(message: OutboundMessage) : String
+  }
+}
+
+' Relationships
+Patient "1" -- "0..*" PatientInsurance
+Insurer "1" -- "1..*" InsurancePlan
+InsurancePlan "1" -- "0..*" PatientInsurance
+
+Patient "1" -- "0..*" Appointment : requests >
+PatientInsurance "0..1" -- "0..*" Appointment : pays for >
+
+Specialty "1" -- "1..*" Doctor : groups >
+Doctor "1" -- "0..*" Slot : serves >
+Location "1" -- "0..*" Slot : hosts >
+
+Slot "1" -- "0..*" Appointment : is taken by >
+Appointment "1" *-- "1..*" AppointmentHistory : records >
+Appointment "1" *-- "0..*" Notification : triggers >
+
+AppUser "1" -- "0..*" AuditLog : performs >
+Doctor "0..1" -- "0..1" AppUser : signs in as >
+
+AppointmentService ..> Appointment : manages
+AppointmentService ..> Slot : takes and frees
+AppointmentService ..> NotificationService : schedules
+AvailabilityService ..> Slot : queries
+PatientService ..> Patient : manages
+NotificationService ..> Notification : processes
+NotificationService ..> MessagingClient : delegates delivery
+
+@enduml

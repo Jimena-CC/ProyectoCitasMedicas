@@ -14,7 +14,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docs/base-de-datos/script_inicial.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docs/database/initial_schema.sql:/docker-entrypoint-initdb.d/init.sql
 
   # Servicio de la API Backend
   api-service:
@@ -26,6 +26,7 @@ services:
     ports:
       - "8080:8080"
     environment:
+      SPRING_PROFILES_ACTIVE: postgres
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/citas_medicas_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgrespassword
