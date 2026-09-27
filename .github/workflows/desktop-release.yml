@@ -48,6 +48,7 @@ jobs:
             --input target\jpackage-input `
             --dest target\installer `
             --name "MediCitas Kiosko" `
+            --icon src\main\resources\icons\app-icon.ico `
             --app-version "1.0.0" `
             --vendor "MediCitas Anglo" `
             --main-jar kiosk-1.0-SNAPSHOT.jar `
