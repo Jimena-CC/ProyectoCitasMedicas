@@ -1,0 +1,32 @@
+name: Desktop CI & Release Generation
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'desktop/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'desktop/**'
+
+jobs:
+  build-and-test:
+    name: Compilar y Probar Cliente Desktop
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Compilar y Probar Lógica
+        run: |
+          cd desktop
+          mvn clean test

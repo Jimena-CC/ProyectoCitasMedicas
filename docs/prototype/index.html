@@ -1,0 +1,704 @@
+<meta charset="utf-8">
+<title>Kiosko MediCitas Anglo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+
+<style>
+:root{
+  --ground:#E7ECF3; --surface:#F4F7FC; --surface-2:#FFFFFF; --ink:#0F1E33; --muted:#56698A;
+  --line:#D2DCEA; --accent:#1069E5; --accent-strong:#0B4FB0; --accent-soft:#E4EEFD;
+  --glow:#BBD6FB; --danger:#C2352F; --danger-soft:#FBECEB; --warning:#A86B12;
+  --shadow:0 24px 60px -30px rgba(15,30,51,.45);
+  --ui:"Onest",-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --r-card:24px; --r-box:18px; --r-ctl:10px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0A1220; --surface:#111C2E; --surface-2:#16243A; --ink:#E6EDF7; --muted:#94A6BF;
+    --line:#24344E; --accent:#4D93FF; --accent-strong:#8BB8FF; --accent-soft:#16294A;
+    --glow:#1D3A66; --danger:#E98D87; --danger-soft:#33201F; --warning:#E0B667;
+    --shadow:0 24px 60px -30px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0A1220; --surface:#111C2E; --surface-2:#16243A; --ink:#E6EDF7; --muted:#94A6BF;
+  --line:#24344E; --accent:#4D93FF; --accent-strong:#8BB8FF; --accent-soft:#16294A;
+  --glow:#1D3A66; --danger:#E98D87; --danger-soft:#33201F; --warning:#E0B667;
+  --shadow:0 24px 60px -30px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;text-wrap:balance}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+/* ---------- barra del prototipo ---------- */
+.protobar{position:sticky;top:0;z-index:30;display:flex;flex-wrap:wrap;align-items:center;gap:12px;
+  padding:10px 16px;background:color-mix(in srgb,var(--surface) 88%,transparent);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.protobar .tag{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.protobar .grow{flex:1}
+.protobar select,.protobar button{background:var(--surface-2);border:1px solid var(--line);
+  border-radius:var(--r-ctl);padding:8px 12px;cursor:pointer;min-height:40px}
+.protobar select{max-width:min(46vw,320px)}
+.protobar button:hover{border-color:var(--accent);color:var(--accent-strong)}
+.protobar .count{font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px;min-width:44px;text-align:center}
+
+/* ---------- escenario ---------- */
+.stage{padding:28px 16px 56px;display:flex;justify-content:center}
+.device{position:relative;width:min(1200px,100%);min-height:680px;display:grid;grid-template-columns:300px 1fr;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow);
+  overflow:hidden;isolation:isolate}
+.device::before,.device::after{content:"";position:absolute;width:420px;height:420px;border-radius:50%;
+  background:radial-gradient(circle,var(--glow),transparent 68%);opacity:.5;pointer-events:none;z-index:-1}
+.device::before{top:-180px;right:-120px}
+.device::after{bottom:-200px;left:-140px}
+
+/* ---------- riel ---------- */
+.rail{display:flex;flex-direction:column;gap:36px;padding:32px 28px;border-right:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}
+.mark{width:42px;height:42px;flex:none;fill:var(--accent)}
+.brand b{font-size:19px;font-weight:700;letter-spacing:-.01em}
+.brand span{display:block;font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.02em}
+
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:26px}
+.step{display:grid;grid-template-columns:32px 1fr;align-items:center;gap:14px;padding:0 0 4px}
+.step .bullet{position:relative;width:32px;height:32px;border-radius:50%;border:1.5px solid var(--line);
+  display:grid;place-items:center;font-size:14px;color:var(--muted);background:var(--surface);font-variant-numeric:tabular-nums}
+.step .label{font-size:15px;color:var(--muted)}
+.step+.step .bullet::before{content:"";position:absolute;left:50%;top:-27px;translate:-50% 0;width:1.5px;height:26px;background:var(--line)}
+.step.done .bullet{border-color:var(--accent);color:var(--accent)}
+.step.done+.step .bullet::before,.step.done .bullet::before{background:var(--accent)}
+.step.done .label{color:var(--ink)}
+.step.done .bullet{font-size:0}
+.step.done .bullet::after{content:"\2713";font-size:16px;line-height:1;font-weight:700;color:var(--accent)}
+.step.active .bullet{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.step.active .label{color:var(--ink);font-weight:600}
+.step .gap{height:26px}
+.rail-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--muted)}
+.rail-foot .help{display:flex;align-items:center;gap:8px}
+.rail-foot .motto{letter-spacing:.14em;text-transform:uppercase;font-size:11px;font-weight:600;color:var(--accent-strong)}
+
+/* ---------- panel ---------- */
+.pane{display:flex;flex-direction:column;gap:20px;padding:32px 36px 28px;min-width:0}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.pane h1{font-size:30px;font-weight:600;letter-spacing:-.02em}
+.pane .lede{color:var(--muted);max-width:62ch}
+.box{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-box);padding:24px}
+.box-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}
+.scroll{overflow-x:auto}
+
+.actions{margin-top:auto;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:12px;padding-top:8px}
+.btn{min-height:52px;padding:0 26px;border-radius:var(--r-ctl);border:1px solid var(--line);background:var(--surface-2);
+  cursor:pointer;font-weight:600;transition:background .18s,border-color .18s,color .18s}
+.btn:hover{border-color:var(--accent);color:var(--accent-strong)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-strong);border-color:var(--accent-strong);color:#fff}
+.btn-lg{min-height:60px;font-size:18px;padding:0 34px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn .spin{display:inline-block;width:16px;height:16px;margin-right:10px;border:2px solid rgba(255,255,255,.45);
+  border-top-color:#fff;border-radius:50%;vertical-align:-3px;animation:spin .7s linear infinite}
+@keyframes spin{to{rotate:360deg}}
+
+/* ---------- formularios ---------- */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label{font-size:14px;font-weight:600}
+.field .hint{font-size:13px;color:var(--muted)}
+input,select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-ctl);
+  padding:14px 14px;min-height:52px;width:100%}
+textarea{min-height:96px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.field.error input{border-color:var(--danger);background:var(--danger-soft)}
+.error-msg{display:flex;gap:8px;align-items:flex-start;color:var(--danger);font-size:14px;font-weight:500}
+
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-ctl);padding:4px;gap:4px}
+.seg button{min-height:44px;padding:0 18px;border:0;background:transparent;border-radius:7px;cursor:pointer;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:600}
+
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:320px}
+.keypad button{min-height:64px;font-size:22px;font-family:var(--mono);background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r-ctl);cursor:pointer}
+.keypad button:hover{border-color:var(--accent);color:var(--accent-strong)}
+.keypad .wide{grid-column:span 2;font-family:var(--ui);font-size:16px;font-weight:600}
+#document-input{font-family:var(--mono);font-size:30px;letter-spacing:.22em;min-height:72px;text-align:center}
+
+/* tarjetas seleccionables */
+.picker{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.pick{display:flex;flex-direction:column;gap:6px;text-align:left;padding:18px;min-height:96px;background:var(--surface);
+  border:1.5px solid var(--line);border-radius:var(--r-box);cursor:pointer;transition:border-color .18s,background .18s}
+.pick:hover{border-color:var(--accent)}
+.pick[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.pick b{font-size:16px}
+.pick small{color:var(--muted);font-size:13px}
+
+/* lista de especialidades */
+.list{display:grid;gap:8px;max-height:280px;overflow-y:auto;padding-right:4px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:56px;padding:0 18px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-ctl);cursor:pointer;text-align:left}
+.row:hover{border-color:var(--accent)}
+.row[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.row small{color:var(--muted);font-variant-numeric:tabular-nums;font-weight:500}
+
+/* ---------- fecha y hora ---------- */
+.month{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-ctl);padding:4px 6px}
+.month b{font-size:15px;padding:0 8px}
+.month button{border:0;background:transparent;cursor:pointer;min-height:40px;min-width:40px;border-radius:8px;color:var(--muted)}
+.month button:hover{color:var(--accent-strong);background:var(--accent-soft)}
+
+.day-strip{display:flex;align-items:stretch;gap:6px;border-bottom:1px solid var(--line);padding-bottom:0}
+.day{flex:1;min-width:64px;padding:10px 4px 14px;background:transparent;border:0;border-bottom:3px solid transparent;
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted)}
+.day .dw{font-size:13px}
+.day .dn{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink)}
+.day:hover:not([disabled]){color:var(--accent-strong)}
+.day[aria-pressed="true"]{border-bottom-color:var(--accent);color:var(--ink);font-weight:600}
+.day[disabled]{opacity:.38;cursor:not-allowed}
+.day[disabled] .dn{color:var(--muted)}
+
+.docgroup+.docgroup{margin-top:20px;padding-top:20px;border-top:1px solid var(--line)}
+.docline{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:12px}
+.docline b{font-size:15px}
+.docline small{color:var(--muted);font-size:13px}
+.cmp{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px}
+.slot{min-height:52px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-ctl);cursor:pointer;
+  font-variant-numeric:tabular-nums;font-size:16px}
+.slot:hover{border-color:var(--accent);color:var(--accent-strong)}
+.slot[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.more{margin-top:16px;display:flex;align-items:center;gap:10px}
+.more button{border:0;background:transparent;color:var(--accent-strong);font-weight:600;cursor:pointer;padding:6px 0}
+.more small{color:var(--muted)}
+
+.summary{background:linear-gradient(115deg,var(--accent-soft),var(--surface-2) 58%,var(--glow));
+  border:1px solid var(--line);border-radius:var(--r-box);padding:20px 24px}
+.summary .eyebrow{margin-bottom:6px}
+.summary p{margin:0;font-size:17px;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.summary .sub{font-weight:500;color:var(--muted);font-size:14px;margin-top:4px}
+
+/* ---------- revisión y éxito ---------- */
+.review{display:grid;gap:0}
+.review div{display:grid;grid-template-columns:200px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
+.review div:last-child{border-bottom:0}
+.review dt,.review .k{color:var(--muted);font-size:14px}
+.review .v{font-weight:600}
+.ok{display:grid;place-items:center;gap:6px;text-align:center;padding:8px 0 4px}
+.ok .check{width:76px;height:76px;border-radius:50%;background:var(--accent-soft);border:2px solid var(--accent);
+  display:grid;place-items:center;margin-bottom:8px}
+.code-big{font-family:var(--mono);font-size:40px;letter-spacing:.08em;color:var(--accent-strong)}
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--surface-2);border:1px solid var(--line);
+  border-radius:var(--r-box);padding:16px 18px;color:var(--muted);font-size:14px}
+
+/* ---------- bienvenida ---------- */
+.welcome{grid-column:1/-1;display:flex;flex-direction:column;justify-content:center;gap:28px;padding:64px 56px;min-height:680px}
+.welcome h1{font-size:clamp(34px,4.6vw,52px);font-weight:700;letter-spacing:-.03em;max-width:16ch}
+.welcome .lede{font-size:19px;max-width:52ch}
+.locations{display:flex;flex-wrap:wrap;gap:12px}
+.location{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-box);padding:14px 18px;min-width:200px}
+.location b{display:block;font-size:15px}
+.location small{color:var(--muted);font-size:13px}
+
+svg{flex:none}
+@media (max-width:900px){
+  .device{grid-template-columns:1fr;min-height:0}
+  .rail{flex-direction:row;align-items:center;gap:20px;border-right:0;border-bottom:1px solid var(--line);
+    padding:18px;overflow-x:auto}
+  .steps{flex-direction:row;gap:14px}
+  .step{grid-template-columns:28px auto}
+  .step .label{display:none}
+  .step.active .label{display:block}
+  .step+.step .bullet::before{display:none}
+  .step .gap{display:none}
+  .rail-foot{display:none}
+  .pane{padding:22px 18px}
+  .welcome{padding:40px 22px;min-height:0}
+  .review div{grid-template-columns:1fr;gap:2px}
+  .actions .btn{flex:1}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+
+<header class="protobar">
+  <span class="tag">Prototipo · Flujo de reserva</span>
+  <label class="tag" for="nav-select" style="letter-spacing:0;text-transform:none;font-weight:500">Pantalla</label>
+  <select id="nav-select"></select>
+  <button id="prev" type="button" aria-label="Pantalla anterior">←</button>
+  <span class="count" id="counter">1 / 8</span>
+  <button id="next" type="button" aria-label="Pantalla siguiente">→</button>
+  <span class="grow"></span>
+  <button id="theme" type="button">Tema oscuro</button>
+</header>
+
+<main class="stage">
+  <div class="device" id="device">
+
+    <!-- riel -->
+    <aside class="rail" id="rail">
+      <div class="brand">
+        <svg class="mark" viewBox="46 33 250 250" aria-hidden="true"><path d="M173.03 101.44c-31.02 0-56.17 25.15-56.17 56.17s25.15 56.17 56.17 56.17 56.17-25.15 56.17-56.17-25.15-56.17-56.17-56.17Zm32.55 67.99h-20.74v20.74h-23.63v-20.74h-20.74V145.8h20.74v-20.74h23.63v20.74h20.74v23.63ZM105.68 115.5a79.876 79.876 0 0 1 26.21-25.86c.79-3.55 1.01-7.5.04-11.59-3.31-14.02-21.11-27.73-28.36-6.46 0 0-13.55-1.58-13.71 14.18 0 0-16.07-.95-12.92 15.91 2.3 12.31 18.61 14.03 28.73 13.82ZM257.68 85.77c-.16-15.75-13.71-14.18-13.71-14.18-7.25-21.27-25.05-7.56-28.36 6.46-1.07 4.52-.69 8.88.31 12.71a79.758 79.758 0 0 1 24.43 24.7c9.91.41 27.82-.83 30.24-13.77 3.15-16.86-12.92-15.91-12.92-15.91ZM270.6 214.18c-2.45-13.12-20.85-14.21-30.66-13.76a79.916 79.916 0 0 1-23.8 23.91c-1.15 4.01-1.66 8.65-.52 13.48 3.31 14.02 21.11 27.73 28.36 6.46 0 0 13.55 1.58 13.71-14.18 0 0 16.07.95 12.92-15.91ZM106.09 200.37c-10.08-.26-26.81 1.34-29.14 13.81-3.15 16.86 12.92 15.91 12.92 15.91.16 15.75 13.71 14.18 13.71 14.18 7.25 21.27 25.05 7.56 28.36-6.46 1.03-4.37.71-8.59-.21-12.33-10.34-6.31-19.1-14.92-25.63-25.11ZM282.79 147.76c5.46-18.32-7.07-18.16-7.07-18.16-3.86 12.39-18.77 17.71-23.75 19.17.32 2.9.5 5.85.5 8.84 0 2.64-.14 5.25-.39 7.82 5.1 1.5 19.8 6.84 23.64 19.13 0 0 12.54.16 7.07-18.16 0 0 11.09 1.61 12.7-9.32-1.61-10.93-12.7-9.32-12.7-9.32ZM164.67 78.61c2.75-.29 5.54-.44 8.36-.44 2.66 0 5.28.14 7.88.39 1.14-4.15 6.35-20.36 19.36-24.42 0 0 .16-12.54-18.16-7.07 0 0 1.61-11.09-9.32-12.7-10.93 1.61-9.32 12.7-9.32 12.7-18.32-5.46-18.16 7.07-18.16 7.07 13.05 4.07 18.26 20.39 19.37 24.47ZM93.59 157.61c0-2.94.17-5.84.48-8.7-4.42-1.23-20.23-6.48-24.23-19.31 0 0-12.54-.16-7.07 18.16 0 0-11.09-1.61-12.7 9.32 1.61 10.93 12.7 9.32 12.7 9.32-5.46 18.32 7.07 18.16 7.07 18.16 3.97-12.72 19.56-17.99 24.12-19.28a81.26 81.26 0 0 1-.38-7.68ZM181.2 236.64c-2.69.27-5.41.42-8.17.42a79.6 79.6 0 0 1-8.65-.48c-1.58 5.27-6.94 19.66-19.08 23.45 0 0-.16 12.54 18.16 7.07 0 0-1.61 11.09 9.32 12.7 10.93-1.61 9.32-12.7 9.32-12.7 18.32 5.46 18.16-7.07 18.16-7.07-12.1-3.77-17.46-18.07-19.06-23.39Z"/><path d="M173.03 78.17c-43.88 0-79.44 35.57-79.44 79.44s35.57 79.44 79.44 79.44 79.44-35.57 79.44-79.44-35.57-79.44-79.44-79.44Zm0 149.06c-38.45 0-69.62-31.17-69.62-69.62s31.17-69.62 69.62-69.62 69.62 31.17 69.62 69.62-31.17 69.62-69.62 69.62Z"/></svg>
+        <span><b>MediCitas</b><span>Clínica Anglo Americana</span></span>
+      </div>
+      <ol class="steps" id="steps">
+        <li class="step" data-step="1"><span class="bullet">1</span><span class="label">Identificación</span></li>
+        <li class="step" data-step="2"><span class="bullet">2</span><span class="label">Datos y seguro</span></li>
+        <li class="step" data-step="3"><span class="bullet">3</span><span class="label">Especialidad y sede</span></li>
+        <li class="step" data-step="4"><span class="bullet">4</span><span class="label">Fecha y hora</span></li>
+        <li class="step" data-step="5"><span class="bullet">5</span><span class="label">Confirmación</span></li>
+      </ol>
+      <div class="rail-foot">
+        <span class="help">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"  stroke-linecap="round" stroke-linejoin="round"/><path d="M9 9C9 5.49997 14.5 5.5 14.5 9C14.5 11.5 12 10.9999 12 13.9999"  stroke-linecap="round" stroke-linejoin="round"/><path d="M12 18.01L12.01 17.9989"  stroke-linecap="round" stroke-linejoin="round"/></svg>
+          ¿Necesitas ayuda? Acércate a Admisión
+        </span>
+        <span class="motto">Paciente Ante Todo</span>
+      </div>
+    </aside>
+
+    <!-- 0 · bienvenida -->
+    <section class="welcome" id="s-bienvenida" hidden>
+      <div class="brand">
+        <svg class="mark" viewBox="46 33 250 250" aria-hidden="true"><path d="M173.03 101.44c-31.02 0-56.17 25.15-56.17 56.17s25.15 56.17 56.17 56.17 56.17-25.15 56.17-56.17-25.15-56.17-56.17-56.17Zm32.55 67.99h-20.74v20.74h-23.63v-20.74h-20.74V145.8h20.74v-20.74h23.63v20.74h20.74v23.63ZM105.68 115.5a79.876 79.876 0 0 1 26.21-25.86c.79-3.55 1.01-7.5.04-11.59-3.31-14.02-21.11-27.73-28.36-6.46 0 0-13.55-1.58-13.71 14.18 0 0-16.07-.95-12.92 15.91 2.3 12.31 18.61 14.03 28.73 13.82ZM257.68 85.77c-.16-15.75-13.71-14.18-13.71-14.18-7.25-21.27-25.05-7.56-28.36 6.46-1.07 4.52-.69 8.88.31 12.71a79.758 79.758 0 0 1 24.43 24.7c9.91.41 27.82-.83 30.24-13.77 3.15-16.86-12.92-15.91-12.92-15.91ZM270.6 214.18c-2.45-13.12-20.85-14.21-30.66-13.76a79.916 79.916 0 0 1-23.8 23.91c-1.15 4.01-1.66 8.65-.52 13.48 3.31 14.02 21.11 27.73 28.36 6.46 0 0 13.55 1.58 13.71-14.18 0 0 16.07.95 12.92-15.91ZM106.09 200.37c-10.08-.26-26.81 1.34-29.14 13.81-3.15 16.86 12.92 15.91 12.92 15.91.16 15.75 13.71 14.18 13.71 14.18 7.25 21.27 25.05 7.56 28.36-6.46 1.03-4.37.71-8.59-.21-12.33-10.34-6.31-19.1-14.92-25.63-25.11ZM282.79 147.76c5.46-18.32-7.07-18.16-7.07-18.16-3.86 12.39-18.77 17.71-23.75 19.17.32 2.9.5 5.85.5 8.84 0 2.64-.14 5.25-.39 7.82 5.1 1.5 19.8 6.84 23.64 19.13 0 0 12.54.16 7.07-18.16 0 0 11.09 1.61 12.7-9.32-1.61-10.93-12.7-9.32-12.7-9.32ZM164.67 78.61c2.75-.29 5.54-.44 8.36-.44 2.66 0 5.28.14 7.88.39 1.14-4.15 6.35-20.36 19.36-24.42 0 0 .16-12.54-18.16-7.07 0 0 1.61-11.09-9.32-12.7-10.93 1.61-9.32 12.7-9.32 12.7-18.32-5.46-18.16 7.07-18.16 7.07 13.05 4.07 18.26 20.39 19.37 24.47ZM93.59 157.61c0-2.94.17-5.84.48-8.7-4.42-1.23-20.23-6.48-24.23-19.31 0 0-12.54-.16-7.07 18.16 0 0-11.09-1.61-12.7 9.32 1.61 10.93 12.7 9.32 12.7 9.32-5.46 18.32 7.07 18.16 7.07 18.16 3.97-12.72 19.56-17.99 24.12-19.28a81.26 81.26 0 0 1-.38-7.68ZM181.2 236.64c-2.69.27-5.41.42-8.17.42a79.6 79.6 0 0 1-8.65-.48c-1.58 5.27-6.94 19.66-19.08 23.45 0 0-.16 12.54 18.16 7.07 0 0-1.61 11.09 9.32 12.7 10.93-1.61 9.32-12.7 9.32-12.7 18.32 5.46 18.16-7.07 18.16-7.07-12.1-3.77-17.46-18.07-19.06-23.39Z"/><path d="M173.03 78.17c-43.88 0-79.44 35.57-79.44 79.44s35.57 79.44 79.44 79.44 79.44-35.57 79.44-79.44-35.57-79.44-79.44-79.44Zm0 149.06c-38.45 0-69.62-31.17-69.62-69.62s31.17-69.62 69.62-69.62 69.62 31.17 69.62 69.62-31.17 69.62-69.62 69.62Z"/></svg>
+        <span><b>MediCitas</b><span>Clínica Anglo Americana</span></span>
+      </div>
+      <h1>Reserva tu cita sin hacer cola.</h1>
+      <p class="lede">Elige tu especialidad, revisa los horarios disponibles y recibe la confirmación en tu correo. Toma menos de un minuto.</p>
+      <div class="locations">
+        <span class="location"><b>Sede San Isidro</b><small>Av. Alfredo Salazar 350</small></span>
+        <span class="location"><b>Sede La Molina</b><small>Av. La Fontana 362</small></span>
+      </div>
+      <div><button class="btn btn-primary btn-lg" type="button" data-go="identificacion">Comenzar</button></div>
+    </section>
+
+    <!-- 1 · identificación -->
+    <section class="pane" id="s-identificacion" hidden>
+      <div>
+        <p class="eyebrow">Paso 1 de 5</p>
+        <h1>Identifícate</h1>
+        <p class="lede">Ingresa tu número de documento. Si ya te atendiste aquí, recuperamos tus datos.</p>
+      </div>
+      <div class="box">
+        <div class="box-head">
+          <div class="field" style="gap:10px">
+            <span class="hint">Tipo de documento</span>
+            <div class="seg" role="group" aria-label="Tipo de documento">
+              <button type="button" aria-pressed="true">DNI</button>
+              <button type="button" aria-pressed="false">CE</button>
+              <button type="button" aria-pressed="false">Pasaporte</button>
+            </div>
+          </div>
+        </div>
+        <div class="grid2" style="align-items:start;gap:28px">
+          <div class="field">
+            <label for="document-input">Número de documento</label>
+            <input id="document-input" name="documento" inputmode="numeric" maxlength="8" value="45871236" autocomplete="off">
+            <span class="hint" id="document-hint">8 dígitos</span>
+          </div>
+          <div class="keypad" id="keypad" role="group" aria-label="Teclado numérico">
+            <button type="button">1</button><button type="button">2</button><button type="button">3</button>
+            <button type="button">4</button><button type="button">5</button><button type="button">6</button>
+            <button type="button">7</button><button type="button">8</button><button type="button">9</button>
+            <button type="button" class="wide" data-key="clear">Borrar</button>
+            <button type="button">0</button>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button" data-go="bienvenida">Atrás</button>
+        <button class="btn btn-primary" type="button" data-go="datos">Continuar</button>
+      </div>
+    </section>
+
+    <!-- 2 · datos -->
+    <section class="pane" id="s-datos" hidden>
+      <div>
+        <p class="eyebrow">Paso 2 de 5</p>
+        <h1>Tus datos</h1>
+        <p class="lede">No encontramos el documento <b>45871236</b>. Completa tus datos para registrarte.</p>
+      </div>
+      <div class="box">
+        <div class="grid2">
+          <div class="field"><label for="f-first-names">Nombres</label><input id="f-first-names" value="Lucía Fernanda"></div>
+          <div class="field"><label for="f-last-names">Apellidos</label><input id="f-last-names" value="Paredes Quispe"></div>
+          <div class="field"><label for="f-birth-date">Fecha de nacimiento</label><input id="f-birth-date" value="18/04/1991" inputmode="numeric"></div>
+          <div class="field"><label for="f-phone">Celular</label><input id="f-phone" value="987654321" inputmode="numeric"></div>
+          <div class="field error">
+            <label for="f-email">Correo electrónico</label>
+            <input id="f-email" value="lucia.paredes@correo" aria-describedby="e-email" aria-invalid="true">
+            <span class="error-msg" id="e-email" role="alert">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-top:2px"><path d="M12 7L12 13"  stroke-linecap="round" stroke-linejoin="round"/><path d="M12 17.01L12.01 16.9989"  stroke-linecap="round" stroke-linejoin="round"/><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"  stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Escribe un correo válido, por ejemplo nombre@correo.com. Ahí te enviaremos la confirmación.
+            </span>
+          </div>
+          <div class="field"><label for="f-sex">Sexo</label>
+            <select id="f-sex"><option>Femenino</option><option>Masculino</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button" data-go="identificacion">Atrás</button>
+        <button class="btn btn-primary" type="button" data-go="seguro">Continuar</button>
+      </div>
+    </section>
+
+    <!-- 2b · seguro -->
+    <section class="pane" id="s-seguro" hidden>
+      <div>
+        <p class="eyebrow">Paso 2 de 5</p>
+        <h1>Tu seguro</h1>
+        <p class="lede">Elige tu aseguradora para aplicar la cobertura de tu plan, o continúa como atención particular.</p>
+      </div>
+      <div class="box">
+        <div class="picker" id="insurers" role="group" aria-label="Aseguradora">
+          <button class="pick" type="button" aria-pressed="true"><b>Rímac Seguros</b><small>Convenio vigente</small></button>
+          <button class="pick" type="button" aria-pressed="false"><b>Pacífico Seguros</b><small>Convenio vigente</small></button>
+          <button class="pick" type="button" aria-pressed="false"><b>La Positiva</b><small>Convenio vigente</small></button>
+          <button class="pick" type="button" aria-pressed="false"><b>Mapfre</b><small>Convenio vigente</small></button>
+          <button class="pick" type="button" aria-pressed="false"><b>Atención particular</b><small>Sin seguro</small></button>
+        </div>
+        <div class="grid2" style="margin-top:20px">
+          <div class="field"><label for="f-plan">Plan</label>
+            <select id="f-plan"><option>Red Médica — copago S/ 60.00</option><option>Red Preferente — copago S/ 45.00</option></select>
+          </div>
+          <div class="field"><label for="f-policy">Número de póliza</label>
+            <input id="f-policy" value="RM-00458712" style="font-family:var(--mono)">
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button" data-go="datos">Atrás</button>
+        <button class="btn btn-primary" type="button" data-go="especialidad">Continuar</button>
+      </div>
+    </section>
+
+    <!-- 3 · especialidad y sede -->
+    <section class="pane" id="s-especialidad" hidden>
+      <div>
+        <p class="eyebrow">Paso 3 de 5</p>
+        <h1>¿Qué necesitas atender?</h1>
+      </div>
+      <div class="box">
+        <div class="box-head">
+          <div class="seg" role="group" aria-label="Sede">
+            <button type="button" aria-pressed="true">San Isidro</button>
+            <button type="button" aria-pressed="false">La Molina</button>
+          </div>
+          <span class="hint" id="location-address">Av. Alfredo Salazar 350, San Isidro</span>
+        </div>
+        <div class="field" style="margin-bottom:16px">
+          <label for="specialty-search">Buscar especialidad</label>
+          <input id="specialty-search" placeholder="Escribe por ejemplo: cardio" autocomplete="off">
+        </div>
+        <div class="list" id="specialties" role="group" aria-label="Especialidades">
+          <button class="row" type="button" aria-pressed="true">Cardiología <small>18 cupos</small></button>
+          <button class="row" type="button" aria-pressed="false">Dermatología <small>24 cupos</small></button>
+          <button class="row" type="button" aria-pressed="false">Endocrinología <small>9 cupos</small></button>
+          <button class="row" type="button" aria-pressed="false">Gastroenterología <small>12 cupos</small></button>
+          <button class="row" type="button" aria-pressed="false">Ginecología <small>31 cupos</small></button>
+          <button class="row" type="button" aria-pressed="false">Medicina Interna <small>27 cupos</small></button>
+          <button class="row" type="button" aria-pressed="false">Neurología <small>7 cupos</small></button>
+          <button class="row" type="button" aria-pressed="false">Oftalmología <small>15 cupos</small></button>
+          <button class="row" type="button" aria-pressed="false">Pediatría <small>22 cupos</small></button>
+          <button class="row" type="button" aria-pressed="false">Traumatología <small>19 cupos</small></button>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button" data-go="seguro">Atrás</button>
+        <button class="btn btn-primary" type="button" data-go="fecha">Continuar</button>
+      </div>
+    </section>
+
+    <!-- 4 · fecha y hora -->
+    <section class="pane" id="s-fecha" hidden>
+      <div>
+        <p class="eyebrow">Paso 4 de 5 · Cardiología · Sede San Isidro</p>
+        <h1>Elige fecha y hora</h1>
+      </div>
+      <div class="box">
+        <div class="box-head">
+          <h2 style="font-size:20px;font-weight:600">Horarios disponibles</h2>
+          <div class="month">
+            <button type="button" aria-label="Mes anterior">‹</button>
+            <b>Septiembre 2026</b>
+            <button type="button" aria-label="Mes siguiente">›</button>
+          </div>
+        </div>
+        <div class="day-strip" id="day-strip" role="group" aria-label="Días disponibles">
+          <button class="day" type="button" aria-pressed="false" data-date="Martes 15 de septiembre"><span class="dw">Hoy</span><span class="dn">15</span></button>
+          <button class="day" type="button" aria-pressed="false" data-date="Miércoles 16 de septiembre"><span class="dw">Mañana</span><span class="dn">16</span></button>
+          <button class="day" type="button" aria-pressed="true" data-date="Jueves 17 de septiembre"><span class="dw">jue</span><span class="dn">17</span></button>
+          <button class="day" type="button" aria-pressed="false" data-date="Viernes 18 de septiembre"><span class="dw">vie</span><span class="dn">18</span></button>
+          <button class="day" type="button" aria-pressed="false" data-date="Sábado 19 de septiembre"><span class="dw">sáb</span><span class="dn">19</span></button>
+          <button class="day" type="button" aria-pressed="false" disabled title="Sin atención"><span class="dw">dom</span><span class="dn">20</span></button>
+          <button class="day" type="button" aria-pressed="false" data-date="Lunes 21 de septiembre"><span class="dw">lun</span><span class="dn">21</span></button>
+        </div>
+
+        <div style="margin-top:22px" id="slots-wrapper">
+          <div class="docgroup">
+            <div class="docline"><b>Dra. Carla Benavides Ortiz</b><span class="cmp">CMP 045712</span><small>Consultorio 304</small></div>
+            <div class="slots" role="group" aria-label="Horarios de Carla Benavides Ortiz">
+              <button class="slot" type="button" aria-pressed="false" data-doctor="Dra. Carla Benavides Ortiz" data-room="Consultorio 304">07:00</button>
+              <button class="slot" type="button" aria-pressed="true" data-doctor="Dra. Carla Benavides Ortiz" data-room="Consultorio 304">07:20</button>
+              <button class="slot" type="button" aria-pressed="false" data-doctor="Dra. Carla Benavides Ortiz" data-room="Consultorio 304">07:40</button>
+              <button class="slot" type="button" aria-pressed="false" data-doctor="Dra. Carla Benavides Ortiz" data-room="Consultorio 304">08:00</button>
+              <button class="slot" type="button" aria-pressed="false" data-doctor="Dra. Carla Benavides Ortiz" data-room="Consultorio 304">08:20</button>
+              <button class="slot" type="button" aria-pressed="false" data-doctor="Dra. Carla Benavides Ortiz" data-room="Consultorio 304">09:00</button>
+            </div>
+          </div>
+          <div class="docgroup">
+            <div class="docline"><b>Dr. Álvaro Mendiola Ruiz</b><span class="cmp">CMP 038914</span><small>Consultorio 212</small></div>
+            <div class="slots" role="group" aria-label="Horarios de Álvaro Mendiola Ruiz">
+              <button class="slot" type="button" aria-pressed="false" data-doctor="Dr. Álvaro Mendiola Ruiz" data-room="Consultorio 212">10:00</button>
+              <button class="slot" type="button" aria-pressed="false" data-doctor="Dr. Álvaro Mendiola Ruiz" data-room="Consultorio 212">10:20</button>
+              <button class="slot" type="button" aria-pressed="false" data-doctor="Dr. Álvaro Mendiola Ruiz" data-room="Consultorio 212">11:00</button>
+              <button class="slot" type="button" aria-pressed="false" data-doctor="Dr. Álvaro Mendiola Ruiz" data-room="Consultorio 212">11:20</button>
+              <button class="slot" type="button" aria-pressed="false" data-doctor="Dr. Álvaro Mendiola Ruiz" data-room="Consultorio 212">11:40</button>
+              <button class="slot" type="button" aria-pressed="false" data-doctor="Dr. Álvaro Mendiola Ruiz" data-room="Consultorio 212">12:00</button>
+            </div>
+          </div>
+          <div class="more">
+            <button type="button" id="show-more">Ver más horarios ⌄</button>
+            <small>(10 disponibles)</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary">
+        <p class="eyebrow">Seleccionado actualmente</p>
+        <p>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 6L12 12L18 12"  stroke-linecap="round" stroke-linejoin="round"/><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"  stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span id="selected-time">Jueves 17 de septiembre, 07:20 – 07:40</span>
+        </p>
+        <p class="sub" id="selected-detail">Dra. Carla Benavides Ortiz · Consultorio 304 · Sede San Isidro</p>
+      </div>
+
+      <div class="actions">
+        <button class="btn" type="button" data-go="especialidad">Atrás</button>
+        <button class="btn btn-primary" type="button" data-go="confirmacion">Continuar</button>
+      </div>
+    </section>
+
+    <!-- 5 · confirmación -->
+    <section class="pane" id="s-confirmacion" hidden>
+      <div>
+        <p class="eyebrow">Paso 5 de 5</p>
+        <h1>Revisa y confirma</h1>
+      </div>
+      <div class="box">
+        <div class="review">
+          <div><span class="k">Paciente</span><span class="v">Lucía Fernanda Paredes Quispe · DNI 45871236</span></div>
+          <div><span class="k">Especialidad</span><span class="v">Cardiología</span></div>
+          <div><span class="k">Médico</span><span class="v">Dra. Carla Benavides Ortiz <span class="cmp">CMP 045712</span></span></div>
+          <div><span class="k">Fecha y hora</span><span class="v" id="review-date">Jueves 17 de septiembre, 07:20 – 07:40</span></div>
+          <div><span class="k">Sede</span><span class="v">Sede San Isidro · Consultorio 304</span></div>
+          <div><span class="k">Cobertura</span><span class="v">Rímac Seguros · Red Médica · copago S/ 60.00</span></div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="reason">Motivo de consulta</label>
+        <textarea id="reason" maxlength="250">Control de presión arterial</textarea>
+        <span class="hint">Ayuda al médico a preparar tu atención. Máximo 250 caracteres.</span>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button" data-go="fecha">Atrás</button>
+        <button class="btn btn-primary" type="button" id="confirm">Confirmar reserva</button>
+      </div>
+    </section>
+
+    <!-- 6 · reserva confirmada -->
+    <section class="pane" id="s-listo" hidden>
+      <div class="ok">
+        <span class="check" aria-hidden="true">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1069E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13L9 17L19 7"  stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <h1>Tu cita quedó reservada</h1>
+        <p class="lede">Guarda tu código. Preséntalo en Admisión el día de tu atención.</p>
+        <p class="code-big">MCA-7K2Q9</p>
+      </div>
+      <div class="box">
+        <div class="review">
+          <div><span class="k">Fecha y hora</span><span class="v" id="success-date">Jueves 17 de septiembre, 07:20 – 07:40</span></div>
+          <div><span class="k">Médico</span><span class="v">Dra. Carla Benavides Ortiz · Cardiología</span></div>
+          <div><span class="k">Sede</span><span class="v">Sede San Isidro · Consultorio 304</span></div>
+          <div><span class="k">Cobertura</span><span class="v">Rímac Seguros · Red Médica</span></div>
+        </div>
+      </div>
+      <div class="note">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-top:2px"><path d="M7 9L12 12.5L17 9"  stroke-linecap="round" stroke-linejoin="round"/><path d="M2 17V7C2 5.89543 2.89543 5 4 5H20C21.1046 5 22 5.89543 22 7V17C22 18.1046 21.1046 19 20 19H4C2.89543 19 2 18.1046 2 17Z"  stroke-width="1.5"/></svg>
+        <span>Enviamos la confirmación a <b>lucia.paredes@correo.pe</b> y te recordaremos por SMS 24 horas antes. Llega 15 minutos antes con tu DNI.</span>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button" data-go="bienvenida">Terminar</button>
+        <button class="btn btn-primary" type="button" data-go="especialidad">Reservar otra cita</button>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+(function(){
+  var screens = [
+    {id:"bienvenida", name:"0 · Bienvenida", step:0},
+    {id:"identificacion", name:"1 · Identificación", step:1},
+    {id:"datos", name:"2 · Datos del paciente", step:2},
+    {id:"seguro", name:"2b · Aseguradora y plan", step:2},
+    {id:"especialidad", name:"3 · Especialidad y sede", step:3},
+    {id:"fecha", name:"4 · Fecha y hora", step:4},
+    {id:"confirmacion", name:"5 · Revisar y confirmar", step:5},
+    {id:"listo", name:"6 · Cita reservada", step:6}
+  ];
+  var picker = document.getElementById("nav-select");
+  screens.forEach(function(screen){
+    var option = document.createElement("option");
+    option.value = screen.id; option.textContent = screen.name; picker.appendChild(option);
+  });
+
+  function indexOf(id){
+    for (var i = 0; i < screens.length; i++){ if (screens[i].id === id) return i; }
+    return 0;
+  }
+
+  function show(id){
+    var i = indexOf(id), current = screens[i];
+    screens.forEach(function(screen){
+      var el = document.getElementById("s-" + screen.id);
+      if (el) el.hidden = (screen.id !== current.id);
+    });
+    document.getElementById("rail").hidden = (current.step === 0);
+    document.querySelectorAll(".step").forEach(function(row){
+      var n = Number(row.dataset.step);
+      row.classList.toggle("done", current.step > n);
+      row.classList.toggle("active", current.step === n);
+    });
+    picker.value = current.id;
+    document.getElementById("counter").textContent = (i + 1) + " / " + screens.length;
+    document.getElementById("prev").disabled = (i === 0);
+    document.getElementById("next").disabled = (i === screens.length - 1);
+    if (location.hash !== "#" + current.id) history.replaceState(null, "", "#" + current.id);
+    document.querySelector(".stage").scrollIntoView({block:"start"});
+  }
+
+  function go(id){ location.hash = "#" + id; }
+
+  window.addEventListener("hashchange", function(){ show((location.hash || "#bienvenida").slice(1)); });
+  picker.addEventListener("change", function(){ go(picker.value); });
+  document.getElementById("prev").addEventListener("click", function(){
+    var i = indexOf(picker.value); if (i > 0) go(screens[i - 1].id);
+  });
+  document.getElementById("next").addEventListener("click", function(){
+    var i = indexOf(picker.value); if (i < screens.length - 1) go(screens[i + 1].id);
+  });
+  document.addEventListener("click", function(event){
+    var target = event.target.closest("[data-go]"); if (target) go(target.dataset.go);
+  });
+
+  /* Tema claro / oscuro */
+  var themeButton = document.getElementById("theme");
+  themeButton.addEventListener("click", function(){
+    var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    document.documentElement.setAttribute("data-theme", isDark ? "light" : "dark");
+    themeButton.textContent = isDark ? "Tema oscuro" : "Tema claro";
+  });
+
+  /* Grupos de selección única */
+  function singleChoice(container, selector, onSelect){
+    if (!container) return;
+    container.addEventListener("click", function(event){
+      var option = event.target.closest(selector);
+      if (!option || option.disabled) return;
+      container.querySelectorAll(selector).forEach(function(other){ other.setAttribute("aria-pressed", "false"); });
+      option.setAttribute("aria-pressed", "true");
+      if (onSelect) onSelect(option);
+    });
+  }
+
+  document.querySelectorAll(".seg").forEach(function(group){
+    singleChoice(group, "button", function(option){
+      var address = document.getElementById("location-address");
+      if (address && group.getAttribute("aria-label") === "Sede") {
+        address.textContent = option.textContent.trim() === "San Isidro"
+          ? "Av. Alfredo Salazar 350, San Isidro" : "Av. La Fontana 362, La Molina";
+      }
+    });
+  });
+  singleChoice(document.getElementById("insurers"), ".pick");
+  singleChoice(document.getElementById("specialties"), ".row");
+
+  /* Teclado numérico */
+  var documentInput = document.getElementById("document-input");
+  var keypad = document.getElementById("keypad");
+  if (keypad) keypad.addEventListener("click", function(event){
+    var key = event.target.closest("button"); if (!key) return;
+    if (key.dataset.key === "clear") documentInput.value = documentInput.value.slice(0, -1);
+    else if (documentInput.value.length < 8) documentInput.value += key.textContent.trim();
+    document.getElementById("document-hint").textContent =
+      documentInput.value.length === 8 ? "Documento completo" : "8 dígitos";
+  });
+
+  /* Fecha y hora */
+  var selectedDate = "Jueves 17 de septiembre", selectedTime = "07:20 – 07:40";
+  var selectedDoctor = "Dra. Carla Benavides Ortiz", selectedRoom = "Consultorio 304";
+
+  function renderSelection(){
+    var text = selectedDate + ", " + selectedTime;
+    document.getElementById("selected-time").textContent = text;
+    document.getElementById("selected-detail").textContent =
+      selectedDoctor + " · " + selectedRoom + " · Sede San Isidro";
+    document.getElementById("review-date").textContent = text;
+    document.getElementById("success-date").textContent = text;
+  }
+
+  singleChoice(document.getElementById("day-strip"), ".day", function(day){
+    selectedDate = day.dataset.date; renderSelection();
+  });
+
+  var slotsWrapper = document.getElementById("slots-wrapper");
+  if (slotsWrapper) slotsWrapper.addEventListener("click", function(event){
+    var slot = event.target.closest(".slot"); if (!slot) return;
+    slotsWrapper.querySelectorAll(".slot").forEach(function(other){ other.setAttribute("aria-pressed", "false"); });
+    slot.setAttribute("aria-pressed", "true");
+    var start = slot.textContent.trim();
+    var parts = start.split(":");
+    var end = new Date(2026, 8, 17, Number(parts[0]), Number(parts[1]) + 20);
+    selectedTime = start + " – " + String(end.getHours()).padStart(2, "0") + ":"
+      + String(end.getMinutes()).padStart(2, "0");
+    selectedDoctor = slot.dataset.doctor; selectedRoom = slot.dataset.room;
+    renderSelection();
+  });
+
+  var showMore = document.getElementById("show-more");
+  if (showMore) showMore.addEventListener("click", function(){
+    var extra = document.getElementById("more-slots");
+    if (extra){ extra.remove(); showMore.textContent = "Ver más horarios ⌄"; return; }
+    var group = document.createElement("div");
+    group.className = "docgroup"; group.id = "more-slots";
+    group.innerHTML = '<div class="docline"><b>Dra. Rosa Ynfantes Cárdenas</b><span class="cmp">CMP 052330</span><small>Consultorio 118</small></div>'
+      + '<div class="slots" role="group" aria-label="Horarios de Rosa Ynfantes Cárdenas">'
+      + ["15:00","15:20","15:40","16:00","16:20","16:40","17:00","17:20","17:40","18:00"].map(function(time){
+          return '<button class="slot" type="button" aria-pressed="false" data-doctor="Dra. Rosa Ynfantes Cárdenas" data-room="Consultorio 118">' + time + '</button>';
+        }).join("") + '</div>';
+    showMore.parentNode.insertAdjacentElement("beforebegin", group);
+    showMore.textContent = "Ver menos horarios ⌃";
+  });
+
+  /* Confirmar con estado de carga */
+  var confirmButton = document.getElementById("confirm");
+  if (confirmButton) confirmButton.addEventListener("click", function(){
+    if (confirmButton.disabled) return;
+    var label = confirmButton.textContent;
+    confirmButton.disabled = true;
+    confirmButton.innerHTML = '<span class="spin" aria-hidden="true"></span>Reservando…';
+    setTimeout(function(){
+      confirmButton.disabled = false; confirmButton.textContent = label; go("listo");
+    }, 900);
+  });
+
+  show((location.hash || "#bienvenida").slice(1));
+})();
+</script>

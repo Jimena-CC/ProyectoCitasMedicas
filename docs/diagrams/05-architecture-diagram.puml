@@ -1,0 +1,78 @@
+@startuml
+title 05 - Diagrama de Arquitectura de Componentes - MediCitas Anglo
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultTextAlignment center
+skinparam ArrowColor #374151
+skinparam node {
+  BackgroundColor #FFFFFF
+  BorderColor #6B7280
+}
+skinparam package {
+  BackgroundColor #F5F7FA
+  BorderColor #4B5563
+}
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #9CA3AF
+}
+
+node "Estación de la Clínica\n(Kiosko físico / PC de Admisión)" as ESTACION {
+
+  package "Cliente Desktop — JavaFX 21" as CLIENTE {
+    component "Kiosko Autoservicio\n<<Paciente>>" as KIOSKO
+    component "Panel Administrativo\n<<Admisión / Médico / Administrador>>" as PANEL
+    component "Componentes de Interfaz\nAtlantaFX + ControlsFX + Ikonli" as UI
+    component "Cliente HTTP\nHttpClient (JDK 21) + Jackson" as HTTPC
+  }
+}
+
+interface "HTTP / JSON" as REST
+
+node "Servidor de Aplicaciones\n(Docker Compose)" as SERVIDOR {
+
+  package "API REST — Spring Boot 4.1.1 / Java 21" as API {
+    component "Controladores REST\nSpring Web MVC" as CTRL
+    component "Validación de Entrada\nBean Validation" as VAL
+    component "Servicios de Negocio\nReglas de agendamiento" as SRV
+    component "Mapeo Entidad ↔ DTO\nMapStruct" as MAP
+    component "Repositorios\nSpring Data JPA" as REPO
+    component "Hibernate ORM" as ORM
+    component "Documentación de la API\nspringdoc-openapi / Swagger UI" as DOCS
+  }
+
+  database "PostgreSQL 15\ncitas_medicas_db" as DB
+}
+
+cloud "Servicio de Mensajería\n(correo / SMS)" as MSG
+
+KIOSKO --> UI
+PANEL --> UI
+UI --> HTTPC
+
+HTTPC --> REST : consume
+REST --> CTRL : expone
+
+CTRL --> VAL : valida
+CTRL --> SRV : delega
+SRV --> MAP : transforma
+SRV --> REPO : consulta y persiste
+REPO --> ORM
+ORM --> DB : JDBC
+
+SRV --> MSG : confirmaciones\ny recordatorios
+DOCS ..> CTRL : publica el contrato
+
+legend bottom
+  == Frontera cliente / servidor ==
+  El Cliente Desktop nunca accede a PostgreSQL de forma directa: toda
+  comunicación ocurre por HTTP/JSON contra la API REST, y las credenciales
+  de la base de datos residen únicamente en el servidor.
+
+  El cliente concentra la presentación, mientras que la lógica de negocio,
+  la validación y el acceso a datos residen en la API. Esto permite conectar
+  en el futuro otras interfaces al mismo backend.
+endlegend
+
+@enduml

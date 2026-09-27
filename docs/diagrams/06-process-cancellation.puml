@@ -1,0 +1,94 @@
+@startuml
+title 06 - Proceso propuesto (TO-BE) - Anular una cita desde el Kiosko
+
+skinparam shadowing false
+skinparam roundCorner 10
+skinparam defaultFontName "Helvetica"
+skinparam defaultFontSize 12
+skinparam ArrowColor #2F5D56
+skinparam SwimlaneBorderColor #A9C4BD
+skinparam SwimlaneTitleFontColor #0C6E5F
+skinparam SwimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #13917D
+  FontColor #17302B
+  DiamondBackgroundColor #E3F4EF
+  DiamondBorderColor #13917D
+  StartColor #0C6E5F
+  EndColor #0C6E5F
+}
+skinparam note {
+  BackgroundColor #FFF8E6
+  BorderColor #D9B45A
+  FontColor #3D3321
+}
+
+' Orden de los carriles
+|Paciente|
+|Kiosko (JavaFX)|
+|API MediCitas|
+|Servicio de Mensajería|
+
+|Paciente|
+start
+:Identificarse con su documento;
+
+|Kiosko (JavaFX)|
+:Abrir "Mis citas";
+
+|API MediCitas|
+:Listar citas BOOKED futuras
+GET /patients/{id}/appointments;
+
+if (¿Tiene citas activas?) then (No)
+  |Kiosko (JavaFX)|
+  :Ofrecer reservar una nueva cita;
+  stop
+else (Sí)
+endif
+
+|Paciente|
+:Seleccionar la cita y elegir "Anular";
+
+|Kiosko (JavaFX)|
+:Mostrar fecha, hora, médico y sede
+y pedir confirmación explícita;
+
+|Paciente|
+if (¿Confirma la anulación?) then (No)
+  :Mantener la cita y volver a "Mis citas";
+  stop
+else (Sí)
+endif
+
+|Kiosko (JavaFX)|
+:Enviar PATCH /appointments/{id}/cancellation;
+
+|API MediCitas|
+if (¿La cita está BOOKED? (RF-10)) then (No)
+  :Responder 422 APPOINTMENT_NOT_MODIFIABLE;
+  |Kiosko (JavaFX)|
+  :Mostrar el motivo al paciente;
+  stop
+else (Sí)
+endif
+
+|API MediCitas|
+:Cambiar estado a CANCELLED;
+:Liberar el cupo para otros pacientes;
+:Registrar evento CANCELLATION;
+:Cancelar recordatorios PENDING;
+:Programar notificación CANCELLATION;
+
+|Kiosko (JavaFX)|
+:Confirmar que la cita fue anulada;
+
+|Servicio de Mensajería|
+:Entregar aviso de anulación;
+
+|Paciente|
+:Recibir aviso por correo / SMS;
+stop
+
+@enduml

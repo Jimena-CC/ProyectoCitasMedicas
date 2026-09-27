@@ -1,0 +1,726 @@
+/*
+ * MediCitas Anglo - Kiosko de Autoatención
+ * Tema propio sobre AtlantaFX PrimerLight. Los tokens son los mismos del prototipo HTML.
+ *   Marca: Clínica Anglo Americana (#1069E5). Iconos: Iconoir.
+ *   ground #E7ECF3 · surface #F4F7FC · surface-2 #FFFFFF · ink #0F1E33 · muted #56698A
+ *   line #D2DCEA · accent #1069E5 · accent-strong #0B4FB0 · accent-soft #E4EEFD · glow #BBD6FB
+ *   danger #C2352F · warning #A86B12
+ */
+
+.root {
+    -k-ground: #E7ECF3;
+    -k-surface: #F4F7FC;
+    -k-surface-2: #FFFFFF;
+    -k-ink: #0F1E33;
+    -k-muted: #56698A;
+    -k-line: #D2DCEA;
+    -k-accent: #1069E5;
+    -k-accent-strong: #0B4FB0;
+    -k-accent-soft: #E4EEFD;
+    -k-glow: #BBD6FB;
+    -k-danger: #C2352F;
+    -k-warning: #A86B12;
+
+    /* Variables de AtlantaFX */
+    -color-bg-default: #F4F7FC;
+    -color-bg-subtle: #FFFFFF;
+    -color-bg-overlay: #FFFFFF;
+    -color-bg-inset: #E7EDF7;
+    -color-fg-default: #0F1E33;
+    -color-fg-muted: #56698A;
+    -color-fg-subtle: #8093AF;
+    -color-fg-emphasis: #FFFFFF;
+    -color-border-default: #D2DCEA;
+    -color-border-muted: #E0E7F2;
+    -color-border-subtle: #EDF1F8;
+    -color-shadow-default: rgba(15, 30, 51, 0.12);
+    -color-neutral-subtle: #E7EDF7;
+    -color-neutral-muted: #D2DCEA;
+    -color-neutral-emphasis: #56698A;
+    -color-neutral-emphasis-plus: #0F1E33;
+    -color-accent-fg: #0B4FB0;
+    -color-accent-emphasis: #1069E5;
+    -color-accent-muted: #BBD6FB;
+    -color-accent-subtle: #E4EEFD;
+    -color-success-fg: #0F7A4A;
+    -color-success-emphasis: #14935A;
+    -color-success-muted: #B7E4CD;
+    -color-success-subtle: #E3F6EC;
+    -color-danger-fg: #C2352F;
+    -color-danger-emphasis: #C2352F;
+    -color-danger-muted: #F0CBC8;
+    -color-danger-subtle: #FBEDEC;
+    -color-warning-fg: #A86B12;
+    -color-warning-emphasis: #A86B12;
+    -color-warning-muted: #EBD3A8;
+    -color-warning-subtle: #FBF3E4;
+
+    -fx-font-family: "Onest";
+    -fx-font-size: 17px;
+    -fx-background-color: -k-ground;
+}
+
+/* ---------- Marca ---------- */
+
+.brand-shape {
+    -fx-fill: -k-accent;
+}
+
+/* ---------- Iconos (Iconoir) ---------- */
+
+.icon-stroke {
+    -fx-fill: transparent;
+    -fx-stroke: -k-ink;
+    -fx-stroke-width: 1.5;
+}
+
+.icon-fill {
+    -fx-fill: -k-ink;
+    -fx-stroke: transparent;
+}
+
+.icon-success .icon-stroke {
+    -fx-stroke: -color-success-emphasis;
+    -fx-stroke-width: 2;
+}
+
+.icon-action .icon-stroke {
+    -fx-stroke: -k-accent;
+}
+
+/* ---------- Estructura ---------- */
+
+.ground {
+    -fx-background-color: -k-ground;
+    -fx-padding: 32px;
+}
+
+.shell-card {
+    -fx-background-color:
+        radial-gradient(center 0% 100%, radius 42%, rgba(107, 165, 245, 0.75) 0%, rgba(187, 214, 251, 0) 100%),
+        radial-gradient(center 100% 0%, radius 30%, rgba(107, 165, 245, 0.60) 0%, rgba(187, 214, 251, 0) 100%),
+        -k-surface;
+    -fx-background-radius: 28px;
+    -fx-border-color: rgba(255, 255, 255, 0.7);
+    -fx-border-radius: 28px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(15, 30, 51, 0.14), 48, 0.0, 0, 18);
+}
+
+.rail {
+    -fx-padding: 44px 32px 32px 44px;
+    -fx-spacing: 40px;
+    -fx-border-color: transparent -k-line transparent transparent;
+    -fx-border-width: 0 1px 0 0;
+}
+
+.brand-name {
+    -fx-font-size: 24px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -k-accent-strong;
+}
+
+.brand-sub {
+    -fx-font-size: 12px;
+    -fx-text-fill: -k-muted;
+}
+
+.rail-footer {
+    -fx-text-fill: -k-muted;
+    -fx-font-size: 14px;
+}
+
+.rail-footer .icon-stroke {
+    -fx-stroke: -k-muted;
+}
+
+.rail-motto {
+    -fx-text-fill: -k-accent-strong;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.content {
+    -fx-padding: 40px 48px 36px 48px;
+    -fx-spacing: 22px;
+}
+
+.section-card {
+    -fx-background-color: rgba(255, 255, 255, 0.72);
+    -fx-background-radius: 20px;
+    -fx-border-color: -k-line;
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+    -fx-padding: 24px 32px;
+    -fx-spacing: 18px;
+}
+
+.title {
+    -fx-font-size: 30px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -k-ink;
+}
+
+.subtitle {
+    -fx-font-size: 17px;
+    -fx-text-fill: -k-muted;
+}
+
+.section-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -k-muted;
+}
+
+.muted {
+    -fx-text-fill: -k-muted;
+}
+
+.mono {
+    -fx-font-family: "IBM Plex Mono";
+    -fx-font-weight: 500;
+}
+
+.actions {
+    -fx-spacing: 16px;
+    -fx-alignment: center-right;
+}
+
+/* ---------- Botones ---------- */
+
+.button.kiosk-button {
+    -fx-min-height: 56px;
+    -fx-pref-height: 60px;
+    -fx-min-width: 150px;
+    -fx-padding: 0 32px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+}
+
+.button.kiosk-button.button-outlined {
+    -color-button-bg: transparent;
+    -color-button-fg: -k-ink;
+    -color-button-border: -k-line;
+    -color-button-bg-hover: rgba(255, 255, 255, 0.6);
+    -color-button-fg-hover: -k-ink;
+    -color-button-border-hover: -k-muted;
+}
+
+.button.kiosk-button.accent {
+    -color-button-bg: -k-accent;
+    -color-button-border: -k-accent;
+    -color-button-bg-hover: -k-accent-strong;
+    -color-button-border-hover: -k-accent-strong;
+    -color-button-bg-pressed: -k-accent-strong;
+}
+
+.button.kiosk-button:disabled {
+    -fx-opacity: 0.45;
+}
+
+/* El foco se marca con borde, no con relleno: el botón principal debe seguir siendo el único lleno. */
+.button.kiosk-button.button-outlined:focused {
+    -color-button-bg: transparent;
+    -color-button-fg: -k-ink;
+    -fx-background-color: -k-surface-2;
+    -fx-text-fill: -k-ink;
+    -fx-border-color: -k-accent;
+    -fx-border-width: 2px;
+}
+
+.link-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -k-accent;
+    -fx-font-weight: 600;
+    -fx-padding: 8px 0;
+    -fx-cursor: hand;
+}
+
+.link-button .icon-stroke {
+    -fx-stroke: -k-accent;
+}
+
+/* ---------- Stepper ---------- */
+
+.stepper {
+    -fx-spacing: 0;
+}
+
+.step {
+    -fx-spacing: 18px;
+    -fx-alignment: center-left;
+    -fx-cursor: hand;
+}
+
+.step-circle {
+    -fx-min-width: 48px;
+    -fx-min-height: 48px;
+    -fx-max-width: 48px;
+    -fx-max-height: 48px;
+    -fx-background-radius: 24px;
+    -fx-border-radius: 24px;
+    -fx-border-width: 1.5px;
+    -fx-border-color: -k-line;
+    -fx-background-color: transparent;
+}
+
+.step-circle .label {
+    -fx-text-fill: -k-muted;
+    -fx-font-size: 17px;
+}
+
+.step-circle .icon-stroke {
+    -fx-stroke: -k-accent;
+}
+
+.step-title {
+    -fx-font-size: 18px;
+    -fx-text-fill: -k-muted;
+}
+
+.step:done .step-circle {
+    -fx-border-color: -k-accent;
+}
+
+.step:done .step-title {
+    -fx-text-fill: -k-ink;
+}
+
+.step:active .step-circle {
+    -fx-background-color: -k-accent;
+    -fx-border-color: -k-accent;
+}
+
+.step:active .step-circle .label {
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+}
+
+.step:active .step-title {
+    -fx-text-fill: -k-ink;
+    -fx-font-weight: 600;
+}
+
+.step:locked {
+    -fx-cursor: default;
+}
+
+.step-line {
+    -fx-min-width: 1.5px;
+    -fx-max-width: 1.5px;
+    -fx-min-height: 58px;
+    -fx-background-color: -k-line;
+}
+
+.step-line:done {
+    -fx-background-color: -k-accent;
+}
+
+/* ---------- Identificación ---------- */
+
+.segmented .toggle-button {
+    -fx-min-height: 52px;
+    -fx-padding: 0 26px;
+    -fx-font-size: 17px;
+    -fx-font-weight: 600;
+    -fx-background-color: -k-surface;
+    -fx-background-radius: 10px;
+    -fx-border-color: -k-line;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-text-fill: -k-muted;
+}
+
+.segmented .toggle-button:hover {
+    -fx-border-color: -k-accent;
+    -fx-text-fill: -k-accent-strong;
+}
+
+.segmented .toggle-button:selected {
+    -fx-background-color: -k-accent;
+    -fx-border-color: -k-accent;
+    -fx-text-fill: white;
+}
+
+.document-field {
+    -fx-font-family: "IBM Plex Mono";
+    -fx-font-size: 34px;
+    -fx-pref-height: 76px;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-padding: 0 22px;
+}
+
+.keypad {
+    -fx-hgap: 12px;
+    -fx-vgap: 12px;
+}
+
+.keypad-key {
+    -fx-min-width: 104px;
+    -fx-min-height: 64px;
+    -fx-font-size: 24px;
+    -fx-font-weight: 500;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -color-button-bg: -k-surface-2;
+    -color-button-border: -k-line;
+    -color-button-bg-hover: white;
+    -color-button-bg-pressed: -k-accent-soft;
+}
+
+.keypad-key.secondary {
+    -fx-font-size: 16px;
+    -color-button-fg: -k-muted;
+}
+
+/* ---------- Formularios ---------- */
+
+.form-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -k-ink;
+}
+
+.text-field.kiosk-field, .date-picker.kiosk-field, .combo-box.kiosk-field {
+    -fx-min-height: 52px;
+    -fx-font-size: 17px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+}
+
+.field-error {
+    -fx-text-fill: -k-danger;
+    -fx-font-size: 13px;
+}
+
+.insurer-card {
+    -fx-min-height: 76px;
+    -fx-pref-width: 242px;
+    -fx-padding: 14px 18px;
+    -fx-alignment: center-left;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -color-button-bg: -k-surface-2;
+    -color-button-border: -k-line;
+    -color-button-bg-hover: white;
+    -color-button-bg-selected: -k-accent-soft;
+    -color-button-fg-selected: -k-ink;
+}
+
+.insurer-card:selected {
+    -fx-background-color: -k-accent, -k-accent-soft;
+    -fx-background-insets: 0, 2px;
+}
+
+.insurer-card .insurer-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: 600;
+}
+
+.insurer-card .insurer-sub {
+    -fx-font-size: 13px;
+    -fx-text-fill: -k-muted;
+}
+
+.insurer-card:selected .icon-stroke {
+    -fx-stroke: -k-accent;
+}
+
+/* ---------- Especialidades ---------- */
+
+.specialty-list {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.specialty-list .list-cell {
+    -fx-padding: 14px 18px;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -k-line transparent;
+    -fx-font-size: 17px;
+}
+
+.specialty-list .list-cell:selected {
+    -fx-background-color: -k-accent-soft;
+    -fx-background-radius: 10px;
+    -fx-text-fill: -k-ink;
+}
+
+.location-address {
+    -fx-font-size: 14px;
+    -fx-text-fill: -k-muted;
+}
+
+/* ---------- Fecha y hora ---------- */
+
+.month-switch {
+    -fx-background-color: rgba(255, 255, 255, 0.55);
+    -fx-background-radius: 10px;
+    -fx-border-color: -k-line;
+    -fx-border-radius: 10px;
+    -fx-padding: 6px 8px;
+    -fx-spacing: 10px;
+    -fx-alignment: center;
+}
+
+.month-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-min-width: 150px;
+    -fx-alignment: center;
+}
+
+.chevron {
+    -fx-background-color: transparent;
+    -fx-min-width: 44px;
+    -fx-min-height: 44px;
+    -fx-cursor: hand;
+}
+
+.chevron .icon-stroke {
+    -fx-stroke: -k-muted;
+}
+
+.chevron:disabled {
+    -fx-opacity: 0.35;
+}
+
+.day-strip {
+    -fx-border-color: transparent transparent -k-line transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-alignment: center;
+}
+
+.day-button {
+    -fx-background-color: transparent;
+    -fx-padding: 6px 4px 14px 4px;
+    -fx-min-height: 88px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 3px 0;
+    -fx-cursor: hand;
+}
+
+.day-button .day-name {
+    -fx-font-size: 16px;
+    -fx-text-fill: -k-muted;
+}
+
+.day-button .day-number {
+    -fx-font-size: 30px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -k-muted;
+}
+
+.day-button:selected {
+    -fx-border-color: transparent transparent -k-ink transparent;
+}
+
+.day-button:selected .day-name {
+    -fx-text-fill: -k-ink;
+    -fx-font-weight: 600;
+}
+
+.day-button:selected .day-number {
+    -fx-text-fill: -k-ink;
+    -fx-font-weight: 600;
+}
+
+.day-button:disabled {
+    -fx-opacity: 0.38;
+}
+
+.doctor-header {
+    -fx-spacing: 10px;
+    -fx-alignment: baseline-left;
+}
+
+.doctor-name {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+}
+
+.doctor-license {
+    -fx-font-size: 13px;
+    -fx-text-fill: -k-muted;
+}
+
+.slot-grid {
+    -fx-hgap: 12px;
+    -fx-vgap: 12px;
+}
+
+.slot-chip {
+    -fx-min-width: 112px;
+    -fx-min-height: 56px;
+    -fx-font-size: 18px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -color-button-bg: rgba(255, 255, 255, 0.78);
+    -color-button-border: transparent;
+    -color-button-bg-hover: white;
+    -color-button-border-hover: -k-line;
+    -color-button-bg-selected: -k-accent;
+    -color-button-fg-selected: white;
+    -fx-effect: dropshadow(gaussian, rgba(15, 30, 51, 0.05), 6, 0, 0, 1);
+}
+
+.summary-card {
+    -fx-background-color:
+        radial-gradient(center 78% 110%, radius 60%, rgba(107, 165, 245, 0.70) 0%, rgba(187, 214, 251, 0) 100%),
+        linear-gradient(to right, rgba(228, 238, 253, 0.55), rgba(255, 255, 255, 0.6));
+    -fx-background-radius: 16px;
+    -fx-border-color: -k-line;
+    -fx-border-radius: 16px;
+    -fx-padding: 20px 28px;
+    -fx-spacing: 8px;
+}
+
+.summary-label {
+    -fx-font-size: 15px;
+    -fx-text-fill: -k-ink;
+}
+
+.summary-value {
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -k-ink;
+}
+
+.summary-card .icon-stroke {
+    -fx-stroke: -k-ink;
+}
+
+/* ---------- Confirmación y Mis citas ---------- */
+
+.review-row {
+    -fx-spacing: 16px;
+    -fx-padding: 8px 0;
+    -fx-border-color: transparent transparent -k-line transparent;
+}
+
+.review-key {
+    -fx-min-width: 160px;
+    -fx-text-fill: -k-muted;
+    -fx-font-size: 15px;
+}
+
+.review-value {
+    -fx-font-size: 17px;
+    -fx-font-weight: 500;
+}
+
+.code-big {
+    -fx-font-family: "IBM Plex Mono";
+    -fx-font-weight: 500;
+    -fx-font-size: 44px;
+    -fx-text-fill: -k-accent-strong;
+}
+
+.success-badge {
+    -fx-background-color: -k-accent;
+    -fx-background-radius: 40px;
+    -fx-min-width: 72px;
+    -fx-min-height: 72px;
+    -fx-max-width: 72px;
+    -fx-max-height: 72px;
+}
+
+.success-badge .icon-stroke {
+    -fx-stroke: white;
+}
+
+.appointment-card {
+    -fx-background-color: rgba(255, 255, 255, 0.72);
+    -fx-background-radius: 16px;
+    -fx-border-color: -k-line;
+    -fx-border-radius: 16px;
+    -fx-padding: 18px 22px;
+    -fx-spacing: 18px;
+    -fx-alignment: center-left;
+}
+
+.appointment-date-block {
+    -fx-background-color: -k-accent-soft;
+    -fx-background-radius: 12px;
+    -fx-min-width: 86px;
+    -fx-padding: 10px;
+    -fx-alignment: center;
+}
+
+.appointment-date-day {
+    -fx-font-size: 30px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -k-accent-strong;
+}
+
+.appointment-date-month {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -k-accent-strong;
+}
+
+.text-area.kiosk-area {
+    -fx-font-size: 17px;
+    -fx-pref-height: 80px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+}
+
+/* ---------- Avisos ---------- */
+
+.banner {
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-padding: 14px 18px;
+    -fx-spacing: 14px;
+    -fx-alignment: center-left;
+}
+
+.banner.error {
+    -fx-background-color: #FBEDEC;
+    -fx-border-color: #F0CBC8;
+}
+
+.banner.error .icon-stroke {
+    -fx-stroke: -k-danger;
+}
+
+.banner.info {
+    -fx-background-color: -k-accent-soft;
+    -fx-border-color: -k-glow;
+}
+
+.banner.info .icon-stroke {
+    -fx-stroke: -k-accent-strong;
+}
+
+.banner-text {
+    -fx-font-size: 16px;
+    -fx-text-fill: -k-ink;
+}
+
+.dialog-card {
+    -fx-background-color: -k-surface-2;
+    -fx-background-radius: 20px;
+    -fx-padding: 32px;
+    -fx-spacing: 18px;
+    -fx-max-width: 520px;
+    -fx-max-height: 320px;
+    -fx-effect: dropshadow(gaussian, rgba(15, 30, 51, 0.25), 40, 0, 0, 12);
+}
+
+.countdown {
+    -fx-font-family: "IBM Plex Mono";
+    -fx-font-size: 48px;
+    -fx-text-fill: -k-accent-strong;
+}
+
+.scroll-pane.plain, .scroll-pane.plain > .viewport {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
