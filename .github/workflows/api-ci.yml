@@ -47,3 +47,25 @@ jobs:
       - name: Construir Imagen Docker
         run: |
           docker build -t citas-medicas-api:latest ./api
+          
+  integration-test:
+    name: Prueba de Integración Real (Docker Compose + Flyway)
+    needs: docker-check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Levantar API + Postgres
+        run: docker compose up -d --build --wait
+
+      - name: Verificar que la API responde (healthcheck real)
+        run: curl -f http://localhost:8080/actuator/health
+
+      - name: Ver logs si algo falló
+        if: failure()
+        run: docker compose logs
+
+      - name: Apagar todo
+        if: always()
+        run: docker compose down -v
