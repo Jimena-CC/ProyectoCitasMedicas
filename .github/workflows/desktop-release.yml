@@ -1,0 +1,73 @@
+name: Release del Kiosko (instalador Windows)
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-installer:
+    name: Construir instalador .exe
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Compilar el kiosko
+        working-directory: desktop
+        run: |
+          ./mvnw -q -DskipTests clean package
+          ./mvnw -q dependency:build-classpath "-Dmdep.outputFile=target/cp.txt"
+
+      - name: Armar carpeta de entrada para jpackage
+        working-directory: desktop
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path target\jpackage-input | Out-Null
+          Copy-Item target\kiosk-1.0-SNAPSHOT.jar target\jpackage-input\
+          $cp = (Get-Content target\cp.txt -Raw).Trim().Split(";")
+          foreach ($jar in $cp) { if ($jar) { Copy-Item $jar target\jpackage-input\ } }
+
+      - name: Generar instalador con jpackage
+        working-directory: desktop
+        shell: pwsh
+        run: |
+          jpackage `
+            --type exe `
+            --input target\jpackage-input `
+            --dest target\installer `
+            --name "MediCitas Kiosko" `
+            --app-version "1.0.0" `
+            --vendor "MediCitas Anglo" `
+            --main-jar kiosk-1.0-SNAPSHOT.jar `
+            --main-class com.medicitas.kiosk.app.KioskLauncher `
+            --win-shortcut `
+            --win-menu `
+            --java-options "-Xmx256m" `
+            --java-options "-XX:MaxMetaspaceSize=160m"
+
+      - name: Subir instalador como artifact de este run (para probar sin publicar nada)
+        uses: actions/upload-artifact@v4
+        with:
+          name: instalador-kiosko
+          path: desktop/target/installer/*.exe
+
+      - name: Publicar como Release de GitHub (solo si vino de un tag real)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            desktop/target/installer/*.exe
+            scripts/setup-kiosk.ps1
+          generate_release_notes: true

@@ -46,7 +46,7 @@ public class ApiClient {
     }
 
     public static ApiClient fromProperties() {
-        return new ApiClient(System.getProperty("api.url", DEFAULT_URL));
+        return new ApiClient(KioskConfig.resolveApiUrl(DEFAULT_URL));
     }
 
     public String getBaseUrl() {
