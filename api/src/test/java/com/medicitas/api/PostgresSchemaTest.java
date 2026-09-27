@@ -7,30 +7,26 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.jdbc.datasource.init.ScriptUtils;
 
 import java.nio.file.Path;
-import java.sql.Connection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Levanta un PostgreSQL 15 real (sin Docker), ejecuta docs/database/initial_schema.sql y arranca la API con el
- * perfil {@code postgres}: {@code ddl-auto=validate} falla si alguna entidad no coincide con el script.
+ * Levanta un PostgreSQL 15 real (sin Docker), ejecuta
+ * docs/database/initial_schema.sql y arranca la API con el
+ * perfil {@code postgres}: {@code ddl-auto=validate} falla si alguna entidad no
+ * coincide con el script.
  */
 class PostgresSchemaTest {
-
-    private static final Path SCRIPT = Path.of("..", "docs", "database", "initial_schema.sql");
 
     private static EmbeddedPostgres postgres;
 
     @BeforeAll
     static void startPostgres() throws Exception {
         postgres = EmbeddedPostgres.builder().start();
-        try (Connection connection = postgres.getPostgresDatabase().getConnection()) {
-            ScriptUtils.executeSqlScript(connection, new FileSystemResource(SCRIPT));
-        }
+        // Flyway aplica V1__init_schema.sql automáticamente al levantar el contexto
+        // Spring
     }
 
     @AfterAll
