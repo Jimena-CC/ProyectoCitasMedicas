@@ -33,27 +33,32 @@ skinparam note {
 |Paciente|
 start
 :Identificarse con su documento;
+-[#2F5D56,dashed]->
 
 |Kiosko (JavaFX)|
 :Abrir "Mis citas";
+-[#2F5D56,dashed]->
 
 |API MediCitas|
 :Listar citas BOOKED futuras
 GET /patients/{id}/appointments;
 
 if (¿Tiene citas activas?) then (No)
+  -[#2F5D56,dashed]->
   |Kiosko (JavaFX)|
   :Ofrecer reservar una nueva cita;
   stop
 else (Sí)
 endif
+-[#2F5D56,dashed]->
 
 |Paciente|
 :Seleccionar la cita y elegir "Anular";
+-[#2F5D56,dashed]->
 
 |Kiosko (JavaFX)|
-:Mostrar fecha, hora, médico y sede
-y pedir confirmación explícita;
+:Mostrar fecha, hora, médico y sede\ny pedir confirmación explícita;
+-[#2F5D56,dashed]->
 
 |Paciente|
 if (¿Confirma la anulación?) then (No)
@@ -61,13 +66,16 @@ if (¿Confirma la anulación?) then (No)
   stop
 else (Sí)
 endif
+-[#2F5D56,dashed]->
 
 |Kiosko (JavaFX)|
 :Enviar PATCH /appointments/{id}/cancellation;
+-[#2F5D56,dashed]->
 
 |API MediCitas|
 if (¿La cita está BOOKED? (RF-10)) then (No)
   :Responder 422 APPOINTMENT_NOT_MODIFIABLE;
+  -[#2F5D56,dashed]->
   |Kiosko (JavaFX)|
   :Mostrar el motivo al paciente;
   stop
@@ -80,12 +88,15 @@ endif
 :Registrar evento CANCELLATION;
 :Cancelar recordatorios PENDING;
 :Programar notificación CANCELLATION;
+-[#2F5D56,dashed]->
 
 |Kiosko (JavaFX)|
 :Confirmar que la cita fue anulada;
+-[#2F5D56,dashed]->
 
 |Servicio de Mensajería|
 :Entregar aviso de anulación;
+-[#2F5D56,dashed]->
 
 |Paciente|
 :Recibir aviso por correo / SMS;
