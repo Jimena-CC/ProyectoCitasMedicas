@@ -33,35 +33,40 @@ skinparam note {
 |Paciente|
 start
 :Identificarse con su documento;
+-[#2F5D56,dashed]->
 
 |Kiosko (JavaFX)|
 :Abrir "Mis citas";
+-[#2F5D56,dashed]->
 
 |API MediCitas|
-:Listar citas BOOKED futuras
-GET /patients/{id}/appointments;
+:Listar citas BOOKED futuras\nGET /patients/{id}/appointments;
 
 if (¿Tiene citas activas?) then (No)
+  -[#2F5D56,dashed]->
   |Kiosko (JavaFX)|
   :Ofrecer reservar una nueva cita;
   stop
 else (Sí)
 endif
+-[#2F5D56,dashed]->
 
 |Paciente|
 :Seleccionar la cita y elegir "Reprogramar";
+-[#2F5D56,dashed]->
 
 repeat
   |API MediCitas|
-  :Consultar cupos FREE de la misma
-  especialidad y sede (RF-05);
+  :Consultar cupos FREE de la misma\nespecialidad y sede (RF-05);
+  -[#2F5D56,dashed]->
   |Paciente|
   :Elegir nuevo horario;
+  -[#2F5D56,dashed]->
   |Kiosko (JavaFX)|
   :Enviar PATCH /appointments/{id}/reschedule;
+  -[#2F5D56,dashed]->
   |API MediCitas|
-  :Validar que la cita esté BOOKED
-  y que aún no haya iniciado;
+  :Validar que la cita esté BOOKED\ny que aún no haya iniciado;
   :Tomar el cupo nuevo actualizando su versión (RF-07);
   :Verificar cruce con otra cita del paciente (RF-08);
 repeat while (¿Cupo tomado o cita duplicada? → 409) is (Sí, elegir otro horario)
@@ -69,17 +74,18 @@ repeat while (¿Cupo tomado o cita duplicada? → 409) is (Sí, elegir otro hora
 
 :Liberar el cupo original (RF-09);
 :Incrementar reschedule_count;
-:Registrar evento RESCHEDULE
-con cupo anterior y nuevo;
-:Cancelar recordatorio pendiente
-y programar uno para la nueva fecha;
+:Registrar evento RESCHEDULE\ncon cupo anterior y nuevo;
+:Cancelar recordatorio pendiente\ny programar uno para la nueva fecha;
 :Programar notificación RESCHEDULE;
+-[#2F5D56,dashed]->
 
 |Kiosko (JavaFX)|
 :Mostrar la cita con su nueva fecha y hora;
+-[#2F5D56,dashed]->
 
 |Servicio de Mensajería|
 :Entregar aviso de reprogramación;
+-[#2F5D56,dashed]->
 
 |Paciente|
 :Recibir aviso por correo / SMS;
