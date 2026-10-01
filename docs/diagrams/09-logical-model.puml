@@ -1,0 +1,204 @@
+@startuml
+title 06 - Modelo lógico - MediCitas Anglo
+
+skinparam shadowing false
+skinparam roundCorner 10
+skinparam defaultFontName "Helvetica"
+skinparam defaultFontSize 12
+skinparam dpi 150
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 70
+skinparam ArrowColor #5A6E69
+skinparam entity {
+  BackgroundColor #F4F8F7
+  BorderColor #7A8C88
+  FontColor #17302B
+}
+skinparam note {
+  BackgroundColor #FFF6E5
+  BorderColor #9A5B00
+  FontColor #5A3A00
+}
+
+hide circle
+
+entity specialty {
+  * id : INT <<PK>>
+  --
+  * name : VARCHAR(120)
+  description : TEXT
+  * appointment_minutes : INT
+  * active : BOOLEAN
+}
+
+entity location {
+  * id : INT <<PK>>
+  --
+  * code : VARCHAR(10)
+  * name : VARCHAR(100)
+  * address : VARCHAR(200)
+  * district : VARCHAR(60)
+  phone : VARCHAR(20)
+  * active : BOOLEAN
+}
+
+entity location_specialty {
+  * location_id : INT <<PK, FK>>
+  * specialty_id : INT <<PK, FK>>
+  --
+  * active : BOOLEAN
+}
+
+entity doctor {
+  * id : INT <<PK>>
+  --
+  * license : VARCHAR(10)
+  specialist_registry : VARCHAR(10)
+  * first_names : VARCHAR(100)
+  * last_names : VARCHAR(100)
+  * specialty_id : INT <<FK>>
+  * active : BOOLEAN
+}
+
+entity insurer {
+  * id : INT <<PK>>
+  --
+  * name : VARCHAR(100)
+  * ruc : CHAR(11)
+  * type : VARCHAR(15)
+  * active : BOOLEAN
+}
+
+entity insurance_plan {
+  * id : INT <<PK>>
+  --
+  * insurer_id : INT <<FK>>
+  * name : VARCHAR(80)
+  consultation_copay : DECIMAL(8,2)
+  * active : BOOLEAN
+}
+
+entity patient {
+  * id : INT <<PK>>
+  --
+  * document_type : VARCHAR(3)
+  * document_number : VARCHAR(12)
+  * first_names : VARCHAR(100)
+  * last_names : VARCHAR(100)
+  birth_date : DATE
+  sex : CHAR(1)
+  * phone : VARCHAR(15)
+  * email : VARCHAR(120)
+  * accepts_notifications : BOOLEAN
+  * registered_at : TIMESTAMP
+}
+
+entity patient_insurance {
+  * id : INT <<PK>>
+  --
+  * patient_id : INT <<FK>>
+  * plan_id : INT <<FK>>
+  policy_number : VARCHAR(30)
+  * coverage_status : VARCHAR(12)
+  valid_until : DATE
+}
+
+entity slot {
+  * id : INT <<PK>>
+  --
+  * doctor_id : INT <<FK>>
+  * location_id : INT <<FK>>
+  * date : DATE
+  * start_time : TIME
+  * end_time : TIME
+  room : VARCHAR(20)
+  * status : VARCHAR(10)
+}
+
+entity appointment {
+  * id : INT <<PK>>
+  --
+  * code : VARCHAR(12)
+  * patient_id : INT <<FK>>
+  * slot_id : INT <<FK>>
+  patient_insurance_id : INT <<FK>>
+  visit_reason : VARCHAR(250)
+  * status : VARCHAR(12)
+  * booking_channel : VARCHAR(10)
+  * idempotency_key : VARCHAR(36)
+  * reschedule_count : INT
+  * booked_at : TIMESTAMP
+  * updated_at : TIMESTAMP
+}
+
+entity appointment_history {
+  * id : INT <<PK>>
+  --
+  * appointment_id : INT <<FK>>
+  * event : VARCHAR(15)
+  previous_status : VARCHAR(12)
+  * new_status : VARCHAR(12)
+  previous_slot_id : INT <<FK>>
+  new_slot_id : INT <<FK>>
+  user_id : INT <<FK>>
+  detail : VARCHAR(250)
+  * event_at : TIMESTAMP
+}
+
+entity notification {
+  * id : INT <<PK>>
+  --
+  * appointment_id : INT <<FK>>
+  * type : VARCHAR(15)
+  * channel : VARCHAR(5)
+  * destination : VARCHAR(120)
+  * scheduled_for : TIMESTAMP
+  sent_at : TIMESTAMP
+  * status : VARCHAR(10)
+  * attempts : INT
+  provider_message_id : VARCHAR(80)
+  error_detail : VARCHAR(250)
+}
+
+entity app_user {
+  * id : INT <<PK>>
+  --
+  * username : VARCHAR(50)
+  * password_hash : VARCHAR(72)
+  * role : VARCHAR(15)
+  doctor_id : INT <<FK>>
+  * active : BOOLEAN
+  last_access : TIMESTAMP
+}
+
+entity audit_log {
+  * id : INT <<PK>>
+  --
+  user_id : INT <<FK>>
+  * action : VARCHAR(60)
+  * entity : VARCHAR(40)
+  entity_id : INT
+  detail : TEXT
+  source_ip : VARCHAR(45)
+  * registered_at : TIMESTAMP
+}
+
+specialty ||--o{ doctor : groups
+location ||--o{ location_specialty : offers
+specialty ||--o{ location_specialty : "is offered at"
+doctor ||--o{ slot : serves
+location ||--o{ slot : hosts
+insurer ||--|{ insurance_plan : sells
+insurance_plan ||--o{ patient_insurance : covers
+patient ||--o{ patient_insurance : "enrolls in"
+patient ||--o{ appointment : requests
+patient_insurance |o--o{ appointment : "pays for"
+slot ||--o{ appointment : "is taken by"
+appointment ||--|{ appointment_history : records
+appointment ||--o{ notification : triggers
+doctor |o--o| app_user : "signs in as"
+app_user |o--o{ audit_log : performs
+app_user |o--o{ appointment_history : executes
+
+@enduml

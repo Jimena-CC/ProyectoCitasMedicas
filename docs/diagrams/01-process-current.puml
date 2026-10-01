@@ -33,56 +33,62 @@ note right
 end note
 
 |Personal de Admisión / Central de Citas|
+-[dashed]->
 :Solicitar número de documento;
 :Buscar al paciente en el sistema interno;
 
 if (¿Paciente registrado?) then (No)
   |Paciente|
+  -[dashed]->
   :Dictar datos personales;
   |Personal de Admisión / Central de Citas|
+  -[dashed]->
   :Registrar paciente manualmente;
   note right
     <b>Problema:</b> errores de digitación
     y registros duplicados
   end note
+else (Sí)
 endif
 
 |Paciente|
+-[dashed]->
 :Indicar aseguradora y especialidad;
 
 |Personal de Admisión / Central de Citas|
+-[dashed]->
 :Validar cobertura con la aseguradora;
 :Consultar agenda de médicos por sede;
 
 if (¿Hay cupos disponibles?) then (No)
   :Informar falta de cupos;
   |Paciente|
+  -[dashed]->
   :Volver a llamar otro día;
   stop
 else (Sí)
+  |Personal de Admisión / Central de Citas|
+  :Ofrecer horarios de forma verbal;
+  |Paciente|
+  -[dashed]->
+  :Elegir horario;
+  |Personal de Admisión / Central de Citas|
+  -[dashed]->
+  :Registrar la cita en la agenda;
+  note right
+    <b>Problema recurrente:</b> doble agendamiento
+    cuando otro operador toma el mismo cupo
+    al mismo tiempo
+  end note
+  :Comunicar fecha, hora y sede de forma verbal;
+  |Paciente|
+  -[dashed]->
+  :Anotar los datos de la cita;
+  note right
+    <b>Problema:</b> no recibe confirmación
+    ni recordatorio escrito → ausentismo
+  end note
+  stop
 endif
-
-|Personal de Admisión / Central de Citas|
-:Ofrecer horarios de forma verbal;
-
-|Paciente|
-:Elegir horario;
-
-|Personal de Admisión / Central de Citas|
-:Registrar la cita en la agenda;
-note right
-  <b>Problema recurrente:</b> doble agendamiento
-  cuando otro operador toma el mismo cupo
-  al mismo tiempo
-end note
-:Comunicar fecha, hora y sede de forma verbal;
-
-|Paciente|
-:Anotar los datos de la cita;
-note right
-  <b>Problema:</b> no recibe confirmación
-  ni recordatorio escrito → ausentismo
-end note
-stop
 
 @enduml

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="926.5625px" preserveAspectRatio="none" style="width:1178px;height:926px;" version="1.1" viewBox="0 0 1178 926" width="1178.125px" zoomAndPan="magnify"><defs/><g><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="403.125" x="393.75" y="17.4042">05 - Modelo conceptual - MediCitas Anglo</text><!--MD5=[e58b328d98718587d2cf25b4c2010115]
+class Paciente--><rect fill="#F4F8F7" height="37.4512" id="Paciente" rx="7.8125" ry="7.8125" style="stroke: #7A8C88; stroke-width: 2.34375;" width="106.25" x="9.375" y="34.3262"/><text fill="#17302B" font-family="Helvetica" font-size="18.75" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="96.875" x="14.0625" y="59.5428">Paciente</text><!--MD5=[59b615ab8a138cf700c12aca10c75181]
+class Aseguradora--><rect fill="#F4F8F7" height="37.4512" id="Aseguradora" rx="7.8125" ry="7.8125" style="stroke: #7A8C88; stroke-width: 2.34375;" width="153.125" x="228.125" y="34.3262"/><text fill="#17302B" font-family="Helvetica" font-size="18.75" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="143.75" x="232.8125" y="59.5428">Aseguradora</text><!--MD5=[8a55eca40716f1c7672455919308ef3b]
+class PlanSeguro--><rect fill="#F4F8F7" height="37.4512" id="PlanSeguro" rx="7.8125" ry="7.8125" style="stroke: #7A8C88; stroke-width: 2.34375;" width="137.5" x="235.9375" y="189.0137"/><text fill="#17302B" font-family="Helvetica" font-size="18.75" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="128.125" x="240.625" y="214.2303">PlanSeguro</text><!--MD5=[8d08471c6b94e7212e3b5283fb3b9507]
+class Especialidad--><rect fill="#F4F8F7" height="37.4512" id="Especialidad" rx="7.8125" ry="7.8125" style="stroke: #7A8C88; stroke-width: 2.34375;" width="148.4375" x="435.1563" y="189.0137"/><text fill="#17302B" font-family="Helvetica" font-size="18.75" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="139.0625" x="439.8438" y="214.2303">Especialidad</text><!--MD5=[2ba98e238c263525875c71f17cb2a939]
+class Sede--><rect fill="#F4F8F7" height="37.4512" id="Sede" rx="7.8125" ry="7.8125" style="stroke: #7A8C88; stroke-width: 2.34375;" width="65.625" x="709.375" y="34.3262"/><text fill="#17302B" font-family="Helvetica" font-size="18.75" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="56.25" x="714.0625" y="59.5428">Sede</text><!--MD5=[5b0945d094f0812fdd8c9a06da7a670d]
+class Medico--><rect fill="#F4F8F7" height="37.4512" id="Medico" rx="7.8125" ry="7.8125" style="stroke: #7A8C88; stroke-width: 2.34375;" width="87.5" x="682.8125" y="376.5137"/><text fill="#17302B" font-family="Helvetica" font-size="18.75" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="78.125" x="687.5" y="401.7303">Medico</text><!--MD5=[6894dc49a917176971ef530eb888d549]
+class Cupo--><rect fill="#F4F8F7" height="37.4512" id="Cupo" rx="7.8125" ry="7.8125" style="stroke: #7A8C88; stroke-width: 2.34375;" width="65.625" x="693.75" y="564.0137"/><text fill="#17302B" font-family="Helvetica" font-size="18.75" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="56.25" x="698.4375" y="589.2303">Cupo</text><!--MD5=[a0e26133449989a638b0b6a4b7a1b218]
+class Cita--><rect fill="#F4F8F7" height="37.4512" id="Cita" rx="7.8125" ry="7.8125" style="stroke: #7A8C88; stroke-width: 2.34375;" width="53.125" x="695.3125" y="718.7012"/><text fill="#17302B" font-family="Helvetica" font-size="18.75" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="43.75" x="700" y="743.9178">Cita</text><!--MD5=[d331226d1317b3fc678f52fa8b08f650]
+class Notificacion--><rect fill="#F4F8F7" height="37.4512" id="Notificacion" rx="7.8125" ry="7.8125" style="stroke: #7A8C88; stroke-width: 2.34375;" width="139.0625" x="646.0938" y="873.3887"/><text fill="#17302B" font-family="Helvetica" font-size="18.75" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="129.6875" x="650.7813" y="898.6053">Notificacion</text><!--MD5=[8f6eae613477ee4675060984283805b7]
+class HistorialCita--><rect fill="#F4F8F7" height="37.4512" id="HistorialCita" rx="7.8125" ry="7.8125" style="stroke: #7A8C88; stroke-width: 2.34375;" width="146.875" x="867.1875" y="873.3887"/><text fill="#17302B" font-family="Helvetica" font-size="18.75" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="137.5" x="871.875" y="898.6053">HistorialCita</text><!--MD5=[35a64b983c79880384a2fd9b61f0c24b]
+class Usuario--><rect fill="#F4F8F7" height="37.4512" id="Usuario" rx="7.8125" ry="7.8125" style="stroke: #7A8C88; stroke-width: 2.34375;" width="95.3125" x="938.2813" y="189.0137"/><text fill="#17302B" font-family="Helvetica" font-size="18.75" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="85.9375" x="942.9688" y="214.2303">Usuario</text><!--MD5=[ba78e3650ea01c75d74d9d1de6cfef56]
+class Auditoria--><rect fill="#F4F8F7" height="37.4512" id="Auditoria" rx="7.8125" ry="7.8125" style="stroke: #7A8C88; stroke-width: 2.34375;" width="110.9375" x="1050.7813" y="376.5137"/><text fill="#17302B" font-family="Helvetica" font-size="18.75" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="101.5625" x="1055.4688" y="401.7303">Auditoria</text><path d="M149.2188,351.5137 L149.2188,438.8184 A7.8125,7.8125 0 0 0 157.0313,446.6309 L621.0938,446.6309 A7.8125,7.8125 0 0 0 628.9063,438.8184 L628.9063,359.3262 L613.2813,343.7012 L157.0313,343.7012 A7.8125,7.8125 0 0 0 149.2188,351.5137 " fill="#FFF6E5" style="stroke: #9A5B00; stroke-width: 1.5625;"/><path d="M613.2813,343.7012 L613.2813,355.4199 A3.9063,3.9063 0 0 0 617.1875,359.3262 L628.9063,359.3262 L613.2813,343.7012 " fill="#FFF6E5" style="stroke: #9A5B00; stroke-width: 1.5625;"/><text fill="#5A3A00" font-family="Helvetica" font-size="18.75" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="60.9375" x="158.5938" y="368.9178">Nota:</text><text fill="#5A3A00" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="320.3125" x="225.7813" y="368.9178">las relaciones muchos a muchos</text><text fill="#5A3A00" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="446.875" x="158.5938" y="390.744">(Paciente - PlanSeguro y Sede - Especialidad)</text><text fill="#5A3A00" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="420.3125" x="158.5938" y="412.5702">se resuelven en el modelo lógico mediante</text><text fill="#5A3A00" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="189.0625" x="158.5938" y="434.3964">tablas intermedias.</text><!--MD5=[8360fdeb94ce6e91181537b3a04e6bf8]
+link Aseguradora to PlanSeguro--><path d="M304.6875,72.0293 C304.6875,101.1074 304.6875,159.2949 304.6875,188.5449 " fill="none" id="Aseguradora-PlanSeguro" style="stroke: #5A6E69; stroke-width: 1.5625;"/><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="62.5" x="306.25" y="137.6678">ofrece</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="12.5" x="289.6094" y="101.7634">1</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="34.375" x="312.6367" y="172.412">1..*</text><!--MD5=[0768b8ec49d8e903ab777a6e67306ff1]
+link Paciente to PlanSeguro--><path d="M88.2031,72.1543 C114.7656,90.1074 157.5625,118.6699 195.3125,142.1387 C221.6719,158.5137 252.1719,176.2949 274.25,188.9512 " fill="none" id="Paciente-PlanSeguro" style="stroke: #5A6E69; stroke-width: 1.5625;"/><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="93.75" x="196.875" y="137.6678">se afilia a</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="34.375" x="57.3408" y="101.9399">0..*</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="34.375" x="216.6578" y="172.3014">0..*</text><!--MD5=[f221b30e2cd4394ad617fe0750d89e35]
+link Especialidad to Medico--><path d="M502.4844,226.623 C496.125,245.748 489.7031,276.498 504.6875,296.8262 C546.5313,353.5762 593.0469,312.4668 656.25,343.7012 C673.9688,352.4668 692.1094,365.4824 705.5313,376.0449 " fill="none" id="Especialidad-Medico" style="stroke: #5A6E69; stroke-width: 1.5625;"/><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="70.3125" x="506.25" y="292.3553">agrupa</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="12.5" x="484.5639" y="256.3184">1</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="34.375" x="653.4801" y="359.912">0..*</text><!--MD5=[ff08ba1547c839910d6149f7d8c6b7d9]
+link Sede to Especialidad--><path d="M715.4844,72.0293 C670.8125,101.1074 581.4219,159.2949 536.4844,188.5449 " fill="none" id="Sede-Especialidad" style="stroke: #5A6E69; stroke-width: 1.5625;"/><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="62.5" x="640.625" y="137.6678">ofrece</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="34.375" x="663.0045" y="101.7634">0..*</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="34.375" x="506.6982" y="172.412">0..*</text><!--MD5=[dba2810e2b66a5217e731e39daf00f0e]
+link Medico to Cupo--><path d="M726.5625,414.498 C726.5625,449.8418 726.5625,528.7793 726.5625,563.8418 " fill="none" id="Medico-Cupo" style="stroke: #5A6E69; stroke-width: 1.5625;"/><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="50" x="728.125" y="512.6678">tiene</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="12.5" x="711.6016" y="443.7824">1</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="34.375" x="683.8086" y="547.1387">0..*</text><!--MD5=[6914edb88964675e6abbb391e47713af]
+link Sede to Cupo--><path d="M747.3281,72.0293 C757.9531,108.8105 782.3438,197.373 793.75,273.3887 C798.4063,304.3574 797.3906,312.4043 798.4375,343.7012 C799.9688,389.5137 800.4687,401.0449 798.4375,446.8262 C797.0469,478.1699 805.6406,488.7949 792.1875,517.1387 C783.3125,535.8418 766.5313,552.0605 752.1563,563.5137 " fill="none" id="Sede-Cupo" style="stroke: #5A6E69; stroke-width: 1.5625;"/><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="46.875" x="796.875" y="292.3553">aloja</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="12.5" x="734.3705" y="101.7634">1</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="34.375" x="721.6691" y="547.3663">0..*</text><!--MD5=[839fe647649271402f7de4fb302f8c0c]
+link Paciente to Cita--><path d="M54.9688,71.998 C43.625,99.7793 23.4375,156.2012 23.4375,206.2012 C23.4375,206.2012 23.4375,206.2012 23.4375,584.3262 C23.4375,724.373 566.5625,735.2793 694.9219,735.9043 " fill="none" id="Paciente-Cita" style="stroke: #5A6E69; stroke-width: 1.5625;"/><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="68.75" x="25" y="402.5116">solicita</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="12.5" x="36.784" y="101.7192">1</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="34.375" x="648.6841" y="730.0607">0..*</text><!--MD5=[95d25bf2c0ee32cb797eb3357f28ff81]
+link Cupo to Cita--><path d="M726.0313,601.7168 C725.125,630.7949 723.3281,688.9824 722.4219,718.2324 " fill="none" id="Cupo-Cita" style="stroke: #5A6E69; stroke-width: 1.5625;"/><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="143.75" x="725" y="667.3553">es tomado por</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="12.5" x="710.734" y="631.4509">1</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="34.375" x="730.624" y="702.0995">0..*</text><!--MD5=[c5c4f353294d79169da43b3794260576]
+link Cita to HistorialCita--><path d="M746.7188,756.5293 C771.9063,774.248 812.0156,802.4043 846.875,826.5137 C869.8906,842.4355 896.2188,860.4043 915.1094,873.248 " fill="none" id="Cita-HistorialCita" style="stroke: #5A6E69; stroke-width: 1.5625;"/><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="76.5625" x="848.4375" y="822.0428">registra</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="12.5" x="741.8887" y="786.3149">1</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="34.375" x="859.9166" y="856.5602">1..*</text><!--MD5=[5b38a85a9d7288d6a07c4ca3cec4b72a]
+link Cita to Notificacion--><path d="M718.1094,756.3105 C715.5,769.1543 712.2969,787.1074 710.9375,803.0762 C708.875,827.3262 711.2344,855.4512 713.2813,873.123 " fill="none" id="Cita-Notificacion" style="stroke: #5A6E69; stroke-width: 1.5625;"/><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="70.3125" x="712.5" y="822.0428">genera</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="12.5" x="701.4779" y="786.0059">1</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="34.375" x="669.3848" y="856.3743">0..*</text><!--MD5=[55ba20bac364f6d940c8bd299d7f7028]
+link Usuario to Medico--><path d="M937.6563,210.9668 C851.75,214.998 677.8594,228.623 640.625,273.3887 C611.5781,308.3262 663.7813,352.4668 698.7656,376.373 " fill="none" id="Usuario-Medico" style="stroke: #5A6E69; stroke-width: 1.5625;"/><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="143.75" x="642.1875" y="292.3553">corresponde a</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="37.5" x="888.2163" y="206.9591">0..1</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="37.5" x="694.3553" y="359.6852">0..1</text><!--MD5=[d1891e17b5066fb7f3b1483e942d6705]
+link Usuario to Auditoria--><path d="M997.4688,226.998 C1020.5313,262.3418 1072.0469,341.2793 1094.9219,376.3418 " fill="none" id="Usuario-Auditoria" style="stroke: #5A6E69; stroke-width: 1.5625;"/><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="62.5" x="1043.75" y="292.3553">realiza</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="37.5" x="1009.392" y="256.2824">0..1</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="34.375" x="1046.6455" y="359.6387">0..*</text><!--MD5=[b45203015c0b6ea5b4f1e7e6fed69e4c]
+link Usuario to HistorialCita--><path d="M983,226.5449 C977.7344,259.1074 967.1875,331.9199 967.1875,393.7012 C967.1875,393.7012 967.1875,393.7012 967.1875,739.0137 C967.1875,788.1699 953.4688,844.9668 945.75,873.0137 " fill="none" id="Usuario-HistorialCita" style="stroke: #5A6E69; stroke-width: 1.5625;"/><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="81.25" x="968.75" y="590.0116">modifica</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="37.5" x="936.5539" y="256.2081">0..1</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="34.375" x="956.6273" y="856.2116">0..*</text><!--MD5=[79b68242b1cf7066fb153b3ac937481a]
+link PlanSeguro to N1--><path d="M312.7813,226.998 C324.9531,253.5918 348.4219,304.8887 366.125,343.5762 " fill="none" id="PlanSeguro-N1" style="stroke: #5A6E69; stroke-width: 1.5625; stroke-dasharray: 7.0,7.0;"/><!--MD5=[9b31825bf66d182d3cfc33f42b082c69]
+link Especialidad to N1--><path d="M487.2344,226.5293 C472.9688,238.498 454.7969,255.4512 442.1875,273.3887 C427.2188,294.6855 415.0469,320.873 406.1563,343.373 " fill="none" id="Especialidad-N1" style="stroke: #5A6E69; stroke-width: 1.5625; stroke-dasharray: 7.0,7.0;"/><!--MD5=[11b55b6275967df3bf70e250028b6695]
+@startuml
+title 05 - Modelo conceptual - MediCitas Anglo
+
+skinparam shadowing false
+skinparam roundCorner 10
+skinparam defaultFontName "Helvetica"
+skinparam defaultFontSize 12
+skinparam dpi 150
+skinparam ArrowColor #5A6E69
+skinparam class {
+  BackgroundColor #F4F8F7
+  BorderColor #7A8C88
+  FontColor #17302B
+  FontStyle bold
+}
+skinparam note {
+  BackgroundColor #FFF6E5
+  BorderColor #9A5B00
+  FontColor #5A3A00
+}
+
+hide circle
+hide members
+
+class Paciente
+class Aseguradora
+class PlanSeguro
+class Especialidad
+class Sede
+class Medico
+class Cupo
+class Cita
+class Notificacion
+class HistorialCita
+class Usuario
+class Auditoria
+
+Aseguradora "1" - - "1..*" PlanSeguro : ofrece
+Paciente "0..*" - - "0..*" PlanSeguro : se afilia a
+Especialidad "1" - - "0..*" Medico : agrupa
+Sede "0..*" - - "0..*" Especialidad : ofrece
+Medico "1" - - "0..*" Cupo : tiene
+Sede "1" - - "0..*" Cupo : aloja
+Paciente "1" - - "0..*" Cita : solicita
+Cupo "1" - - "0..*" Cita : es tomado por
+Cita "1" - - "1..*" HistorialCita : registra
+Cita "1" - - "0..*" Notificacion : genera
+Usuario "0..1" - - "0..1" Medico : corresponde a
+Usuario "0..1" - - "0..*" Auditoria : realiza
+Usuario "0..1" - - "0..*" HistorialCita : modifica
+
+note as N1
+  <b>Nota:</b> las relaciones muchos a muchos
+  (Paciente - PlanSeguro y Sede - Especialidad)
+  se resuelven en el modelo lógico mediante
+  tablas intermedias.
+end note
+PlanSeguro .. N1
+Especialidad .. N1
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 17.0.20.1+1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: null
+--></g></svg>

@@ -1,0 +1,61 @@
+@startuml
+title 05 - Modelo conceptual - MediCitas Anglo
+
+skinparam shadowing false
+skinparam roundCorner 10
+skinparam defaultFontName "Helvetica"
+skinparam defaultFontSize 12
+skinparam dpi 150
+skinparam ArrowColor #5A6E69
+skinparam class {
+  BackgroundColor #F4F8F7
+  BorderColor #7A8C88
+  FontColor #17302B
+  FontStyle bold
+}
+skinparam note {
+  BackgroundColor #FFF6E5
+  BorderColor #9A5B00
+  FontColor #5A3A00
+}
+
+hide circle
+hide members
+
+class Paciente
+class Aseguradora
+class PlanSeguro
+class Especialidad
+class Sede
+class Medico
+class Cupo
+class Cita
+class Notificacion
+class HistorialCita
+class Usuario
+class Auditoria
+
+Aseguradora "1" -- "1..*" PlanSeguro : ofrece
+Paciente "0..*" -- "0..*" PlanSeguro : se afilia a
+Especialidad "1" -- "0..*" Medico : agrupa
+Sede "0..*" -- "0..*" Especialidad : ofrece
+Medico "1" -- "0..*" Cupo : tiene
+Sede "1" -- "0..*" Cupo : aloja
+Paciente "1" -- "0..*" Cita : solicita
+Cupo "1" -- "0..*" Cita : es tomado por
+Cita "1" -- "1..*" HistorialCita : registra
+Cita "1" -- "0..*" Notificacion : genera
+Usuario "0..1" -- "0..1" Medico : corresponde a
+Usuario "0..1" -- "0..*" Auditoria : realiza
+Usuario "0..1" -- "0..*" HistorialCita : modifica
+
+note as N1
+  <b>Nota:</b> las relaciones muchos a muchos
+  (Paciente - PlanSeguro y Sede - Especialidad)
+  se resuelven en el modelo lógico mediante
+  tablas intermedias.
+end note
+PlanSeguro .. N1
+Especialidad .. N1
+
+@enduml

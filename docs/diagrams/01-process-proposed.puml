@@ -29,55 +29,68 @@ start
 :Ingresar tipo y número de documento;
 
 |Kiosko (JavaFX)|
-:Consultar paciente
-GET /patients?documentType&documentNumber;
+-[dashed]->
+:Consultar paciente\nGET /patients?documentType&documentNumber;
 
 |API MediCitas|
+-[dashed]->
 :Buscar por documento (RF-02);
 
 if (¿Paciente registrado?) then (No)
   |Paciente|
+  -[dashed]->
   :Completar datos personales y de contacto;
   |Kiosko (JavaFX)|
+  -[dashed]->
   :Validar formato (DNI de 8 dígitos, correo, celular);
   |API MediCitas|
-  :Registrar paciente
-  POST /patients (RF-01);
+  -[dashed]->
+  :Registrar paciente\nPOST /patients (RF-01);
   if (¿Documento ya existe?) then (Sí)
     :Responder 409 DUPLICATE_DOCUMENT;
     |Kiosko (JavaFX)|
+    -[dashed]->
     :Recuperar el perfil existente;
   endif
 endif
 
 |Paciente|
+-[dashed]->
 :Elegir aseguradora y plan, o atención particular;
 |API MediCitas|
+-[dashed]->
 :Asociar seguro al paciente (RF-03);
 
 |Paciente|
+-[dashed]->
 :Elegir especialidad y sede;
 |API MediCitas|
+-[dashed]->
 :Listar especialidades activas por sede (RF-04);
 
 repeat
   |Paciente|
+  -[dashed]->
   :Elegir fecha en la franja de 14 días;
   |API MediCitas|
+  -[dashed]->
   :Consultar cupos FREE del rango (RF-05);
   note right: Respuesta ≤ 3 s (RNF-04)
   |Kiosko (JavaFX)|
+  -[dashed]->
   :Mostrar horarios agrupados por médico;
   |Paciente|
+  -[dashed]->
   :Seleccionar horario e indicar motivo de consulta;
   :Confirmar reserva;
   |Kiosko (JavaFX)|
+  -[dashed]->
   :Enviar POST /appointments con Idempotency-Key;
   |API MediCitas|
+  -[dashed]->
   :Abrir transacción;
   :Tomar cupo actualizando su versión (RF-07);
   :Verificar cruce con otra cita del paciente (RF-08);
-  |API MediCitas|
 repeat while (¿Cupo tomado o cita duplicada? → 409) is (Sí, elegir otro horario)
 ->No;
 
@@ -85,21 +98,25 @@ repeat while (¿Cupo tomado o cita duplicada? → 409) is (Sí, elegir otro hora
 :Crear cita BOOKED con código único;
 :Marcar cupo como BOOKED;
 :Registrar evento BOOKING en historial;
-:Programar notificaciones
-CONFIRMATION (inmediata) y REMINDER (24 h antes) (RF-12);
+:Programar notificaciones\nCONFIRMATION (inmediata) y REMINDER (24 h antes) (RF-12);
 :Confirmar transacción y responder 201;
 
 fork
   |Kiosko (JavaFX)|
+  -[dashed]->
   :Mostrar código de cita, médico, sede, fecha y hora;
   |Paciente|
+  -[dashed]->
   :Revisar el resumen de su cita;
+  -[dashed]->
 fork again
   |API MediCitas|
   :Enviar confirmación al proveedor (RF-11);
   |Servicio de Mensajería|
+  -[dashed]->
   :Entregar correo / SMS;
   |API MediCitas|
+  -[dashed]->
   if (¿Proveedor respondió OK?) then (Sí)
     :Notificación SENT (RF-13);
   else (No)
@@ -112,6 +129,7 @@ fork again
 end fork
 
 |Paciente|
+-[dashed]->
 :Recibir confirmación;
 stop
 
