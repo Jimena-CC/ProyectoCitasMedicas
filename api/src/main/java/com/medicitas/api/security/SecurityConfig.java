@@ -1,0 +1,138 @@
+package com.medicitas.api.security;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+/**
+ * Reglas de acceso de la API: los endpoints del kiosko son públicos y los paneles del personal
+ * exigen un token JWT con el rol correspondiente. La API no guarda sesión ni usa CSRF.
+ */
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    /** Longitud mínima de la clave HMAC para HS256 (256 bits). */
+    private static final int MIN_SECRET_BYTES = 32;
+
+    /** Rutas del kiosko y de la documentación que no requieren token. */
+    static final String[] PUBLIC_PATHS = {
+            "/api/v1/auth/login",
+            "/api/v1/patients/**",
+            "/api/v1/appointments/**",
+            "/api/v1/availability/**",
+            "/api/v1/specialties/**",
+            "/api/v1/locations/**",
+            "/api/v1/insurers/**",
+            "/api/v1/notifications/**",
+            "/actuator/health",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html"
+    };
+
+    @Bean
+    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http, JwtDecoder jwtDecoder,
+                                                      JwtRoleAuthenticationConverter authenticationConverter,
+                                                      ApiAuthenticationEntryPoint entryPoint,
+                                                      ApiAccessDeniedHandler accessDeniedHandler,
+                                                      CorsConfigurationSource corsConfigurationSource) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .httpBasic(basic -> basic.disable())
+                .formLogin(form -> form.disable())
+                .logout(logout -> logout.disable())
+                .authorizeHttpRequests(requests -> requests
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(PUBLIC_PATHS).permitAll()
+                        .requestMatchers("/api/v1/doctor/**").hasRole(UserRole.DOCTOR.name())
+                        .requestMatchers("/api/v1/front-desk/**")
+                        .hasAnyRole(UserRole.FRONT_DESK.name(), UserRole.ADMIN.name())
+                        .requestMatchers("/api/v1/admin/**").hasRole(UserRole.ADMIN.name())
+                        .anyRequest().authenticated())
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.decoder(jwtDecoder).jwtAuthenticationConverter(authenticationConverter))
+                        .authenticationEntryPoint(entryPoint)
+                        .accessDeniedHandler(accessDeniedHandler))
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(entryPoint)
+                        .accessDeniedHandler(accessDeniedHandler));
+        return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource(SecurityProperties properties) {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(properties.cors().allowedOrigins());
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Idempotency-Key"));
+        configuration.setExposedHeaders(List.of("Location"));
+        configuration.setMaxAge(3600L);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * Expone los usuarios de {@code app_user} a Spring Security. Evita además que Spring Boot genere
+     * el usuario "user" con contraseña aleatoria en el arranque.
+     */
+    @Bean
+    public UserDetailsService userDetailsService(AppUserRepository appUserRepository) {
+        return username -> appUserRepository.findByUsernameIgnoreCase(username)
+                .map(user -> User.withUsername(user.getUsername())
+                        .password(user.getPasswordHash())
+                        .authorities(user.getRole().authority())
+                        .disabled(!user.isActive())
+                        .build())
+                .orElseThrow(() -> new UsernameNotFoundException(username));
+    }
+
+    @Bean
+    public JwtEncoder jwtEncoder(SecurityProperties properties) {
+        return NimbusJwtEncoder.withSecretKey(secretKey(properties)).algorithm(MacAlgorithm.HS256).build();
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder(SecurityProperties properties) {
+        return NimbusJwtDecoder.withSecretKey(secretKey(properties)).macAlgorithm(MacAlgorithm.HS256).build();
+    }
+
+    private static SecretKey secretKey(SecurityProperties properties) {
+        String secret = properties.jwt().secret();
+        if (secret == null || secret.getBytes(StandardCharsets.UTF_8).length < MIN_SECRET_BYTES) {
+            throw new IllegalStateException(
+                    "security.jwt.secret debe tener al menos " + MIN_SECRET_BYTES + " caracteres");
+        }
+        return new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+    }
+}

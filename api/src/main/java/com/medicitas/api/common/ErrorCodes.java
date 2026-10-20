@@ -16,6 +16,12 @@ public final class ErrorCodes {
     public static final String APPOINTMENT_NOT_MODIFIABLE = "APPOINTMENT_NOT_MODIFIABLE";
     public static final String INTERNAL_ERROR = "INTERNAL_ERROR";
 
+    // Seguridad (docs/api-contract.md, sección 6)
+    public static final String UNAUTHORIZED = "UNAUTHORIZED";
+    public static final String FORBIDDEN = "FORBIDDEN";
+    public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
+    public static final String USER_INACTIVE = "USER_INACTIVE";
+
     private ErrorCodes() {
     }
 }
