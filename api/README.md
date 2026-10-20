@@ -54,7 +54,7 @@ docker compose up --build -d
 
 Los endpoints del kiosko son públicos y **no cambian**: el paciente nunca inicia sesión. El personal de la clínica sí: inicia sesión con usuario y contraseña, recibe un token JWT (firmado con una clave HMAC, vigente 8 horas por defecto) y lo envía en cada petición protegida con la cabecera `Authorization: Bearer <token>`. Las contraseñas se guardan como hash BCrypt en `app_user`.
 
-Usuarios que crea `DemoDataLoader` (perfil `h2`, o `postgres` en el primer arranque):
+Usuarios que crea `DemoDataLoader` (perfil `h2`, o `postgres` en el primer arranque; si una base creada con una versión anterior ya tiene datos pero `app_user` está vacía, el cargador crea únicamente estos usuarios en el siguiente arranque, sin tocar el resto):
 
 | Usuario | Contraseña | Rol | Uso |
 |---|---|---|---|

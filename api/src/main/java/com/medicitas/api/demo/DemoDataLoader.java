@@ -187,6 +187,13 @@ public class DemoDataLoader implements ApplicationRunner {
         this.clock = clock;
     }
 
+    /**
+     * Carga los datos de demostración si la base está vacía. Si la base ya tiene datos pero ningún usuario
+     * (por ejemplo, un volumen de PostgreSQL creado antes de existir {@code app_user}), crea solo los usuarios
+     * del personal para que alguien pueda iniciar sesión; el resto de datos no se toca.
+     *
+     * @param args argumentos de arranque (no se usan)
+     */
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
@@ -194,7 +201,12 @@ public class DemoDataLoader implements ApplicationRunner {
             return;
         }
         if (locationRepository.count() > 0) {
-            logger.info("La base ya contiene datos; no se cargan datos de demostración.");
+            if (appUserRepository.count() == 0) {
+                createUsers(doctorRepository.findAll());
+                logger.info("La base ya contenía datos pero ningún usuario; se crearon los usuarios de demostración.");
+            } else {
+                logger.info("La base ya contiene datos; no se cargan datos de demostración.");
+            }
             return;
         }
         Instant now = Instant.now(clock);
