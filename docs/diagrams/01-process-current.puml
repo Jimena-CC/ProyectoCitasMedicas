@@ -57,11 +57,16 @@ endif
 
 |Personal de Admisión / Central de Citas|
 -[dashed]->
-:Validar cobertura con la aseguradora;
+:Validar cobertura con la aseguradora
+(llamada telefónica o portal del seguro);
+note right
+  <b>Problema:</b> validación manual,
+  lenta y sin registro
+end note
 :Consultar agenda de médicos por sede;
 
 if (¿Hay cupos disponibles?) then (No)
-  :Informar falta de cupos;
+  :Informar falta de cupos de forma verbal;
   |Paciente|
   -[dashed]->
   :Volver a llamar otro día;

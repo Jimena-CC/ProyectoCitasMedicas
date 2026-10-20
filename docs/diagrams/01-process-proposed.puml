@@ -50,7 +50,9 @@ if (¿Paciente registrado?) then (No)
     :Responder 409 DUPLICATE_DOCUMENT;
     |Kiosko (JavaFX)|
     -[dashed]->
-    :Recuperar el perfil existente;
+    :Recuperar el perfil existente (RF-02);
+  else (No)
+    :Responder 201 con el perfil creado;
   endif
 endif
 
@@ -59,7 +61,8 @@ endif
 :Elegir aseguradora y plan, o atención particular;
 |API MediCitas|
 -[dashed]->
-:Asociar seguro al paciente (RF-03);
+:Asociar seguro al paciente
+PUT /patients/{id}/insurance (RF-03);
 
 |Paciente|
 -[dashed]->
@@ -89,6 +92,8 @@ repeat
   |API MediCitas|
   -[dashed]->
   :Abrir transacción;
+  :Verificar que el cupo sea futuro
+y que la cobertura esté vigente;
   :Tomar cupo actualizando su versión (RF-07);
   :Verificar cruce con otra cita del paciente (RF-08);
 repeat while (¿Cupo tomado o cita duplicada? → 409) is (Sí, elegir otro horario)
@@ -97,8 +102,8 @@ repeat while (¿Cupo tomado o cita duplicada? → 409) is (Sí, elegir otro hora
 |API MediCitas|
 :Crear cita BOOKED con código único;
 :Marcar cupo como BOOKED;
-:Registrar evento BOOKING en historial;
-:Programar notificaciones\nCONFIRMATION (inmediata) y REMINDER (24 h antes) (RF-12);
+:Registrar evento BOOKING en appointment_history;
+:Programar notificaciones CONFIRMATION por correo (inmediata)\ny REMINDER por SMS (24 h antes) (RF-11, RF-12);
 :Confirmar transacción y responder 201;
 
 fork
@@ -111,7 +116,8 @@ fork
   -[dashed]->
 fork again
   |API MediCitas|
-  :Enviar confirmación al proveedor (RF-11);
+  :Enviar confirmación al proveedor
+tras confirmar la transacción (RF-11);
   |Servicio de Mensajería|
   -[dashed]->
   :Entregar correo / SMS;
