@@ -250,7 +250,9 @@ Los endpoints de las secciones 1 a 4 son **públicos**: el kiosko no envía toke
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
 ```
 
-Claims del token: `sub` (usuario), `role` (`ADMIN`, `FRONT_DESK` o `DOCTOR`), `uid` (id en `app_user`), `iss` = `medicitas-api`, `iat` y `exp`.
+Claims del token: `sub` (usuario), `role` (`ADMIN`, `FRONT_DESK` o `DOCTOR`), `uid` (id en `app_user`), `iss` = `medicitas-api`, `iat` y `exp`. La API verifica en cada petición la firma, la vigencia y el emisor del token, y además que el usuario de `uid` exista y siga activo: un usuario desactivado recibe `403 USER_INACTIVE` de inmediato en cualquier ruta, aunque su token no haya vencido.
+
+Las rutas públicas del kiosko (`/patients/**`, `/appointments/**`, `/availability/**`, `/specialties/**`, `/locations/**`, `/insurers/**`, `/notifications/**`) se abren completas; los endpoints del personal se publican siempre bajo `/doctor/**`, `/front-desk/**` o `/admin/**`.
 
 | Ruta | Rol requerido |
 |---|---|
@@ -318,6 +320,12 @@ Con token de `DOCTOR` en `/admin/**`:
 { "code": "FORBIDDEN", "message": "No tienes permiso para realizar esta acción.", "fields": [], "timestamp": "2026-10-20T08:00:00-05:00" }
 ```
 
+Con el token de un usuario que fue desactivado (en cualquier ruta):
+
+```json
+{ "code": "USER_INACTIVE", "message": "Tu usuario está desactivado. Comunícate con el administrador del sistema.", "fields": [], "timestamp": "2026-10-20T08:00:00-05:00" }
+```
+
 ### Auditoría
 
-Toda reserva, reprogramación y anulación de cita (desde el kiosko o con token) escribe una fila en `audit_log` con la acción (`APPOINTMENT_BOOKED`, `APPOINTMENT_RESCHEDULED`, `APPOINTMENT_CANCELLED`), la entidad `APPOINTMENT`, el id de la cita, el usuario responsable (`null` desde el kiosko), la IP de origen y un detalle legible. El inicio de sesión se audita como `USER_LOGGED_IN`. Las citas reservadas con token se registran con `bookingChannel = FRONT_DESK`.
+Toda reserva, reprogramación y anulación de cita (desde el kiosko o con token) escribe una fila en `audit_log` con la acción (`APPOINTMENT_BOOKED`, `APPOINTMENT_RESCHEDULED`, `APPOINTMENT_CANCELLED`), la entidad `APPOINTMENT`, el id de la cita, el usuario responsable (`null` desde el kiosko), la IP de origen (la de la conexión; la de `X-Forwarded-For` solo si la API se configura detrás de un proxy de confianza) y un detalle legible en español, por ejemplo «Cita MCA-7K2Q9 reservada en el cupo 12 (2026-10-21 09:00, Carla Benavides Ortiz) para el paciente 5 desde el kiosko» o «... por admisión» cuando la reserva la hace el personal con token. El inicio de sesión se audita como `USER_LOGGED_IN`. Las citas reservadas con token se registran con `bookingChannel = FRONT_DESK`.

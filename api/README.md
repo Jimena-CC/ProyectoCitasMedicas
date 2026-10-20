@@ -78,16 +78,18 @@ Rutas y roles (`SecurityConfig`):
 
 | Ruta | Acceso |
 |---|---|
-| `POST /api/v1/auth/login`, `/api/v1/patients/**`, `/api/v1/appointments/**`, `/api/v1/availability/**`, `/api/v1/specialties/**`, `/api/v1/locations/**`, `/api/v1/insurers/**`, `/actuator/health`, `/v3/api-docs/**`, `/swagger-ui/**` | Público (kiosko y documentación) |
+| `POST /api/v1/auth/login`, `/api/v1/patients/**`, `/api/v1/appointments/**`, `/api/v1/availability/**`, `/api/v1/specialties/**`, `/api/v1/locations/**`, `/api/v1/insurers/**`, `/api/v1/notifications/**`, `/actuator/health`, `/v3/api-docs/**`, `/swagger-ui/**` | Público (kiosko y documentación) |
 | `GET /api/v1/auth/me` | Cualquier usuario autenticado |
 | `/api/v1/doctor/**` | `DOCTOR` |
 | `/api/v1/front-desk/**` | `FRONT_DESK` o `ADMIN` |
 | `/api/v1/admin/**` | `ADMIN` |
 | Cualquier otra ruta | Autenticado |
 
-Respuestas de error, con el mismo formato `ErrorResponse` del contrato: `401 UNAUTHORIZED` sin token o con token vencido, `403 FORBIDDEN` con un rol que no corresponde, `401 INVALID_CREDENTIALS` si el usuario o la contraseña no coinciden (sin decir cuál) y `403 USER_INACTIVE` si el usuario fue desactivado.
+Los prefijos del kiosko se abren completos porque el paciente nunca inicia sesión: **todo endpoint nuevo del personal debe publicarse bajo `/api/v1/doctor/**`, `/api/v1/front-desk/**` o `/api/v1/admin/**`**; si se colocara bajo `/patients` o `/appointments` quedaría público sin querer.
 
-**Auditoría.** Cada reserva, reprogramación y anulación escribe una fila en `audit_log` (`APPOINTMENT_BOOKED`, `APPOINTMENT_RESCHEDULED`, `APPOINTMENT_CANCELLED`) con el usuario responsable, la IP de origen y un detalle legible; cuando actúa el paciente desde el kiosko el usuario queda en nulo. El inicio de sesión también se audita (`USER_LOGGED_IN`). Las mismas operaciones guardan en `appointment_history` el usuario del personal que las realizó, y una reserva hecha con token se registra con canal `FRONT_DESK`.
+Respuestas de error, con el mismo formato `ErrorResponse` del contrato: `401 UNAUTHORIZED` sin token, con token vencido, manipulado o emitido por otro sistema (se valida la firma, la vigencia y el emisor `medicitas-api`), `403 FORBIDDEN` con un rol que no corresponde, `401 INVALID_CREDENTIALS` si el usuario o la contraseña no coinciden (sin decir cuál) y `403 USER_INACTIVE` si el usuario fue desactivado. El estado del usuario se comprueba en **cada petición con token**, no solo al iniciar sesión: desactivar un usuario le quita el acceso de inmediato aunque su token no haya vencido.
+
+**Auditoría.** Cada reserva, reprogramación y anulación escribe una fila en `audit_log` (`APPOINTMENT_BOOKED`, `APPOINTMENT_RESCHEDULED`, `APPOINTMENT_CANCELLED`) con el usuario responsable, la IP de origen y un detalle legible en español, sin nombres técnicos (por ejemplo «Cita MCA-7K2Q9 reservada en el cupo 12 (2026-10-21 09:00, Carla Benavides Ortiz) para el paciente 5 desde el kiosko»); cuando actúa el paciente desde el kiosko el usuario queda en nulo. El inicio de sesión también se audita (`USER_LOGGED_IN`). Las mismas operaciones guardan en `appointment_history` el usuario del personal que las realizó, y una reserva hecha con token se registra con canal `FRONT_DESK`.
 
 ## Endpoints
 
@@ -122,9 +124,10 @@ Base: `/api/v1`. Resumen; el detalle está en el [contrato](../docs/api-contract
 | `messaging.retry-minutes` | `10` | Espera entre intentos |
 | `messaging.reminder-hours-ahead` | `24` | Anticipación del recordatorio |
 | `messaging.job-interval-ms` | `300000` | Frecuencia de la tarea de recordatorios (proceso 07) |
-| `SECURITY_JWT_SECRET` (`security.jwt.secret`) | clave de desarrollo | Clave HMAC (mínimo 32 caracteres) con la que se firman los tokens; cámbiala fuera de desarrollo |
+| `SECURITY_JWT_SECRET` (`security.jwt.secret`) | clave de desarrollo | Clave HMAC (mínimo 32 caracteres) con la que se firman los tokens. La clave versionada en `application.properties` es solo para desarrollo: en `docker compose` se toma de la variable `SECURITY_JWT_SECRET` (por ejemplo desde un archivo `.env`) |
 | `SECURITY_JWT_EXPIRATION_MINUTES` (`security.jwt.expiration-minutes`) | `480` | Vigencia del token |
 | `SECURITY_CORS_ALLOWED_ORIGINS` (`security.cors.allowed-origins`) | `http://localhost:5173` | Orígenes del navegador autorizados (paneles web del personal), separados por coma |
+| `SECURITY_AUDIT_TRUST_FORWARDED_FOR` (`security.audit.trust-forwarded-for`) | `false` | Si la API corre detrás de un proxy inverso de confianza, registra en la auditoría la IP de `X-Forwarded-For`; apagado, usa la IP de la conexión para que ningún cliente pueda falsificarla |
 
 Ejemplo: `./mvnw spring-boot:run -Dspring-boot.run.arguments=--messaging.simulate-failure=true`
 
