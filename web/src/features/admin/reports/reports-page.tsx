@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { useSearchParams } from 'react-router';
-import { RiBarChartBoxLine, RiTimeLine, RiUserUnfollowLine } from '@remixicon/react';
+import { useLocation, useSearchParams } from 'react-router';
+import { RiBarChartBoxLine, RiCloseLine, RiInformationFill, RiTimeLine, RiUserUnfollowLine } from '@remixicon/react';
 import { useQuery } from '@tanstack/react-query';
 
 import { PageHeader } from '@/components/page-header';
+import * as Alert from '@/components/ui/alert';
 import * as TabMenuHorizontal from '@/components/ui/tab-menu-horizontal';
 import { AppointmentsTab } from '@/features/admin/reports/appointments-tab';
 import { NoShowTab } from '@/features/admin/reports/no-show-tab';
@@ -27,6 +28,24 @@ function isTab(value: string | null): value is TabValue {
 
 interface ReportsUrlState extends ReportFilterValues {
   tab: TabValue;
+}
+
+/** El periodo de la URL existe pero no es válido (fechas inexistentes, invertidas o más de 366 días). */
+function hasInvalidUrlRange(params: URLSearchParams): boolean {
+  if (!params.has('desde') && !params.has('hasta')) return false;
+  const from = params.get('desde');
+  const to = params.get('hasta');
+  return !(isIsoDate(from) && isIsoDate(to) && validateRange({ from, to }) === null);
+}
+
+/** Aviso que se pasa en el estado de navegación al corregir una URL inválida. */
+interface ReportsLocationState {
+  reportNotice?: string;
+}
+
+function noticeFrom(state: unknown): string | null {
+  const notice = (state as ReportsLocationState | null)?.reportNotice;
+  return typeof notice === 'string' ? notice : null;
 }
 
 function readUrlState(params: URLSearchParams): ReportsUrlState {
@@ -74,6 +93,32 @@ export function ReportsPage() {
 
   const update = (patch: Partial<ReportsUrlState>) => setSearchParams(writeUrlState({ ...state, ...patch }));
 
+  // Una URL con un periodo inválido o con una especialidad/sede que no existe se corrige (sin crear una entrada
+  // nueva en el historial) y se explica con un aviso, para que la barra de direcciones coincida con lo que se ve.
+  const location = useLocation();
+  const notice = noticeFrom(location.state);
+  const rangeIsInvalid = hasInvalidUrlRange(searchParams);
+  const specialties = specialtiesQuery.data;
+  const locations = locationsQuery.data;
+  React.useEffect(() => {
+    const problems: string[] = [];
+    let next = state;
+    if (rangeIsInvalid) problems.push('El periodo indicado en la dirección no es válido; se muestra el mes actual.');
+    if (specialties && state.specialtyId !== null && !specialties.some((specialty) => specialty.id === state.specialtyId)) {
+      next = { ...next, specialtyId: null };
+      problems.push('La especialidad indicada en la dirección no existe; se muestran todas.');
+    }
+    if (locations && state.locationId !== null && !locations.some((item) => item.id === state.locationId)) {
+      next = { ...next, locationId: null };
+      problems.push('La sede indicada en la dirección no existe; se muestran todas.');
+    }
+    if (problems.length === 0) return;
+    const message = [notice, ...problems].filter(Boolean).join(' ');
+    setSearchParams(writeUrlState(next), { replace: true, state: { reportNotice: message } satisfies ReportsLocationState });
+  }, [rangeIsInvalid, specialties, locations, state, notice, setSearchParams]);
+
+  const dismissNotice = () => setSearchParams(searchParams, { replace: true, state: null });
+
   return (
     <>
       <PageHeader
@@ -81,6 +126,16 @@ export function ReportsPage() {
         eyebrow={`Periodo: ${formatShortDate(state.from)} – ${formatShortDate(state.to)}`}
         description='Citas por estado, tasa de inasistencia y ocupación de cupos. Cada reporte se puede exportar a CSV con los mismos filtros.'
       />
+
+      {notice && (
+        <Alert.Root variant='lighter' status='warning' size='small' role='status'>
+          <Alert.Icon as={RiInformationFill} />
+          {notice}
+          <button type='button' onClick={dismissNotice} aria-label='Cerrar aviso'>
+            <Alert.CloseIcon as={RiCloseLine} />
+          </button>
+        </Alert.Root>
+      )}
 
       <ReportFilters
         key={JSON.stringify(filters)}

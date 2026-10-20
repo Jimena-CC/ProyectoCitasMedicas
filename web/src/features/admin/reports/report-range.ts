@@ -1,4 +1,4 @@
-import { differenceInCalendarDays, endOfMonth, parse, startOfMonth } from 'date-fns';
+import { differenceInCalendarDays, endOfMonth, isValid, parse, startOfMonth } from 'date-fns';
 
 import type { ReportRange } from '@/lib/api';
 import { toIsoDate } from '@/lib/formatters';
@@ -8,18 +8,19 @@ export const MAX_RANGE_DAYS = 366;
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+function parseIso(value: string): Date {
+  return parse(value, 'yyyy-MM-dd', new Date());
+}
+
+/** "yyyy-MM-dd" con una fecha que existe en el calendario ("2026-13-45" o "2026-02-30" no lo son). */
 export function isIsoDate(value: string | null | undefined): value is string {
-  return value !== null && value !== undefined && ISO_DATE.test(value);
+  return value !== null && value !== undefined && ISO_DATE.test(value) && isValid(parseIso(value));
 }
 
 /** Rango por defecto: el mes actual completo. */
 export function currentMonthRange(): ReportRange {
   const now = new Date();
   return { from: toIsoDate(startOfMonth(now)), to: toIsoDate(endOfMonth(now)) };
-}
-
-function parseIso(value: string): Date {
-  return parse(value, 'yyyy-MM-dd', new Date());
 }
 
 /** Valida el rango en el cliente con los mismos mensajes que devuelve la API. */
