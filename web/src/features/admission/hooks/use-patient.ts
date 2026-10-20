@@ -71,7 +71,8 @@ export function usePatient(patientId: number | null, lookup: PatientLookup | nul
     queryKey: admissionKeys.patient(patientId ?? 0),
     queryFn: async () => {
       if (!lookup) {
-        throw new ApiError(404, 'PATIENT_NOT_FOUND', 'No encontramos los datos del paciente. Búscalo nuevamente por su documento.');
+        // Enlace copiado o recortado sin el documento: el paciente puede existir, solo falta con qué buscarlo.
+        throw new ApiError(404, 'PATIENT_NOT_FOUND', 'Este enlace no incluye el documento del paciente. Abre la ficha desde la búsqueda por documento.');
       }
       const patient = await frontDeskApi.searchPatient(lookup);
       if (patient.id !== patientId) {

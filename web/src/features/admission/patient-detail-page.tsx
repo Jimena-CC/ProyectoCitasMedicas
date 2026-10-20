@@ -65,13 +65,15 @@ export function PatientDetailPage() {
   };
 
   if (patientId === null || query.isError) {
+    // Sin documento en el enlace no hay con qué buscar al paciente: se pide abrir la ficha desde la búsqueda.
+    const missingDocument = patientId !== null && lookup === null;
     return (
       <>
         <PageHeader title='Ficha del paciente' description='Datos del paciente, su seguro y sus citas.' />
         <Card>
           <EmptyState
-            icon={RiErrorWarningLine}
-            title='No pudimos cargar la ficha'
+            icon={missingDocument ? RiSearchLine : RiErrorWarningLine}
+            title={missingDocument ? 'Busca al paciente para ver su ficha' : 'No pudimos cargar la ficha'}
             description={patientId === null ? 'El enlace no corresponde a un paciente válido.' : getErrorMessage(query.error)}
             action={
               <Button.Root variant='primary' mode='filled' size='small' asChild>
