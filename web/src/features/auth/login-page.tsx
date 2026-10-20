@@ -16,7 +16,7 @@ import * as Button from '@/components/ui/button';
 import * as Hint from '@/components/ui/hint';
 import * as Input from '@/components/ui/input';
 import * as Label from '@/components/ui/label';
-import { roleHome } from '@/features/auth/roles';
+import { canAccessPath, roleHome } from '@/features/auth/roles';
 import { useAuth } from '@/features/auth/use-auth';
 import { ApiError, getErrorMessage } from '@/lib/api/client';
 import { LOGOUT_MESSAGES, sessionStore } from '@/lib/session';
@@ -70,7 +70,8 @@ export function LoginPage() {
     try {
       const loggedUser = await login({ username: username.trim(), password });
       const from = (location.state as { from?: string } | null)?.from;
-      const destination = from && from !== '/' && from !== '/login' ? from : roleHome(loggedUser.role);
+      // Solo se vuelve a la ruta pedida si el usuario que entra puede abrirla; si no, va a su inicio.
+      const destination = from && canAccessPath(loggedUser.role, from) ? from : roleHome(loggedUser.role);
       navigate(destination, { replace: true });
     } catch (error) {
       if (error instanceof ApiError && error.isValidation) {
