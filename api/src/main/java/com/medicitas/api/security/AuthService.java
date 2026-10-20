@@ -38,6 +38,9 @@ public class AuthService {
     /** Hash BCrypt de referencia para que un usuario inexistente tarde lo mismo que uno real. */
     private static final String DUMMY_HASH = "$2a$10$7EqJtq98hPqEX7fNZaFWoOhi5XIu1gzuSxSQPvZXFhQ/6BmPpmOhO";
 
+    /** Longitud de la columna {@code app_user.username}; lo que se escriba en el log no la supera. */
+    private static final int MAX_USERNAME_LENGTH = 50;
+
     private final AppUserRepository appUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtEncoder jwtEncoder;
@@ -65,11 +68,12 @@ public class AuthService {
      */
     @Transactional
     public LoginResponse login(LoginRequest request) {
-        Optional<AppUser> candidate = appUserRepository.findByUsernameIgnoreCase(request.username().trim());
+        String username = request.username().trim();
+        Optional<AppUser> candidate = appUserRepository.findByUsernameIgnoreCase(username);
         String hash = candidate.map(AppUser::getPasswordHash).orElse(DUMMY_HASH);
         boolean matches = passwordEncoder.matches(request.password(), hash);
         if (candidate.isEmpty() || !matches) {
-            logger.warn("Inicio de sesión rechazado para el usuario '{}'", request.username());
+            logger.warn("Inicio de sesión rechazado para el usuario '{}'", safeForLog(username));
             throw invalidCredentials();
         }
         AppUser user = candidate.get();
@@ -99,6 +103,18 @@ public class AuthService {
                 .build();
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
         return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
+    }
+
+    /**
+     * Versión del nombre de usuario apta para el log: sin caracteres de control (evita inyectar líneas
+     * falsas desde el endpoint público) y recortada a la longitud de la columna.
+     *
+     * @param username nombre de usuario tal como llegó, ya sin espacios en los extremos
+     * @return el texto seguro para registrar
+     */
+    static String safeForLog(String username) {
+        String clean = username.replaceAll("\\p{Cntrl}", "_");
+        return clean.length() > MAX_USERNAME_LENGTH ? clean.substring(0, MAX_USERNAME_LENGTH) : clean;
     }
 
     /**

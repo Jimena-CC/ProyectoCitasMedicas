@@ -130,6 +130,16 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("El usuario que se escribe en el log no lleva saltos de línea ni supera los 50 caracteres")
+    void elUsuarioDelLogNoLlevaCaracteresDeControlNiExcedeLaColumna() {
+        assertAll(
+                () -> assertThat(AuthService.safeForLog("admin\nWARN Inicio de sesión falso\r"))
+                        .isEqualTo("admin_WARN Inicio de sesión falso_"),
+                () -> assertThat(AuthService.safeForLog("a".repeat(80))).hasSize(50),
+                () -> assertThat(AuthService.safeForLog("dr.benavides")).isEqualTo("dr.benavides"));
+    }
+
+    @Test
     @DisplayName("Un usuario desactivado no recibe token aunque su contraseña sea correcta")
     void usuarioInactivoResponde403() {
         doctorUser.setActive(false);
