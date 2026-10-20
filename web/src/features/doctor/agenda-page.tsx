@@ -199,6 +199,7 @@ export function AgendaPage() {
                 isLoading={agendaQuery.isPending}
                 errorMessage={errorMessage}
                 onRetry={() => void agendaQuery.refetch()}
+                date={date}
                 highlightedId={highlightedId}
                 canRegister={canRegister}
                 onRegister={openAttendance}

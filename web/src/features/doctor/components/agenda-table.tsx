@@ -15,9 +15,9 @@ import * as Badge from '@/components/ui/badge';
 import * as Button from '@/components/ui/button';
 import * as Table from '@/components/ui/table';
 import * as Tooltip from '@/components/ui/tooltip';
-import type { AgendaItem, AttendanceStatus, BookingChannel } from '@/lib/api/types';
+import type { AgendaItem, AttendanceStatus, BookingChannel, IsoDate } from '@/lib/api/types';
 import { cn } from '@/lib/cn';
-import { formatDocument, formatTime } from '@/lib/formatters';
+import { formatDateTime, formatDocument, formatTime, toIsoDate } from '@/lib/formatters';
 
 const CHANNEL_BADGE: Record<BookingChannel, { label: string; color: 'purple' | 'blue' }> = {
   KIOSK: { label: 'Kiosco', color: 'purple' },
@@ -35,6 +35,8 @@ export interface AgendaTableProps {
   /** Mensaje de error ya en español (getErrorMessage). */
   errorMessage?: string | null;
   onRetry?: () => void;
+  /** Fecha de la agenda; si la asistencia se registró otro día, se muestra con fecha. */
+  date: IsoDate;
   /** Cita resaltada como próxima pendiente. */
   highlightedId: number | null;
   /** true cuando la fecha de la agenda es hoy o anterior (la API solo admite registrar asistencia entonces). */
@@ -101,7 +103,17 @@ function AttendanceButtons({
   );
 }
 
-function ActionsCell({ item, canRegister, onRegister }: { item: AgendaItem; canRegister: boolean; onRegister: AgendaTableProps['onRegister'] }) {
+function ActionsCell({
+  item,
+  date,
+  canRegister,
+  onRegister,
+}: {
+  item: AgendaItem;
+  date: IsoDate;
+  canRegister: boolean;
+  onRegister: AgendaTableProps['onRegister'];
+}) {
   if (item.status === 'BOOKED') {
     if (canRegister) {
       return (
@@ -122,17 +134,26 @@ function ActionsCell({ item, canRegister, onRegister }: { item: AgendaItem; canR
     );
   }
   if (item.attendanceRegisteredAt) {
+    // Si se registró otro día que el de la cita (p. ej. al ponerse al día), la hora sola confunde: va con fecha.
+    const sameDay = toIsoDate(new Date(item.attendanceRegisteredAt)) === date;
     return (
       <div className='flex flex-col items-end gap-0.5 text-right'>
-        <span className='text-label-sm text-text-strong-950'>{formatTime(item.attendanceRegisteredAt)}</span>
-        <span className='text-paragraph-xs text-text-sub-600'>Hora de registro</span>
+        <span className='whitespace-nowrap text-label-sm text-text-strong-950'>
+          {sameDay ? formatTime(item.attendanceRegisteredAt) : formatDateTime(item.attendanceRegisteredAt)}
+        </span>
+        <span className='text-paragraph-xs text-text-sub-600'>{sameDay ? 'Hora de registro' : 'Fecha de registro'}</span>
       </div>
     );
   }
   return <span className='block text-right text-paragraph-xs text-text-soft-400'>—</span>;
 }
 
-function buildColumns(highlightedId: number | null, canRegister: boolean, onRegister: AgendaTableProps['onRegister']): ColumnDef<AgendaItem>[] {
+function buildColumns(
+  date: IsoDate,
+  highlightedId: number | null,
+  canRegister: boolean,
+  onRegister: AgendaTableProps['onRegister'],
+): ColumnDef<AgendaItem>[] {
   return [
     {
       id: 'time',
@@ -213,7 +234,7 @@ function buildColumns(highlightedId: number | null, canRegister: boolean, onRegi
     {
       id: 'actions',
       header: () => <span className='block text-right'>Asistencia</span>,
-      cell: ({ row }) => <ActionsCell item={row.original} canRegister={canRegister} onRegister={onRegister} />,
+      cell: ({ row }) => <ActionsCell item={row.original} date={date} canRegister={canRegister} onRegister={onRegister} />,
     },
   ];
 }
@@ -227,6 +248,7 @@ export function AgendaTable({
   isLoading,
   errorMessage,
   onRetry,
+  date,
   highlightedId,
   canRegister,
   onRegister,
@@ -234,7 +256,10 @@ export function AgendaTable({
   emptyDescription,
   emptyIcon = RiCalendarScheduleLine,
 }: AgendaTableProps) {
-  const columns = React.useMemo(() => buildColumns(highlightedId, canRegister, onRegister), [highlightedId, canRegister, onRegister]);
+  const columns = React.useMemo(
+    () => buildColumns(date, highlightedId, canRegister, onRegister),
+    [date, highlightedId, canRegister, onRegister],
+  );
   const data = React.useMemo(() => items ?? [], [items]);
 
   const table = useReactTable({

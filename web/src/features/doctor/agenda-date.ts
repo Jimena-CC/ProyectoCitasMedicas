@@ -29,16 +29,14 @@ export function canRegisterAttendance(date: IsoDate): boolean {
 }
 
 /**
- * Próxima cita pendiente de la agenda: la primera BOOKED que aún no termina (si la agenda es de hoy)
- * o, en su defecto, la primera BOOKED del día.
+ * Próxima cita pendiente de la agenda de hoy: la primera BOOKED que aún no termina o, si todas pasaron,
+ * la primera BOOKED del día. En otras fechas no hay "siguiente" y no se resalta ninguna.
  */
 export function findNextPending(items: AgendaItem[], date: IsoDate): number | null {
+  if (date !== todayIso()) return null;
   const booked = items.filter((item) => item.status === 'BOOKED');
   if (booked.length === 0) return null;
-  if (date === todayIso()) {
-    const now = format(new Date(), 'HH:mm');
-    const upcoming = booked.find((item) => item.endTime >= now);
-    return (upcoming ?? booked[0]).appointmentId;
-  }
-  return booked[0].appointmentId;
+  const now = format(new Date(), 'HH:mm');
+  const upcoming = booked.find((item) => item.endTime >= now);
+  return (upcoming ?? booked[0]).appointmentId;
 }
