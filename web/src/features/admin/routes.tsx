@@ -2,8 +2,6 @@ import { Navigate, type RouteObject } from 'react-router';
 import {
   RiBarChartBoxLine,
   RiFileList3Line,
-  RiHeartPulseLine,
-  RiStethoscopeLine,
   RiTimeLine,
 } from '@remixicon/react';
 
@@ -11,6 +9,8 @@ import { UnderConstructionPage } from '@/app/pages/under-construction-page';
 import { ADMIN_ROLES } from '@/features/auth/roles';
 import { RequireRole } from '@/features/auth/require-role';
 
+import { DoctorsPage } from './doctors/doctors-page';
+import { SpecialtiesPage } from './specialties/specialties-page';
 import { UsersPage } from './users/users-page';
 
 /**
@@ -32,20 +32,8 @@ export const adminRoutes: RouteObject[] = [
     children: [
       { index: true, element: <Navigate to='/administracion/usuarios' replace /> },
       { path: 'usuarios', element: <UsersPage /> },
-      {
-        path: 'medicos',
-        element: <UnderConstructionPage title='Médicos' description='Registra y actualiza los médicos de la clínica.' icon={RiStethoscopeLine} />,
-      },
-      {
-        path: 'especialidades',
-        element: (
-          <UnderConstructionPage
-            title='Especialidades'
-            description='Administra las especialidades, su duración de cita y las sedes donde se atienden.'
-            icon={RiHeartPulseLine}
-          />
-        ),
-      },
+      { path: 'medicos', element: <DoctorsPage /> },
+      { path: 'especialidades', element: <SpecialtiesPage /> },
       {
         path: 'horarios',
         element: <UnderConstructionPage title='Horarios' description='Genera y bloquea los cupos de atención de cada médico.' icon={RiTimeLine} />,
