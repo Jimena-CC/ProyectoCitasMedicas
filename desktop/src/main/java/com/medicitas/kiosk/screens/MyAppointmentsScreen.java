@@ -89,7 +89,9 @@ public class MyAppointmentsScreen extends Screen {
         specialty.setStyle("-fx-font-size: 19px; -fx-font-weight: 600;");
         Label when = label(Dates.longDate(appointment.date()) + " · "
                 + Dates.range(appointment.startTime(), appointment.endTime()), "review-value");
-        Label where = label(appointment.doctor() + " · " + appointment.location()
+        String doctor = appointment.doctor() == null || appointment.doctor().isBlank()
+                ? "Médico por asignar" : appointment.doctor();
+        Label where = label(doctor + " · " + appointment.location()
                 + (appointment.room() == null ? "" : " · " + appointment.room()), "muted");
         where.setWrapText(true);
         where.setMaxWidth(Double.MAX_VALUE);
