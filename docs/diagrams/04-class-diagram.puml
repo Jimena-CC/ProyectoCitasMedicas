@@ -1,11 +1,22 @@
 @startuml
-title 04 - Class Diagram - MediCitas Anglo
+title 04 - Diagrama de Clases - MediCitas Anglo
+
+' ---------------------------------------------------------------
+' Convenciones
+'  Paquetes "Dominio", "Servicios" y "REST" reflejan el código real de
+'  api/src/main/java/com/medicitas/api (Fase 1, en producción).
+'  El paquete "Backoffice (Fase 2)" contiene las clases nuevas que
+'  implementan seguridad, auditoría, agenda del médico, admisión,
+'  administración y reportes; sus métodos corresponden a los endpoints
+'  /auth, /doctor, /front-desk, /admin y /admin/reports.
+' ---------------------------------------------------------------
 
 skinparam classAttributeIconSize 0
-skinparam linetype ortho
 skinparam shadowing false
 skinparam defaultFontName "Helvetica"
-skinparam defaultFontSize 12
+skinparam defaultFontSize 11
+skinparam nodesep 15
+skinparam ranksep 35
 skinparam ArrowColor #0B4FB0
 skinparam class {
   BackgroundColor #FFFFFF
@@ -13,6 +24,8 @@ skinparam class {
   HeaderBackgroundColor #E4EEFD
   FontColor #0F1E33
   AttributeFontColor #0F1E33
+  BorderColor<<Fase 2>> #B4413C
+  HeaderBackgroundColor<<Fase 2>> #FDECEA
 }
 skinparam package {
   BackgroundColor #F4F7FC
@@ -20,47 +33,107 @@ skinparam package {
   FontColor #0B4FB0
   FontStyle bold
 }
-
-enum AppointmentStatus {
-  BOOKED
-  CANCELLED
-  ATTENDED
-  NO_SHOW
+skinparam legend {
+  BackgroundColor #FFF8E6
+  BorderColor #D9B45A
+  FontColor #3D3321
 }
 
-enum SlotStatus {
-  FREE
-  BOOKED
-  BLOCKED
+' ---------------------------------------------------------------
+' Enumeraciones
+' ---------------------------------------------------------------
+package "Enumeraciones" as PkgEnums {
+  enum DocumentType {
+    DNI
+    CE
+    PAS
+  }
+  enum CoverageStatus {
+    ACTIVE
+    SUSPENDED
+    EXPIRED
+  }
+  enum SlotStatus {
+    FREE
+    BOOKED
+    BLOCKED
+  }
+  enum AppointmentStatus {
+    BOOKED
+    CANCELLED
+    ATTENDED
+    NO_SHOW
+  }
+  enum AppointmentEvent {
+    BOOKING
+    RESCHEDULE
+    CANCELLATION
+    ATTENDANCE
+  }
+  enum BookingChannel {
+    KIOSK
+    FRONT_DESK
+  }
+  enum NotificationType {
+    CONFIRMATION
+    REMINDER
+    RESCHEDULE
+    CANCELLATION
+  }
+  enum NotificationChannel {
+    EMAIL
+    SMS
+  }
+  enum NotificationStatus {
+    PENDING
+    SENT
+    FAILED
+    CANCELLED
+  }
+  enum UserRole <<Fase 2>> {
+    ADMIN
+    FRONT_DESK
+    DOCTOR
+  }
 }
 
-enum NotificationType {
-  CONFIRMATION
-  REMINDER
-  RESCHEDULE
-  CANCELLATION
-}
+' ---------------------------------------------------------------
+' Dominio (entidades JPA)
+' ---------------------------------------------------------------
+package "Dominio" as PkgDomain {
 
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  CANCELLED
-}
+  class Location {
+    - id : Long
+    - code : String
+    - name : String
+    - address : String
+    - district : String
+    - phone : String
+    - active : boolean
+  }
 
-enum CoverageStatus {
-  ACTIVE
-  SUSPENDED
-  EXPIRED
-}
+  class Specialty {
+    - id : Long
+    - name : String
+    - description : String
+    - appointmentMinutes : Short
+    - active : boolean
+  }
 
-enum UserRole {
-  ADMIN
-  FRONT_DESK
-  DOCTOR
-}
+  class LocationSpecialty {
+    - id : LocationSpecialty.Id
+    - active : boolean
+  }
 
-package "Domain" {
+  class Doctor {
+    - id : Long
+    - license : String
+    - specialistRegistry : String
+    - firstNames : String
+    - lastNames : String
+    - active : boolean
+    + getFullName() : String
+  }
 
   class Patient {
     - id : Long
@@ -69,9 +142,27 @@ package "Domain" {
     - firstNames : String
     - lastNames : String
     - birthDate : LocalDate
+    - sex : String
     - phone : String
     - email : String
-    + fullName() : String
+    - acceptsNotifications : boolean
+    - registeredAt : Instant
+    + getFullName() : String
+  }
+
+  class Insurer {
+    - id : Long
+    - name : String
+    - ruc : String
+    - type : String
+    - active : boolean
+  }
+
+  class InsurancePlan {
+    - id : Long
+    - name : String
+    - consultationCopay : BigDecimal
+    - active : boolean
   }
 
   class PatientInsurance {
@@ -79,40 +170,8 @@ package "Domain" {
     - policyNumber : String
     - coverageStatus : CoverageStatus
     - validUntil : LocalDate
-    + isActive(on: LocalDate) : boolean
-  }
-
-  class Insurer {
-    - id : Long
-    - name : String
-    - taxId : String
-  }
-
-  class InsurancePlan {
-    - id : Long
-    - name : String
-    - consultationCopay : BigDecimal
-  }
-
-  class Specialty {
-    - id : Long
-    - name : String
-    - appointmentMinutes : int
-  }
-
-  class Location {
-    - id : Long
-    - code : String
-    - name : String
-    - address : String
-  }
-
-  class Doctor {
-    - id : Long
-    - license : String
-    - firstNames : String
-    - lastNames : String
-    + fullName() : String
+    + isActiveOn(today : LocalDate) : boolean
+    + getCoverageDescription() : String
   }
 
   class Slot {
@@ -122,22 +181,25 @@ package "Domain" {
     - endTime : LocalTime
     - room : String
     - status : SlotStatus
-    - version : int
-    + startsAt() : LocalDateTime
-    + overlaps(other: Slot) : boolean
+    - version : Integer
+    + getStart() : LocalDateTime
+    + startAt(zone : ZoneId) : Instant
+    + setStatus(status : SlotStatus) : void
   }
 
   class Appointment {
     - id : Long
     - code : String
-    - status : AppointmentStatus
     - visitReason : String
+    - status : AppointmentStatus
+    - bookingChannel : BookingChannel
     - idempotencyKey : UUID
-    - rescheduleCount : int
+    - rescheduleCount : Short
     - bookedAt : Instant
-    + rescheduleTo(slot: Slot) : void
-    + cancel() : void
-    + isModifiable(now: LocalDateTime) : boolean
+    - updatedAt : Instant
+    + reschedule(newSlot : Slot, now : Instant) : void
+    + cancel(now : Instant) : void
+    + registerAttendance(status : AppointmentStatus, now : Instant) : void
   }
 
   class AppointmentHistory {
@@ -145,7 +207,10 @@ package "Domain" {
     - event : AppointmentEvent
     - previousStatus : AppointmentStatus
     - newStatus : AppointmentStatus
-    - occurredAt : Instant
+    - userId : Long
+    - detail : String
+    - eventAt : Instant
+    + {static} record(appointment, event, previousStatus,\n      newStatus, previousSlot, newSlot, detail, eventAt) : AppointmentHistory
   }
 
   class Notification {
@@ -154,86 +219,294 @@ package "Domain" {
     - channel : NotificationChannel
     - destination : String
     - scheduledFor : Instant
+    - sentAt : Instant
     - status : NotificationStatus
-    - attempts : int
-    + markSent(providerMessageId: String) : void
-    + markFailed(detail: String) : void
+    - attempts : Short
+    - providerMessageId : String
+    - errorDetail : String
+    + {static} create(appointment, type, channel, destination, scheduledFor) : Notification
+    + markSent(now : Instant, providerMessageId : String) : void
+    + recordFailure(now, detail, maxAttempts, retryWait) : void
+    + cancel() : void
   }
 
-  class AppUser {
+  class AppUser <<Fase 2>> {
     - id : Long
     - username : String
     - passwordHash : String
     - role : UserRole
+    - active : boolean
+    - lastAccess : Instant
+    + hasRole(role : UserRole) : boolean
+    + touchLastAccess(now : Instant) : void
   }
 
-  class AuditLog {
+  class AuditLog <<Fase 2>> {
     - id : Long
     - action : String
     - entity : String
-    - recordedAt : Instant
+    - entityId : Long
+    - detail : String
+    - sourceIp : String
+    - registeredAt : Instant
+    + {static} of(user, action, entity, entityId,\n      detail, sourceIp, now) : AuditLog
   }
 }
 
-package "Application services" {
+' ---------------------------------------------------------------
+' Servicios de aplicación (Fase 1)
+' ---------------------------------------------------------------
+package "Servicios" as PkgServices {
 
-  class AppointmentService {
-    + book(request: NewAppointment, key: UUID) : Appointment
-    + reschedule(id: Long, newSlotId: Long) : Appointment
-    + cancel(id: Long, reason: String) : Appointment
-    + listUpcoming(patientId: Long) : List<Appointment>
+  class PatientService {
+    + findByDocument(documentType, documentNumber) : PatientResponse
+    + register(request : PatientRequest) : PatientResponse
+    + updateInsurance(patientId : Long, request : InsuranceRequest) : PatientResponse
+  }
+
+  class CatalogService {
+    + listLocations() : List<LocationResponse>
+    + listSpecialties(locationId : Long) : List<SpecialtyResponse>
+    + listInsurers() : List<InsurerResponse>
   }
 
   class AvailabilityService {
-    + search(specialtyId: Long, locationId: Long, from: LocalDate, to: LocalDate) : Availability
+    - MAX_DAYS : int = 14
+    + query(specialtyId, locationId, from, to) : AvailabilityResponse
   }
 
-  class PatientService {
-    + findByDocument(type: DocumentType, number: String) : Patient
-    + register(request: NewPatient) : Patient
-    + updateInsurance(patientId: Long, planId: Long, policyNumber: String) : Patient
+  class AppointmentService {
+    + book(request : AppointmentRequest, idempotencyKey : UUID) : BookingResult
+    + listByPatient(patientId, onlyUpcoming) : List<AppointmentResponse>
+    + reschedule(appointmentId, request) : AppointmentResponse
+    + cancel(appointmentId, reason) : AppointmentResponse
+  }
+
+  class AppointmentCodeGenerator {
+    + generate() : String
   }
 
   class NotificationService {
-    + scheduleForBooking(appointment: Appointment) : List<Long>
-    + processDue() : void
+    + scheduleForBooking(appointment : Appointment) : List<Long>
+    + scheduleForReschedule(appointment : Appointment) : List<Long>
+    + scheduleForCancellation(appointment : Appointment) : List<Long>
+    + send(notificationId : Long) : void
+    + duePendingIds() : List<Long>
+    + listByAppointment(appointmentId : Long) : List<NotificationResponse>
+  }
+
+  class ScheduledNotificationsJob {
+    + processPending() : void
+  }
+
+  class ImmediateSendListener {
+    + sendAfterCommit(event : NotificationsToSendEvent) : void
   }
 
   interface MessagingClient {
-    + send(message: OutboundMessage) : String
+    + send(message : OutgoingMessage) : String
   }
 
   class SimulatedMessagingClient implements MessagingClient {
     - simulateFailure : boolean
-    + send(message: OutboundMessage) : String
+    + send(message : OutgoingMessage) : String
   }
 }
 
-' Relationships
-Patient "1" -- "0..*" PatientInsurance
-Insurer "1" -- "1..*" InsurancePlan
+' ---------------------------------------------------------------
+' Controladores REST (Fase 1) - base /api/v1
+' ---------------------------------------------------------------
+package "REST (Fase 1)" as PkgRest {
+  class PatientController {
+    + GET /patients
+    + POST /patients
+    + PUT /patients/{id}/insurance
+  }
+  class CatalogController {
+    + GET /locations
+    + GET /specialties
+    + GET /insurers
+  }
+  class AvailabilityController {
+    + GET /availability
+  }
+  class AppointmentController {
+    + POST /appointments
+    + GET /patients/{id}/appointments
+    + PATCH /appointments/{id}/reschedule
+    + PATCH /appointments/{id}/cancellation
+  }
+  class NotificationController {
+    + GET /appointments/{id}/notifications
+  }
+}
+
+' ---------------------------------------------------------------
+' Backoffice web (Fase 2) - base /api/v1
+' ---------------------------------------------------------------
+package "Backoffice (Fase 2)" as PkgBackoffice {
+
+  class AuthService <<Fase 2>> {
+    + login(username, password, sourceIp) : AuthToken
+    + logout(token : String) : void
+    + currentUser() : AppUser
+  }
+
+  class AuditService <<Fase 2>> {
+    + record(action, entity, entityId, detail) : void
+    + search(filter : AuditFilter, page : Pageable) : Page<AuditLogResponse>
+  }
+
+  class DoctorAgendaService <<Fase 2>> {
+    + agendaOfDay(date : LocalDate) : List<AgendaItemResponse>
+    + registerAttendance(appointmentId : Long, status : AppointmentStatus) : AgendaItemResponse
+  }
+
+  class FrontDeskService <<Fase 2>> {
+    + searchPatient(documentType, documentNumber) : PatientResponse
+    + registerPatient(request : PatientRequest) : PatientResponse
+    + validateInsurance(patientId : Long) : InsuranceValidationResponse
+    + book(request, idempotencyKey) : BookingResult
+    + reschedule(appointmentId, request) : AppointmentResponse
+    + cancel(appointmentId, reason) : AppointmentResponse
+  }
+
+  class AdminCatalogService <<Fase 2>> {
+    + listUsers() : List<UserResponse>
+    + createUser(request) / updateUser(id, request) : UserResponse
+    + deactivateUser(id) : void
+    + createDoctor(request) / updateDoctor(id, request) : DoctorResponse
+    + createSpecialty(request) / updateSpecialty(id, request) : SpecialtyResponse
+    + generateSlots(request : SlotGenerationRequest) : List<SlotResponse>
+    + blockSlot(slotId) : SlotResponse
+  }
+
+  class ReportService <<Fase 2>> {
+    + appointmentsByStatus(from, to) : AppointmentsReport
+    + noShowRate(from, to) : NoShowRateReport
+    + occupancyBySpecialty(from, to) : List<OccupancyRow>
+    + exportCsv(report, from, to) : byte[]
+  }
+
+  class AuthController <<Fase 2>> {
+    + POST /auth/login
+    + POST /auth/logout
+    + GET /auth/me
+  }
+  class DoctorAgendaController <<Fase 2>> {
+    + GET /doctor/agenda
+    + PATCH /doctor/appointments/{id}/attendance
+  }
+  class FrontDeskController <<Fase 2>> {
+    + GET /front-desk/patients
+    + POST /front-desk/patients
+    + GET /front-desk/patients/{id}/insurance
+    + POST /front-desk/appointments
+    + PATCH /front-desk/appointments/{id}/reschedule
+    + PATCH /front-desk/appointments/{id}/cancellation
+  }
+  class AdminController <<Fase 2>> {
+    + GET|POST|PUT /admin/users
+    + GET|POST|PUT /admin/doctors
+    + GET|POST|PUT /admin/specialties
+    + GET|POST /admin/slots
+    + GET /admin/audit
+  }
+  class ReportController <<Fase 2>> {
+    + GET /admin/reports/appointments
+    + GET /admin/reports/no-show-rate
+    + GET /admin/reports/occupancy
+    + GET /admin/reports/export
+  }
+}
+
+' ---------------------------------------------------------------
+' Relaciones del dominio
+' ---------------------------------------------------------------
+Location "1" -- "0..*" LocationSpecialty
+Specialty "1" -- "0..*" LocationSpecialty
+Specialty "1" -- "0..*" Doctor : agrupa >
+Doctor "1" -- "0..*" Slot : atiende >
+Location "1" -- "0..*" Slot : aloja >
+
+Insurer "1" *-- "1..*" InsurancePlan : plans >
 InsurancePlan "1" -- "0..*" PatientInsurance
+Patient "1" -- "0..*" PatientInsurance
 
-Patient "1" -- "0..*" Appointment : requests >
-PatientInsurance "0..1" -- "0..*" Appointment : pays for >
+Patient "1" -- "0..*" Appointment : solicita >
+PatientInsurance "0..1" -- "0..*" Appointment : paga >
+Slot "1" -- "0..*" Appointment : es tomado por >
+Appointment "1" *-- "1..*" AppointmentHistory : registra >
+Appointment "1" *-- "0..*" Notification : genera >
+Slot "0..1" -- "0..*" AppointmentHistory : cupo anterior / nuevo >
 
-Specialty "1" -- "1..*" Doctor : groups >
-Doctor "1" -- "0..*" Slot : serves >
-Location "1" -- "0..*" Slot : hosts >
+Doctor "0..1" -- "0..1" AppUser : inicia sesión como >
+AppUser "0..1" -- "0..*" AuditLog : realiza >
 
-Slot "1" -- "0..*" Appointment : is taken by >
-Appointment "1" *-- "1..*" AppointmentHistory : records >
-Appointment "1" *-- "0..*" Notification : triggers >
+' ---------------------------------------------------------------
+' Dependencias de servicios (Fase 1)
+' ---------------------------------------------------------------
+PatientController ..> PatientService
+CatalogController ..> CatalogService
+AvailabilityController ..> AvailabilityService
+AppointmentController ..> AppointmentService
+NotificationController ..> NotificationService
 
-AppUser "1" -- "0..*" AuditLog : performs >
-Doctor "0..1" -- "0..1" AppUser : signs in as >
+PatientService ..> Patient : gestiona
+AvailabilityService ..> Slot : consulta
+AppointmentService ..> Appointment : crea y modifica
+AppointmentService ..> Slot : toma y libera
+AppointmentService ..> AppointmentHistory : registra
+AppointmentService ..> AppointmentCodeGenerator : genera código
+AppointmentService ..> NotificationService : programa
+NotificationService ..> Notification : procesa
+NotificationService ..> MessagingClient : delega envío
+ScheduledNotificationsJob ..> NotificationService : cada 5 min
+ImmediateSendListener ..> NotificationService : tras confirmar la transacción
 
-AppointmentService ..> Appointment : manages
-AppointmentService ..> Slot : takes and frees
-AppointmentService ..> NotificationService : schedules
-AvailabilityService ..> Slot : queries
-PatientService ..> Patient : manages
-NotificationService ..> Notification : processes
-NotificationService ..> MessagingClient : delegates delivery
+' ---------------------------------------------------------------
+' Dependencias del Backoffice (Fase 2)
+' [norank] evita que estas dependencias suban el paquete por encima del dominio
+' ---------------------------------------------------------------
+AuthController ..> AuthService
+DoctorAgendaController ..> DoctorAgendaService
+FrontDeskController ..> FrontDeskService
+AdminController ..> AdminCatalogService
+AdminController ..> AuditService : consulta
+ReportController ..> ReportService
+
+AuthService -[norank]-> AppUser : valida BCrypt y emite JWT
+AuthService ..> AuditService : LOGIN / LOGOUT
+AuditService -[norank]-> AuditLog : escribe
+DoctorAgendaService -[norank]-> Appointment : ATTENDED / NO_SHOW\n+ evento ATTENDANCE en AppointmentHistory
+DoctorAgendaService ..> AuditService
+FrontDeskService -[norank]-> AppointmentService : canal FRONT_DESK\n(reutiliza también PatientService)
+FrontDeskService ..> AuditService
+AdminCatalogService -[norank]-> Slot : genera y bloquea cupos\n(CRUD de AppUser, Doctor y Specialty)
+AdminCatalogService ..> AuditService
+ReportService -[norank]-> Appointment : agrega por estado y especialidad
+
+' ---------------------------------------------------------------
+' Disposición: enumeraciones en dos columnas, Backoffice debajo del dominio
+' ---------------------------------------------------------------
+DocumentType -[hidden]down- CoverageStatus
+CoverageStatus -[hidden]down- SlotStatus
+SlotStatus -[hidden]down- AppointmentStatus
+AppointmentStatus -[hidden]down- AppointmentEvent
+BookingChannel -[hidden]down- NotificationType
+NotificationType -[hidden]down- NotificationChannel
+NotificationChannel -[hidden]down- NotificationStatus
+NotificationStatus -[hidden]down- UserRole
+AppointmentHistory -[hidden]down- AuthController
+Notification -[hidden]down- FrontDeskController
+AuditLog -[hidden]down- AdminController
+
+legend right
+  <b>Leyenda</b>
+  Borde azul: clases existentes en el código (Fase 1).
+  Borde rojo <<Fase 2>>: clases nuevas del Backoffice web.
+  Los controladores listan sus endpoints bajo /api/v1;
+  los del Backoffice exigen token JWT y rol (RF-17, RF-18).
+endlegend
 
 @enduml
