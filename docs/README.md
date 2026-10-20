@@ -14,6 +14,7 @@ Los nombres de archivos, carpetas e identificadores del código están en inglé
 | `technical-solution-proposals.md` | Propuestas de solución evaluadas y la elegida. |
 | `clinic-profile.md` | Perfil de la Clínica Anglo Americana y sus especialidades. |
 | `api-contract.md` | Contrato REST entre el Kiosko (JavaFX), los paneles del personal y la API. |
+| `web-frontend-decision.md` | Decisión Thymeleaf vs. SPA para el Backoffice Web, arquitectura, seguridad y despliegue del módulo `web/`. |
 | `screens.md` | Capturas de las pantallas ya construidas en la aplicación de escritorio. |
 | `/database` | `initial_schema.sql`: script DDL de PostgreSQL alineado al diagrama ER. |
 | `/prototype` | Prototipo visual navegable del flujo de reserva, con capturas de sus 8 pantallas. |
