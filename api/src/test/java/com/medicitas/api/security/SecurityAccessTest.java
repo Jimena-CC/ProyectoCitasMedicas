@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -34,6 +35,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class SecurityAccessTest extends ApiIntegrationTestSupport {
 
     private static final String DOCTOR_USERNAME = DemoDataLoader.DOCTOR_USERNAME_PREFIX + "benavides";
+
+    /**
+     * Rutas que ningún controlador publicará bajo {@code /doctor/**} y {@code /front-desk/**}: cuando el rol
+     * pasa la autorización, la API responde {@code 404 RESOURCE_NOT_FOUND} en lugar de {@code 403}, y la prueba
+     * no se rompe cuando #45 o #47 publiquen endpoints reales bajo esos prefijos.
+     */
+    private static final String DOCTOR_PROBE_PATH = "/api/v1/doctor/__prueba-acceso";
+    private static final String FRONT_DESK_PROBE_PATH = "/api/v1/front-desk/__prueba-acceso";
 
     @Autowired
     private AppUserRepository appUserRepository;
@@ -55,11 +64,16 @@ class SecurityAccessTest extends ApiIntegrationTestSupport {
 
     /** Firma con la clave de la API un token con el emisor, usuario y rol indicados, vigente 10 minutos. */
     private String issueToken(String issuer, long userId, UserRole role) {
+        return issueToken(issuer, userId, role, Instant.now(clock).plusSeconds(600));
+    }
+
+    /** Firma con la clave de la API un token con el emisor, usuario, rol y vencimiento indicados. */
+    private String issueToken(String issuer, long userId, UserRole role, Instant expiresAt) {
         Instant now = Instant.now(clock);
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(issuer)
-                .issuedAt(now)
-                .expiresAt(now.plusSeconds(600))
+                .issuedAt(now.isBefore(expiresAt) ? now : expiresAt.minusSeconds(600))
+                .expiresAt(expiresAt)
                 .subject("usuario")
                 .claim(JwtRoleAuthenticationConverter.ROLE_CLAIM, role.name())
                 .claim(JwtRoleAuthenticationConverter.USER_ID_CLAIM, userId)
@@ -99,6 +113,19 @@ class SecurityAccessTest extends ApiIntegrationTestSupport {
         @DisplayName("Un token manipulado responde 401 con un mensaje de sesión no válida")
         void tokenInvalidoResponde401() throws Exception {
             mockMvc.perform(get("/api/v1/auth/me").headers(bearer("abc.def.ghi")))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
+                    .andExpect(jsonPath("$.message").value("Tu sesión no es válida o ya venció. Vuelve a iniciar sesión."));
+        }
+
+        @Test
+        @DisplayName("Un token vencido responde 401 UNAUTHORIZED con el mensaje de sesión no válida")
+        void tokenVencidoResponde401() throws Exception {
+            AppUser admin = appUserRepository.findByUsernameIgnoreCase(DemoDataLoader.ADMIN_USERNAME).orElseThrow();
+            String expiredToken = issueToken(AuthService.ISSUER, admin.getId(), UserRole.ADMIN,
+                    Instant.now(clock).minus(Duration.ofMinutes(10)));
+
+            mockMvc.perform(get("/api/v1/admin/users").headers(bearer(expiredToken)))
                     .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
                     .andExpect(jsonPath("$.message").value("Tu sesión no es válida o ya venció. Vuelve a iniciar sesión."));
@@ -227,21 +254,21 @@ class SecurityAccessTest extends ApiIntegrationTestSupport {
         }
 
         /**
-         * Matriz rol/ruta de {@code SecurityConfig}. Las rutas {@code /doctor/**} y {@code /front-desk/**} aún no
-         * tienen controlador: cuando el rol pasa la autorización, la API responde {@code 404 RESOURCE_NOT_FOUND}
-         * en lugar de {@code 403}, lo que demuestra que la regla dejó pasar la petición.
+         * Matriz rol/ruta de {@code SecurityConfig}. Bajo {@code /doctor/**} y {@code /front-desk/**} se usan
+         * rutas de sondeo que nunca tendrán controlador ({@link #DOCTOR_PROBE_PATH}, {@link #FRONT_DESK_PROBE_PATH}):
+         * un {@code 404 RESOURCE_NOT_FOUND} demuestra que la regla dejó pasar la petición.
          */
         @ParameterizedTest(name = "{0} en {1} responde {2} {3}")
         @CsvSource({
-                "DOCTOR,     /api/v1/doctor/agenda,    404, RESOURCE_NOT_FOUND",
-                "FRONT_DESK, /api/v1/doctor/agenda,    403, FORBIDDEN",
-                "ADMIN,      /api/v1/doctor/agenda,    403, FORBIDDEN",
-                "FRONT_DESK, /api/v1/front-desk/ping,  404, RESOURCE_NOT_FOUND",
-                "ADMIN,      /api/v1/front-desk/ping,  404, RESOURCE_NOT_FOUND",
-                "DOCTOR,     /api/v1/front-desk/ping,  403, FORBIDDEN",
-                "ADMIN,      /api/v1/admin/users,      200, ",
-                "FRONT_DESK, /api/v1/admin/users,      403, FORBIDDEN",
-                "DOCTOR,     /api/v1/admin/users,      403, FORBIDDEN"
+                "DOCTOR,     /api/v1/doctor/__prueba-acceso,     404, RESOURCE_NOT_FOUND",
+                "FRONT_DESK, /api/v1/doctor/__prueba-acceso,     403, FORBIDDEN",
+                "ADMIN,      /api/v1/doctor/__prueba-acceso,     403, FORBIDDEN",
+                "FRONT_DESK, /api/v1/front-desk/__prueba-acceso, 404, RESOURCE_NOT_FOUND",
+                "ADMIN,      /api/v1/front-desk/__prueba-acceso, 404, RESOURCE_NOT_FOUND",
+                "DOCTOR,     /api/v1/front-desk/__prueba-acceso, 403, FORBIDDEN",
+                "ADMIN,      /api/v1/admin/users,                200, ",
+                "FRONT_DESK, /api/v1/admin/users,                403, FORBIDDEN",
+                "DOCTOR,     /api/v1/admin/users,                403, FORBIDDEN"
         })
         @DisplayName("Cada rol solo pasa la autorización de las rutas que le corresponden")
         void cadaRolSoloAccedeASusRutas(UserRole role, String path, int expectedStatus, String expectedCode)
@@ -266,7 +293,7 @@ class SecurityAccessTest extends ApiIntegrationTestSupport {
             user.setActive(false);
             appUserRepository.save(user);
 
-            mockMvc.perform(get("/api/v1/front-desk/ping").headers(bearer(token)))
+            mockMvc.perform(get(FRONT_DESK_PROBE_PATH).headers(bearer(token)))
                     .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.code").value("USER_INACTIVE"))
                     .andExpect(jsonPath("$.message").value(
@@ -334,6 +361,7 @@ class SecurityAccessTest extends ApiIntegrationTestSupport {
                 "/api/v1/patients?documentType=DNI&documentNumber=45871236",
                 "/actuator/health",
                 "/v3/api-docs"})
+        @DisplayName("Las rutas del kiosko y la documentación siguen siendo públicas")
         void lasRutasDelKioskoSiguenPublicas(String path) throws Exception {
             mockMvc.perform(get(path)).andExpect(status().isOk());
         }
