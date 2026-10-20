@@ -33,16 +33,21 @@ import com.medicitas.api.patient.PatientRepository;
 import com.medicitas.api.schedule.Slot;
 import com.medicitas.api.schedule.SlotRepository;
 import com.medicitas.api.schedule.SlotStatus;
+import com.medicitas.api.security.AppUser;
+import com.medicitas.api.security.AppUserRepository;
+import com.medicitas.api.security.UserRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.Duration;
@@ -52,6 +57,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -61,6 +67,8 @@ import java.util.UUID;
  * las dos sedes de la clínica, 12 especialidades, médicos y pacientes ficticios, aseguradoras con planes y
  * copagos inventados, y 14 días de agenda (lunes a sábado, 07:00 a 13:00, cupos de 20 minutos) con cerca del
  * 30 % de cupos ya ocupados. Los nombres, CMP, RUC y copagos no corresponden a personas ni contratos reales.
+ * También crea los usuarios del personal: {@code admin}, {@code admision} y un {@code dr.<apellido>} por médico
+ * (credenciales en api/README.md).
  */
 @Component
 public class DemoDataLoader implements ApplicationRunner {
@@ -76,6 +84,14 @@ public class DemoDataLoader implements ApplicationRunner {
     static final String DNI_LUCIA = "45871236";
     static final String DNI_DIEGO = "70123456";
     static final String LUCIA_APPOINTMENT_CODE = "MCA-7K2Q9";
+
+    /** Usuarios de demostración por perfil; las contraseñas son públicas y solo valen para la demo. */
+    public static final String ADMIN_USERNAME = "admin";
+    public static final String ADMIN_PASSWORD = "admin123";
+    public static final String FRONT_DESK_USERNAME = "admision";
+    public static final String FRONT_DESK_PASSWORD = "admision123";
+    public static final String DOCTOR_USERNAME_PREFIX = "dr.";
+    public static final String DOCTOR_PASSWORD = "doctor123";
 
     private static final String[][] SPECIALTIES = {
             {"Cardiología", "Evaluación y control del corazón, la presión arterial y el ritmo cardiaco."},
@@ -140,6 +156,8 @@ public class DemoDataLoader implements ApplicationRunner {
     private final AppointmentRepository appointmentRepository;
     private final AppointmentHistoryRepository appointmentHistoryRepository;
     private final NotificationRepository notificationRepository;
+    private final AppUserRepository appUserRepository;
+    private final PasswordEncoder passwordEncoder;
     private final Clock clock;
 
     public DemoDataLoader(@Value("${clinic.demo-data:false}") boolean enabled,
@@ -149,7 +167,8 @@ public class DemoDataLoader implements ApplicationRunner {
                           PatientRepository patientRepository, PatientInsuranceRepository patientInsuranceRepository,
                           SlotRepository slotRepository, AppointmentRepository appointmentRepository,
                           AppointmentHistoryRepository appointmentHistoryRepository,
-                          NotificationRepository notificationRepository, Clock clock) {
+                          NotificationRepository notificationRepository, AppUserRepository appUserRepository,
+                          PasswordEncoder passwordEncoder, Clock clock) {
         this.enabled = enabled;
         this.locationRepository = locationRepository;
         this.specialtyRepository = specialtyRepository;
@@ -163,6 +182,8 @@ public class DemoDataLoader implements ApplicationRunner {
         this.appointmentRepository = appointmentRepository;
         this.appointmentHistoryRepository = appointmentHistoryRepository;
         this.notificationRepository = notificationRepository;
+        this.appUserRepository = appUserRepository;
+        this.passwordEncoder = passwordEncoder;
         this.clock = clock;
     }
 
@@ -202,6 +223,7 @@ public class DemoDataLoader implements ApplicationRunner {
                     String.format("%05d", 10200 + i * 317), demo.firstNames(), demo.lastNames(),
                     specialties.get(demo.specialty()))));
         }
+        AppUser frontDesk = createUsers(doctors);
 
         // Aseguradoras con convenio mencionadas en la especificación; RUC, planes y copagos son ficticios.
         InsurancePlan redMedica = createInsurer("Rímac Seguros", "20999999001",
@@ -272,7 +294,7 @@ public class DemoDataLoader implements ApplicationRunner {
                     UUID.nameUUIDFromBytes(("demo-slot-" + i).getBytes(StandardCharsets.UTF_8)), now);
             appointments.add(appointment);
             history.add(AppointmentHistory.record(appointment, AppointmentEvent.BOOKING, null,
-                    AppointmentStatus.BOOKED, null, slots.get(i), null, null, now));
+                    AppointmentStatus.BOOKED, null, slots.get(i), frontDesk, null, now));
         }
 
         Appointment luciaAppointment = new Appointment(LUCIA_APPOINTMENT_CODE, lucia, luciaSlot, luciaInsurance,
@@ -293,9 +315,44 @@ public class DemoDataLoader implements ApplicationRunner {
         notificationRepository.saveAll(List.of(confirmation, reminder));
 
         logger.info("Datos de demostración cargados: 2 sedes, {} especialidades, {} médicos, {} cupos ({} ocupados). "
-                        + "Pacientes demo: DNI {} (Rímac · Red Médica, cita {}) y DNI {} (particular).",
+                        + "Pacientes demo: DNI {} (Rímac · Red Médica, cita {}) y DNI {} (particular). "
+                        + "Usuarios: {} / {} (ADMIN), {} / {} (FRONT_DESK) y {}<apellido> / {} (DOCTOR).",
                 specialties.size(), doctors.size(), slots.size(), appointments.size(), DNI_LUCIA,
-                LUCIA_APPOINTMENT_CODE, DNI_DIEGO);
+                LUCIA_APPOINTMENT_CODE, DNI_DIEGO, ADMIN_USERNAME, ADMIN_PASSWORD, FRONT_DESK_USERNAME,
+                FRONT_DESK_PASSWORD, DOCTOR_USERNAME_PREFIX, DOCTOR_PASSWORD);
+    }
+
+    /**
+     * Crea los usuarios del personal: un administrador, uno de admisión y un médico por cada doctor,
+     * con usuario {@code dr.<primer apellido sin tildes>}.
+     *
+     * @param doctors médicos de demostración ya guardados
+     * @return el usuario de admisión, responsable de las citas de la central de citas
+     */
+    private AppUser createUsers(List<Doctor> doctors) {
+        List<AppUser> users = new ArrayList<>();
+        users.add(new AppUser(ADMIN_USERNAME, passwordEncoder.encode(ADMIN_PASSWORD), UserRole.ADMIN, null));
+        AppUser frontDesk = new AppUser(FRONT_DESK_USERNAME, passwordEncoder.encode(FRONT_DESK_PASSWORD),
+                UserRole.FRONT_DESK, null);
+        users.add(frontDesk);
+        String doctorHash = passwordEncoder.encode(DOCTOR_PASSWORD);
+        for (Doctor doctor : doctors) {
+            users.add(new AppUser(doctorUsername(doctor), doctorHash, UserRole.DOCTOR, doctor));
+        }
+        appUserRepository.saveAll(users);
+        return frontDesk;
+    }
+
+    /**
+     * Nombre de usuario de un médico: {@code dr.} más su primer apellido en minúsculas y sin tildes.
+     *
+     * @param doctor médico
+     * @return el nombre de usuario, por ejemplo {@code dr.benavides}
+     */
+    public static String doctorUsername(Doctor doctor) {
+        String firstLastName = doctor.getLastNames().trim().split("\\s+")[0];
+        String plain = Normalizer.normalize(firstLastName, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        return DOCTOR_USERNAME_PREFIX + plain.toLowerCase(Locale.ROOT);
     }
 
     private List<InsurancePlan> createInsurer(String name, String ruc, String plan1, String copay1,
