@@ -229,16 +229,16 @@ Todas las respuestas de error usan la misma forma. `message` está pensado para 
 | HTTP | `code` | Cuándo |
 |---|---|---|
 | 400 | `INVALID_DATA` | Falla Bean Validation; `fields` lista `{ "field", "message" }` |
+| 401 | `UNAUTHORIZED` | Ruta del personal sin token, o con token vencido o manipulado |
+| 401 | `INVALID_CREDENTIALS` | Usuario o contraseña incorrectos en el login (no se indica cuál) |
+| 403 | `FORBIDDEN` | Hay sesión, pero el rol no puede usar esa ruta |
+| 403 | `USER_INACTIVE` | El usuario fue desactivado por el administrador |
 | 404 | `PATIENT_NOT_FOUND`, `APPOINTMENT_NOT_FOUND`, `RESOURCE_NOT_FOUND` | Id o documento inexistente |
 | 409 | `DUPLICATE_DOCUMENT` | RF-01 |
 | 409 | `SLOT_NOT_AVAILABLE` | RF-07 |
 | 409 | `DUPLICATE_APPOINTMENT` | RF-08 |
 | 422 | `COVERAGE_NOT_ACTIVE`, `APPOINTMENT_NOT_MODIFIABLE` | Regla de negocio incumplida |
 | 500 | `INTERNAL_ERROR` | Mensaje genérico; el detalle solo va al log |
-| 401 | `UNAUTHORIZED` | Ruta del personal sin token, o con token vencido o manipulado |
-| 401 | `INVALID_CREDENTIALS` | Usuario o contraseña incorrectos en el login (no se indica cuál) |
-| 403 | `FORBIDDEN` | Hay sesión, pero el rol no puede usar esa ruta |
-| 403 | `USER_INACTIVE` | El usuario fue desactivado por el administrador |
 
 ---
 
