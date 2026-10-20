@@ -41,7 +41,7 @@ curl "http://localhost:8080/api/v1/patients?documentType=DNI&documentNumber=4587
 Desde la raíz del repositorio, con la clave JWT definida en un archivo `.env` (o en el entorno):
 
 ```bash
-echo 'SECURITY_JWT_SECRET=una-clave-secreta-de-al-menos-32-caracteres' > .env
+cp .env.example .env   # y cambia el valor de SECURITY_JWT_SECRET
 docker compose up --build -d
 ```
 
