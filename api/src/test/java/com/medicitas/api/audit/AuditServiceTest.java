@@ -2,6 +2,7 @@ package com.medicitas.api.audit;
 
 import com.medicitas.api.security.AppUser;
 import com.medicitas.api.security.CurrentUserService;
+import com.medicitas.api.security.SecurityProperties;
 import com.medicitas.api.security.UserRole;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,7 +47,7 @@ class AuditServiceTest {
 
     @BeforeEach
     void preparar() {
-        auditService = new AuditService(auditLogRepository, currentUserService, CLOCK);
+        auditService = newAuditService(false);
         when(auditLogRepository.save(any(AuditLog.class))).thenAnswer(invocation -> invocation.getArgument(0));
         frontDesk = new AppUser("admision", "$2a$10$hash", UserRole.FRONT_DESK, null);
         ReflectionTestUtils.setField(frontDesk, "id", 2L);
@@ -54,6 +56,12 @@ class AuditServiceTest {
     @AfterEach
     void limpiarPeticion() {
         RequestContextHolder.resetRequestAttributes();
+    }
+
+    private AuditService newAuditService(boolean trustForwardedFor) {
+        SecurityProperties properties = new SecurityProperties(new SecurityProperties.Jwt("x".repeat(32), 480),
+                new SecurityProperties.Cors(List.of()), new SecurityProperties.Audit(trustForwardedFor));
+        return new AuditService(auditLogRepository, currentUserService, properties, CLOCK);
     }
 
     @Nested
@@ -102,19 +110,31 @@ class AuditServiceTest {
     @DisplayName("IP de origen")
     class IpDeOrigen {
 
+        @ParameterizedTest(name = "X-Forwarded-For=''{0}'' y remoto {1} registra {1}")
+        @CsvSource(value = {
+                "'', 192.168.1.20",
+                "'10.0.0.5, 10.0.0.1', 192.168.1.20",
+                "'1.2.3.4', 2001:db8::1"
+        })
+        @DisplayName("Por defecto ignora X-Forwarded-For: un cliente no puede falsificar su IP")
+        void porDefectoTomaLaDireccionRemotaDeLaConexion(String forwardedFor, String remoteAddr) {
+            prepareRequest(forwardedFor, remoteAddr);
+
+            AuditLog entry = auditService.record(frontDesk, AuditAction.APPOINTMENT_BOOKED, 1L, "detalle");
+
+            assertThat(entry.getSourceIp()).isEqualTo(remoteAddr);
+        }
+
         @ParameterizedTest(name = "X-Forwarded-For=''{0}'' y remoto {1} registra {2}")
         @CsvSource(value = {
                 "'', 192.168.1.20, 192.168.1.20",
                 "'10.0.0.5, 10.0.0.1', 192.168.1.20, 10.0.0.5",
                 "'2001:db8::1', 192.168.1.20, 2001:db8::1"
         })
-        void tomaLaIpDeLaPeticionEnCurso(String forwardedFor, String remoteAddr, String expected) {
-            MockHttpServletRequest request = new MockHttpServletRequest();
-            request.setRemoteAddr(remoteAddr);
-            if (!forwardedFor.isEmpty()) {
-                request.addHeader(AuditService.FORWARDED_FOR_HEADER, forwardedFor);
-            }
-            RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+        @DisplayName("Detrás de un proxy de confianza toma la primera IP de X-Forwarded-For")
+        void conProxyDeConfianzaTomaLaPrimeraIpReenviada(String forwardedFor, String remoteAddr, String expected) {
+            auditService = newAuditService(true);
+            prepareRequest(forwardedFor, remoteAddr);
 
             AuditLog entry = auditService.record(frontDesk, AuditAction.APPOINTMENT_BOOKED, 1L, "detalle");
 
@@ -124,13 +144,21 @@ class AuditServiceTest {
         @Test
         @DisplayName("Una IP más larga que la columna se recorta a 45 caracteres")
         void recortaIpsDemasiadoLargas() {
-            MockHttpServletRequest request = new MockHttpServletRequest();
-            request.addHeader(AuditService.FORWARDED_FOR_HEADER, "x".repeat(60));
-            RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+            auditService = newAuditService(true);
+            prepareRequest("x".repeat(60), "192.168.1.20");
 
             AuditLog entry = auditService.record(frontDesk, AuditAction.APPOINTMENT_BOOKED, 1L, "detalle");
 
             assertThat(entry.getSourceIp()).hasSize(45);
+        }
+
+        private void prepareRequest(String forwardedFor, String remoteAddr) {
+            MockHttpServletRequest request = new MockHttpServletRequest();
+            request.setRemoteAddr(remoteAddr);
+            if (!forwardedFor.isEmpty()) {
+                request.addHeader(AuditService.FORWARDED_FOR_HEADER, forwardedFor);
+            }
+            RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
         }
     }
 }

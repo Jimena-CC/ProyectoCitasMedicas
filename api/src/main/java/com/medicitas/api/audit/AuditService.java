@@ -2,6 +2,7 @@ package com.medicitas.api.audit;
 
 import com.medicitas.api.security.AppUser;
 import com.medicitas.api.security.CurrentUserService;
+import com.medicitas.api.security.SecurityProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -27,11 +28,14 @@ public class AuditService {
 
     private final AuditLogRepository auditLogRepository;
     private final CurrentUserService currentUserService;
+    private final boolean trustForwardedFor;
     private final Clock clock;
 
-    public AuditService(AuditLogRepository auditLogRepository, CurrentUserService currentUserService, Clock clock) {
+    public AuditService(AuditLogRepository auditLogRepository, CurrentUserService currentUserService,
+                        SecurityProperties properties, Clock clock) {
         this.auditLogRepository = auditLogRepository;
         this.currentUserService = currentUserService;
+        this.trustForwardedFor = properties.audit().trustForwardedFor();
         this.clock = clock;
     }
 
@@ -80,18 +84,18 @@ public class AuditService {
     }
 
     /**
-     * IP de origen de la petición HTTP en curso: la primera de {@code X-Forwarded-For} si existe,
-     * o la dirección remota de la conexión.
+     * IP de origen de la petición HTTP en curso: la dirección remota de la conexión o, solo si
+     * {@code security.audit.trust-forwarded-for} está activo, la primera de {@code X-Forwarded-For}.
      *
      * @return la IP, o {@code null} fuera de una petición HTTP (tareas programadas, pruebas unitarias)
      */
-    static String currentSourceIp() {
+    String currentSourceIp() {
         RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
         if (!(attributes instanceof ServletRequestAttributes servletAttributes)) {
             return null;
         }
         HttpServletRequest request = servletAttributes.getRequest();
-        String forwarded = request.getHeader(FORWARDED_FOR_HEADER);
+        String forwarded = trustForwardedFor ? request.getHeader(FORWARDED_FOR_HEADER) : null;
         String ip = forwarded != null && !forwarded.isBlank()
                 ? forwarded.split(",")[0].trim()
                 : request.getRemoteAddr();

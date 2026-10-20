@@ -69,7 +69,7 @@ class AuthServiceTest {
     @BeforeEach
     void preparar() {
         SecurityProperties properties = new SecurityProperties(new SecurityProperties.Jwt(SECRET, 480),
-                new SecurityProperties.Cors(List.of("http://localhost:5173")));
+                new SecurityProperties.Cors(List.of("http://localhost:5173")), new SecurityProperties.Audit(false));
         authService = new AuthService(appUserRepository, ENCODER,
                 NimbusJwtEncoder.withSecretKey(KEY).algorithm(MacAlgorithm.HS256).build(), properties, auditService,
                 CLOCK);
