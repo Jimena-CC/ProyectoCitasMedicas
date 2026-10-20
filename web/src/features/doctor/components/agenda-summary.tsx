@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/loading-state';
 import * as Badge from '@/components/ui/badge';
 import type { AgendaSummary as AgendaSummaryData } from '@/lib/api/types';
 import { cn } from '@/lib/cn';
-import { formatInteger } from '@/lib/formatters';
+import { formatInteger, formatRate } from '@/lib/formatters';
 
 type BadgeColor = 'orange' | 'green' | 'gray' | 'red';
 
@@ -39,9 +39,9 @@ interface AgendaSummaryProps {
   isLoading: boolean;
 }
 
+/** Parte del total del día en porcentaje entero ("40%"), con el mismo formato que los reportes. */
 function share(value: number, total: number): string {
-  if (total === 0) return '0 %';
-  return `${Math.round((value / total) * 100)} %`;
+  return formatRate(total === 0 ? 0 : value / total, 0);
 }
 
 /** Fila de tarjetas con los totales del día (estilo widget de dashboard AlignUI: icono en círculo, etiqueta y cifra). */

@@ -77,10 +77,17 @@ export function formatCurrency(amount: number | null | undefined): string {
   return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', minimumFractionDigits: 2 }).format(amount);
 }
 
-/** 0.1234 → "12.3 %" (las tasas de la API van de 0 a 1). */
+/**
+ * 0.1234 → "12.3%" (las tasas de la API van de 0 a 1). Usa la misma configuración regional que
+ * `formatInteger` (es-PE: punto decimal), para que cifras y porcentajes no se contradigan en pantalla.
+ */
 export function formatRate(rate: number | null | undefined, decimals = 1): string {
   if (rate === null || rate === undefined) return '—';
-  return `${(rate * 100).toFixed(decimals).replace('.', ',')} %`;
+  return new Intl.NumberFormat('es-PE', {
+    style: 'percent',
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(Number.isFinite(rate) ? rate : 0);
 }
 
 /** 1297 → "1 297" (separador de miles en español). */
