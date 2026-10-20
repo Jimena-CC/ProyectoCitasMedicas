@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { RiCalendarCheckLine, RiCheckboxCircleFill, RiDoorOpenLine, RiErrorWarningFill, RiLoader4Line, RiTimeLine } from '@remixicon/react';
+import { RiCalendarCheckLine, RiCheckboxCircleFill, RiDoorOpenLine, RiErrorWarningFill, RiInformationFill, RiLoader4Line, RiTimeLine } from '@remixicon/react';
 import { addDays } from 'date-fns';
 
 import { FormField, SelectField, TextField } from '@/components/form-field';
@@ -9,6 +9,7 @@ import * as Button from '@/components/ui/button';
 import * as Checkbox from '@/components/ui/checkbox';
 import * as Label from '@/components/ui/label';
 import { adminApi } from '@/lib/api/admin';
+import { ApiError } from '@/lib/api/client';
 import type { DoctorDetail, LocationDetail, SlotGenerationRequest, SpecialtyDetail, Weekday } from '@/lib/api/types';
 import { todayIso, toIsoDate } from '@/lib/formatters';
 
@@ -120,11 +121,16 @@ export function SlotGenerationForm({ doctors, specialties, locations, onGenerate
     return Object.keys(errors).length === 0;
   };
 
+  // Guardia síncrona contra dos envíos en el mismo instante (isPending llega en el siguiente render).
+  const submitting = React.useRef(false);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (submitting.current) return;
     setFormError(null);
     setResult(null);
     if (!validate()) return;
+    submitting.current = true;
     try {
       const outcome = await mutation.mutateAsync({
         doctorId: Number(form.doctorId),
@@ -143,6 +149,13 @@ export function SlotGenerationForm({ doctors, specialties, locations, onGenerate
       const failure = toFormFailure(error);
       setFieldErrors(failure.fields);
       setFormError(failure.message);
+      if (error instanceof ApiError && error.code === 'SPECIALTY_NOT_OFFERED') {
+        // La sede dejó de atender la especialidad desde otra sesión: se recargan las sedes ofrecidas y se limpia la elegida.
+        void queryClient.invalidateQueries({ queryKey: adminKeys.specialties });
+        setForm((prev) => ({ ...prev, locationId: '' }));
+      }
+    } finally {
+      submitting.current = false;
     }
   };
 
@@ -151,7 +164,17 @@ export function SlotGenerationForm({ doctors, specialties, locations, onGenerate
 
   return (
     <form className='flex flex-col gap-4' onSubmit={handleSubmit} noValidate>
-      {result && (
+      {result && result.created === 0 && (
+        <Alert.Root variant='lighter' status='information' size='small'>
+          <Alert.Icon as={RiInformationFill} />
+          {result.skipped === 1
+            ? 'No se generaron cupos nuevos: ese horario ya existía.'
+            : result.skipped > 1
+              ? `No se generaron cupos nuevos: los ${result.skipped} horarios ya existían.`
+              : 'No se generaron cupos: ningún día del rango coincide con los días de la semana marcados.'}
+        </Alert.Root>
+      )}
+      {result && result.created > 0 && (
         <Alert.Root variant='lighter' status='success' size='small'>
           <Alert.Icon as={RiCheckboxCircleFill} />
           {result.created === 1 ? 'Se generó 1 cupo' : `Se generaron ${result.created} cupos`}
