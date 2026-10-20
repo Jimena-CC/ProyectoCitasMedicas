@@ -1,15 +1,12 @@
 import { Navigate, type RouteObject } from 'react-router';
-import {
-  RiBarChartBoxLine,
-  RiFileList3Line,
-  RiTimeLine,
-} from '@remixicon/react';
+import { RiBarChartBoxLine, RiFileList3Line } from '@remixicon/react';
 
 import { UnderConstructionPage } from '@/app/pages/under-construction-page';
 import { ADMIN_ROLES } from '@/features/auth/roles';
 import { RequireRole } from '@/features/auth/require-role';
 
 import { DoctorsPage } from './doctors/doctors-page';
+import { SchedulesPage } from './schedules/schedules-page';
 import { SpecialtiesPage } from './specialties/specialties-page';
 import { UsersPage } from './users/users-page';
 
@@ -34,10 +31,7 @@ export const adminRoutes: RouteObject[] = [
       { path: 'usuarios', element: <UsersPage /> },
       { path: 'medicos', element: <DoctorsPage /> },
       { path: 'especialidades', element: <SpecialtiesPage /> },
-      {
-        path: 'horarios',
-        element: <UnderConstructionPage title='Horarios' description='Genera y bloquea los cupos de atención de cada médico.' icon={RiTimeLine} />,
-      },
+      { path: 'horarios', element: <SchedulesPage /> },
       {
         path: 'auditoria',
         element: <UnderConstructionPage title='Auditoría' description='Revisa quién hizo qué y cuándo en el sistema.' icon={RiFileList3Line} />,
