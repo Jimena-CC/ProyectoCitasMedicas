@@ -88,6 +88,16 @@ public class AppUser {
     }
 
     /**
+     * Cambia el perfil del usuario. Aplica en la siguiente petición con token, porque la autoridad
+     * se construye con el rol guardado en la base y no con el claim del token.
+     *
+     * @param role nuevo perfil
+     */
+    public void changeRole(UserRole role) {
+        this.role = role;
+    }
+
+    /**
      * Reemplaza el hash de la contraseña.
      *
      * @param passwordHash nuevo hash BCrypt

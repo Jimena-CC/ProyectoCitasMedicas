@@ -281,6 +281,23 @@ class SecurityAccessTest extends ApiIntegrationTestSupport {
         }
 
         @Test
+        @DisplayName("Un cambio de rol surte efecto de inmediato: la autoridad sale de la base y no del claim del token")
+        void unCambioDeRolAplicaDeInmediatoConElMismoToken() throws Exception {
+            String username = "admision.ascenso." + UUID.randomUUID().toString().substring(0, 8);
+            AppUser user = createFrontDeskUser(username, "clave123");
+            String token = loginAs(username, "clave123");
+            mockMvc.perform(get("/api/v1/admin/users").headers(bearer(token))).andExpect(status().isForbidden());
+
+            user.changeRole(UserRole.ADMIN);
+            appUserRepository.save(user);
+
+            mockMvc.perform(get("/api/v1/admin/users").headers(bearer(token))).andExpect(status().isOk());
+            mockMvc.perform(get("/api/v1/auth/me").headers(bearer(token)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.role").value("ADMIN"));
+        }
+
+        @Test
         @DisplayName("Un token bien firmado cuyo usuario no existe responde 401")
         void tokenDeUsuarioInexistenteResponde401() throws Exception {
             String token = issueToken(AuthService.ISSUER, 999_999L, UserRole.ADMIN);

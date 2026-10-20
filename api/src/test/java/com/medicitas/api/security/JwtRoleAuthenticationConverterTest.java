@@ -33,20 +33,21 @@ class JwtRoleAuthenticationConverterTest {
     private AppUserRepository appUserRepository;
 
     private JwtRoleAuthenticationConverter converter;
-    private AppUser admin;
+    private AppUser user;
 
     @BeforeEach
     void preparar() {
         converter = new JwtRoleAuthenticationConverter(appUserRepository);
-        admin = new AppUser("admin", "$2a$10$hash", UserRole.ADMIN, null);
-        ReflectionTestUtils.setField(admin, "id", 1L);
+        user = new AppUser("admin", "$2a$10$hash", UserRole.ADMIN, null);
+        ReflectionTestUtils.setField(user, "id", 1L);
     }
 
-    @ParameterizedTest(name = "claim role={0} -> ROLE_{0}")
+    @ParameterizedTest(name = "rol en la base {0} -> ROLE_{0}")
     @EnumSource(UserRole.class)
-    @DisplayName("Con un usuario activo, el claim role se traduce a la autoridad ROLE_<perfil>")
+    @DisplayName("Con un usuario activo, su rol en la base se traduce a la autoridad ROLE_<perfil>")
     void usuarioActivoRecibeLaAutoridadDeSuRol(UserRole role) {
-        when(appUserRepository.findById(1L)).thenReturn(Optional.of(admin));
+        user.changeRole(role);
+        when(appUserRepository.findById(1L)).thenReturn(Optional.of(user));
 
         AbstractAuthenticationToken authentication = converter.convert(jwt(1L, role.name()));
 
@@ -58,10 +59,25 @@ class JwtRoleAuthenticationConverterTest {
     }
 
     @Test
+    @DisplayName("El rol vigente sale de la base, no del claim del token: un cambio de rol aplica de inmediato")
+    void elRolVigenteSaleDeLaBaseYNoDelClaim() {
+        user.changeRole(UserRole.FRONT_DESK);
+        when(appUserRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        assertAll(
+                () -> assertThat(converter.convert(jwt(1L, "ADMIN")).getAuthorities())
+                        .containsExactly(new SimpleGrantedAuthority(UserRole.FRONT_DESK.authority())),
+                () -> assertThat(converter.convert(jwt(1L, null)).getAuthorities())
+                        .containsExactly(new SimpleGrantedAuthority(UserRole.FRONT_DESK.authority())),
+                () -> assertThat(converter.convert(jwt(1L, "SUPERUSER")).getAuthorities())
+                        .containsExactly(new SimpleGrantedAuthority(UserRole.FRONT_DESK.authority())));
+    }
+
+    @Test
     @DisplayName("Un usuario desactivado tras emitir el token es rechazado con DisabledException")
     void usuarioInactivoEsRechazado() {
-        admin.setActive(false);
-        when(appUserRepository.findById(1L)).thenReturn(Optional.of(admin));
+        user.setActive(false);
+        when(appUserRepository.findById(1L)).thenReturn(Optional.of(user));
 
         assertThatThrownBy(() -> converter.convert(jwt(1L, "ADMIN")))
                 .isInstanceOf(DisabledException.class);
@@ -89,16 +105,6 @@ class JwtRoleAuthenticationConverterTest {
 
         assertThatThrownBy(() -> converter.convert(jwt)).isInstanceOf(InvalidBearerTokenException.class);
         verifyNoInteractions(appUserRepository);
-    }
-
-    @Test
-    @DisplayName("Un claim role ausente o desconocido no otorga autoridades")
-    void rolAusenteODesconocidoNoOtorgaAutoridades() {
-        when(appUserRepository.findById(1L)).thenReturn(Optional.of(admin));
-
-        assertAll(
-                () -> assertThat(converter.convert(jwt(1L, null)).getAuthorities()).isEmpty(),
-                () -> assertThat(converter.convert(jwt(1L, "SUPERUSER")).getAuthorities()).isEmpty());
     }
 
     private static Jwt jwt(long userId, String role) {

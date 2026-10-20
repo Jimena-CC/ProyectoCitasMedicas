@@ -250,7 +250,7 @@ Los endpoints de las secciones 1 a 4 son **públicos**: el kiosko no envía toke
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
 ```
 
-Claims del token: `sub` (usuario), `role` (`ADMIN`, `FRONT_DESK` o `DOCTOR`), `uid` (id en `app_user`), `iss` = `medicitas-api`, `iat` y `exp`. La API verifica en cada petición la firma, la vigencia y el emisor del token, y además que el usuario de `uid` exista y siga activo: un usuario desactivado recibe `403 USER_INACTIVE` de inmediato en cualquier ruta, aunque su token no haya vencido.
+Claims del token: `sub` (usuario), `role` (`ADMIN`, `FRONT_DESK` o `DOCTOR`), `uid` (id en `app_user`), `iss` = `medicitas-api`, `iat` y `exp`. La API verifica en cada petición la firma, la vigencia y el emisor del token, y además que el usuario de `uid` exista y siga activo: un usuario desactivado recibe `403 USER_INACTIVE` de inmediato en cualquier ruta, aunque su token no haya vencido. El rol que autoriza cada petición es el guardado en `app_user` en ese momento, no el del claim `role` (que solo informa al cliente): un cambio de rol aplica en la siguiente petición sin volver a iniciar sesión.
 
 Las rutas públicas del kiosko (`/patients/**`, `/appointments/**`, `/availability/**`, `/specialties/**`, `/locations/**`, `/insurers/**`, `/notifications/**`) se abren completas; los endpoints del personal se publican siempre bajo `/doctor/**`, `/front-desk/**` o `/admin/**`.
 
