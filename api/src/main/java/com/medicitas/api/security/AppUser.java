@@ -152,4 +152,15 @@ public class AppUser {
     public Instant getLastAccess() {
         return lastAccess;
     }
+
+    // Issue #46: administración de usuarios
+
+    /**
+     * Vincula (o desvincula, con {@code null}) la ficha de médico del usuario.
+     *
+     * @param doctor médico vinculado para el perfil {@link UserRole#DOCTOR}, o {@code null} para los demás perfiles
+     */
+    public void linkDoctor(Doctor doctor) {
+        this.doctor = doctor;
+    }
 }

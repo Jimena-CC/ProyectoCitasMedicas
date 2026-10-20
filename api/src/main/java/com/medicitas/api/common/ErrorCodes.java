@@ -22,6 +22,17 @@ public final class ErrorCodes {
     public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
     public static final String USER_INACTIVE = "USER_INACTIVE";
 
+    // Issue #46: administración y reportes (docs/api-contract.md, secciones 7 y 8)
+    public static final String USERNAME_TAKEN = "USERNAME_TAKEN";
+    public static final String DOCTOR_ALREADY_LINKED = "DOCTOR_ALREADY_LINKED";
+    public static final String SELF_DEACTIVATION = "SELF_DEACTIVATION";
+    public static final String SPECIALTY_NAME_TAKEN = "SPECIALTY_NAME_TAKEN";
+    public static final String DOCTOR_LICENSE_TAKEN = "DOCTOR_LICENSE_TAKEN";
+    public static final String DOCTOR_INACTIVE = "DOCTOR_INACTIVE";
+    public static final String SPECIALTY_NOT_OFFERED = "SPECIALTY_NOT_OFFERED";
+    public static final String SLOT_NOT_FREE = "SLOT_NOT_FREE";
+    public static final String SLOT_NOT_BLOCKED = "SLOT_NOT_BLOCKED";
+
     private ErrorCodes() {
     }
 }
