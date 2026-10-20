@@ -326,6 +326,9 @@ public class DemoDataLoader implements ApplicationRunner {
                 luciaSlot.startAt(clock.getZone()).minus(Duration.ofHours(24)));
         notificationRepository.saveAll(List.of(confirmation, reminder));
 
+        // Issue #46: citas pasadas ya cerradas para que los reportes de demostración tengan cifras
+        createPastAppointmentsForReports(doctors, fillers, sanIsidro, laMolina, frontDesk, today, generator, usedCodes);
+
         logger.info("Datos de demostración cargados: 2 sedes, {} especialidades, {} médicos, {} cupos ({} ocupados). "
                         + "Pacientes demo: DNI {} (Rímac · Red Médica, cita {}) y DNI {} (particular). "
                         + "Usuarios: {} / {} (ADMIN), {} / {} (FRONT_DESK) y {}<apellido> / {} (DOCTOR).",
@@ -373,6 +376,98 @@ public class DemoDataLoader implements ApplicationRunner {
         return insurancePlanRepository.saveAll(List.of(
                 new InsurancePlan(insurer, plan1, new BigDecimal(copay1)),
                 new InsurancePlan(insurer, plan2, new BigDecimal(copay2))));
+    }
+
+    // Issue #46: agenda pasada con resultado para los reportes
+
+    /** Posiciones en {@link #DOCTORS} con agenda pasada: cuatro médicos de San Isidro y dos de La Molina. */
+    private static final int[] PAST_AGENDA_DOCTORS = {0, 1, 2, 3, 12, 13};
+    private static final int PAST_AGENDA_DAYS = 14;
+    private static final LocalTime PAST_FIRST_HOUR = LocalTime.of(8, 0);
+    private static final int PAST_SLOTS_PER_DAY = 6;
+
+    /**
+     * Crea, para seis médicos y los 14 días anteriores a hoy (sin domingos), seis cupos diarios de 08:00 a 10:00
+     * con citas ya cerradas en un patrón determinista: la mitad atendidas, una quinta parte no asistidas, una
+     * décima parte anuladas y el resto cupos que quedaron libres. Así los reportes de citas, inasistencia y
+     * ocupación muestran cifras distintas de cero en la demo. Las citas del futuro no se tocan.
+     *
+     * @param doctors   médicos de demostración ya guardados
+     * @param fillers   pacientes de relleno
+     * @param sanIsidro sede San Isidro
+     * @param laMolina  sede La Molina
+     * @param frontDesk usuario de admisión que figura como responsable de las reservas
+     * @param today     fecha de hoy en la zona de la clínica
+     * @param generator generador de códigos de cita
+     * @param usedCodes códigos ya asignados, para no repetirlos
+     */
+    private void createPastAppointmentsForReports(List<Doctor> doctors, List<Patient> fillers, Location sanIsidro,
+                                                  Location laMolina, AppUser frontDesk, LocalDate today,
+                                                  Random generator, Set<String> usedCodes) {
+        List<LocalDate> pastDays = today.minusDays(PAST_AGENDA_DAYS).datesUntil(today)
+                .filter(date -> date.getDayOfWeek() != DayOfWeek.SUNDAY)
+                .toList();
+        List<Slot> slots = new ArrayList<>();
+        List<Appointment> appointments = new ArrayList<>();
+        List<AppointmentHistory> history = new ArrayList<>();
+        int sequence = 0;
+        for (int ordinal = 0; ordinal < PAST_AGENDA_DOCTORS.length; ordinal++) {
+            int m = PAST_AGENDA_DOCTORS[ordinal];
+            Doctor doctor = doctors.get(m);
+            AppUser doctorUser = appUserRepository.findByUsernameIgnoreCase(doctorUsername(doctor)).orElse(null);
+            Location location = DOCTORS.get(m).sanIsidro() ? sanIsidro : laMolina;
+            String room = "Consultorio " + (DOCTORS.get(m).sanIsidro() ? 201 + m : 101 + m);
+            for (int d = 0; d < pastDays.size(); d++) {
+                for (int s = 0; s < PAST_SLOTS_PER_DAY; s++) {
+                    LocalTime start = PAST_FIRST_HOUR.plusMinutes((long) s * MINUTES_PER_SLOT);
+                    Slot slot = new Slot(doctor, location, pastDays.get(d), start, start.plusMinutes(MINUTES_PER_SLOT), room);
+                    slots.add(slot);
+                    int pattern = (m * 5 + d * 3 + s * 7) % 10;
+                    AppointmentStatus outcome = pattern < 5 ? AppointmentStatus.ATTENDED
+                            : pattern < 7 ? AppointmentStatus.NO_SHOW
+                            : pattern == 7 ? AppointmentStatus.CANCELLED : null;
+                    if (outcome == null) {
+                        continue;
+                    }
+                    if (outcome != AppointmentStatus.CANCELLED) {
+                        slot.setStatus(SlotStatus.BOOKED);
+                    }
+                    Instant bookedAt = pastDays.get(d).minusDays(3).atTime(10, 0).atZone(clock.getZone()).toInstant();
+                    Instant closedAt = outcome == AppointmentStatus.CANCELLED
+                            ? slot.startAt(clock.getZone()).minus(Duration.ofHours(26))
+                            : slot.startAt(clock.getZone()).plus(Duration.ofMinutes(25));
+                    String code;
+                    do {
+                        code = AppointmentCodeGenerator.compose(generator);
+                    } while (!usedCodes.add(code));
+                    // Un paciente distinto por médico en cada horario: nunca dos citas del mismo paciente a la misma hora.
+                    Patient patient = fillers.get((ordinal + PAST_AGENDA_DOCTORS.length * (d * PAST_SLOTS_PER_DAY + s))
+                            % FILLER_PATIENTS);
+                    Appointment appointment = new Appointment(code, patient, slot, null,
+                            "Consulta programada por la central de citas", BookingChannel.FRONT_DESK,
+                            UUID.nameUUIDFromBytes(("demo-past-slot-" + sequence++).getBytes(StandardCharsets.UTF_8)),
+                            bookedAt);
+                    history.add(AppointmentHistory.record(appointment, AppointmentEvent.BOOKING, null,
+                            AppointmentStatus.BOOKED, null, slot, frontDesk, null, bookedAt));
+                    if (outcome == AppointmentStatus.CANCELLED) {
+                        appointment.cancel(closedAt);
+                        history.add(AppointmentHistory.record(appointment, AppointmentEvent.CANCELLATION,
+                                AppointmentStatus.BOOKED, AppointmentStatus.CANCELLED, slot, null, frontDesk,
+                                "El paciente avisó que no podrá asistir", closedAt));
+                    } else {
+                        appointment.registerOutcome(outcome, closedAt);
+                        history.add(AppointmentHistory.record(appointment, AppointmentEvent.ATTENDANCE,
+                                AppointmentStatus.BOOKED, outcome, slot, slot, doctorUser, null, closedAt));
+                    }
+                    appointments.add(appointment);
+                }
+            }
+        }
+        slotRepository.saveAll(slots);
+        appointmentRepository.saveAll(appointments);
+        appointmentHistoryRepository.saveAll(history);
+        logger.info("Agenda pasada de demostración: {} cupos y {} citas cerradas de {} médicos en los últimos {} días.",
+                slots.size(), appointments.size(), PAST_AGENDA_DOCTORS.length, PAST_AGENDA_DAYS);
     }
 
     private List<Patient> createFillerPatients(Instant now) {
