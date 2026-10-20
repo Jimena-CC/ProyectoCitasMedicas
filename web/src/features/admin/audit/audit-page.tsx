@@ -224,7 +224,7 @@ export function AuditPage() {
 
   return (
     <>
-      <PageHeader title='Auditoría' description='Revisa quién hizo qué y cuándo en el sistema. Los registros más recientes aparecen primero.' />
+      <PageHeader eyebrow='Administración' title='Auditoría' description='Revisa quién hizo qué y cuándo en el sistema. Los registros más recientes aparecen primero.' />
 
       {notice && (
         <Alert.Root variant='lighter' status='warning' size='small' role='status'>
