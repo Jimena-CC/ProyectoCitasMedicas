@@ -1,0 +1,26 @@
+/*
+ * Impresión de la agenda del día (botón "Imprimir agenda").
+ * La estructura del backoffice ocupa toda la pantalla con scroll propio; al imprimir se libera la altura
+ * para que la tabla fluya por varias páginas y se oculta la barra lateral. Los controles que no tienen sentido
+ * en papel llevan la clase `print:hidden` de Tailwind.
+ */
+@media print {
+  #root,
+  #root > div {
+    height: auto !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+  }
+
+  main {
+    overflow: visible !important;
+  }
+
+  aside {
+    display: none !important;
+  }
+
+  .agenda-print-card {
+    box-shadow: none !important;
+  }
+}
