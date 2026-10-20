@@ -42,12 +42,13 @@ export const AUDIT_ACTIONS: Record<AuditAction, AuditActionMeta> = {
 
 export const AUDIT_ACTION_CODES = Object.keys(AUDIT_ACTIONS) as AuditAction[];
 
+/** `Object.hasOwn` y no `in`: así "constructor" o "toString" (del prototipo) no cuentan como códigos válidos. */
 export function isAuditEntity(value: string | null | undefined): value is AuditEntity {
-  return value !== null && value !== undefined && value in AUDIT_ENTITY_LABELS;
+  return value !== null && value !== undefined && Object.hasOwn(AUDIT_ENTITY_LABELS, value);
 }
 
 export function isAuditAction(value: string | null | undefined): value is AuditAction {
-  return value !== null && value !== undefined && value in AUDIT_ACTIONS;
+  return value !== null && value !== undefined && Object.hasOwn(AUDIT_ACTIONS, value);
 }
 
 /** Acciones que aplican a una entidad (o todas si no se indica). */
