@@ -1,6 +1,5 @@
 import { Navigate, type RouteObject } from 'react-router';
 import {
-  RiBarChartBoxLine,
   RiGroupLine,
   RiHeartPulseLine,
   RiStethoscopeLine,
@@ -9,6 +8,7 @@ import {
 
 import { UnderConstructionPage } from '@/app/pages/under-construction-page';
 import { AuditPage } from '@/features/admin/audit/audit-page';
+import { ReportsPage } from '@/features/admin/reports/reports-page';
 import { ADMIN_ROLES } from '@/features/auth/roles';
 import { RequireRole } from '@/features/auth/require-role';
 
@@ -58,13 +58,7 @@ export const adminRoutes: RouteObject[] = [
       },
       {
         path: 'reportes',
-        element: (
-          <UnderConstructionPage
-            title='Reportes'
-            description='Citas por estado, tasa de inasistencia y ocupación, con exportación a CSV.'
-            icon={RiBarChartBoxLine}
-          />
-        ),
+        element: <ReportsPage />,
       },
     ],
   },
