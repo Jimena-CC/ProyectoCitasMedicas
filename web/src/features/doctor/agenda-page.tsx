@@ -47,6 +47,9 @@ export function AgendaPage() {
   const [target, setTarget] = React.useState<AttendanceTarget | null>(null);
   const [note, setNote] = React.useState('');
   const [noteError, setNoteError] = React.useState<string | null>(null);
+  // Bloqueo síncrono: isPending llega en el siguiente render, así que un doble clic rápido
+  // alcanzaría a enviar dos registros antes de que el botón se deshabilite.
+  const submittingRef = React.useRef(false);
 
   const agendaQuery = useQuery({
     queryKey: [...AGENDA_QUERY_KEY, date],
@@ -88,12 +91,13 @@ export function AgendaPage() {
   };
 
   const confirmAttendance = async () => {
-    if (!target) return;
+    if (!target || submittingRef.current || attendance.isPending) return;
     const trimmed = note.trim();
     if (trimmed.length > NOTE_MAX_LENGTH) {
       setNoteError(`La nota no puede superar los ${NOTE_MAX_LENGTH} caracteres.`);
       return;
     }
+    submittingRef.current = true;
     try {
       const updated = await attendance.mutateAsync({
         appointmentId: target.item.appointmentId,
@@ -114,6 +118,8 @@ export function AgendaPage() {
         closeAttendance();
         void queryClient.invalidateQueries({ queryKey: AGENDA_QUERY_KEY });
       }
+    } finally {
+      submittingRef.current = false;
     }
   };
 
