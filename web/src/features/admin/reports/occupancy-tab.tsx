@@ -80,7 +80,7 @@ export function OccupancyTab({ range }: { range: ReportRange }) {
       </Card>
 
       <Card className='flex flex-col gap-4'>
-        <CardHeader title='Por especialidad y sede' description='Verde: 70 % o más. Naranja: entre 40 % y 70 %. Rojo: menos de 40 %.' />
+        <CardHeader title='Por especialidad y sede' description='Verde: 70% o más. Naranja: entre 40% y 70%. Rojo: menos de 40%.' />
         <DataTable columns={columns} data={report.rows} emptyTitle='Sin datos de ocupación' getRowId={(row) => `${row.specialtyId}-${row.locationId}`} />
       </Card>
     </div>

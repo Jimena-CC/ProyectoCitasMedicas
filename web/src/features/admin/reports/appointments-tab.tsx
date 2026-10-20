@@ -14,17 +14,19 @@ import { Card, CardHeader } from '@/components/card';
 import { DataTable } from '@/components/data-table';
 import { EmptyState } from '@/components/empty-state';
 import { LoadingState } from '@/components/loading-state';
+import { appointmentsCsv, appointmentsCsvFilename } from '@/features/admin/reports/appointments-csv';
 import { ExportCsvButton } from '@/features/admin/reports/components/export-csv-button';
 import { ReportError } from '@/features/admin/reports/components/report-error';
 import { StatCard } from '@/features/admin/reports/components/stat-card';
 import { StatusBarChart } from '@/features/admin/reports/components/status-bar-chart';
 import type { ReportFilterValues } from '@/features/admin/reports/components/report-filters';
+import { formatShareOf } from '@/features/admin/reports/report-format';
 import { reportsApi, type LocationStatusRow, type SpecialtyStatusRow, type StatusTotals } from '@/lib/api';
 import { formatInteger } from '@/lib/formatters';
 
 function percentCaption(value: number, total: number): string {
   if (total === 0) return 'Sin citas';
-  return `${((value / total) * 100).toFixed(1).replace('.', ',')} % del total`;
+  return `${formatShareOf(value, total)} del total`;
 }
 
 function Num({ value, strong = false }: { value: number; strong?: boolean }) {
@@ -76,7 +78,13 @@ export function AppointmentsTab({ filters }: { filters: ReportFilterValues }) {
 
   const report = query.data;
   const { totals } = report;
-  const exportButton = <ExportCsvButton kind='appointments' range={range} disabled={totals.total === 0} />;
+  // La exportación de la API no filtra por especialidad ni sede: con esos filtros el CSV se arma aquí (RF-36).
+  const specialtyName = filters.specialtyId === null ? null : (report.bySpecialty.find((row) => row.specialtyId === filters.specialtyId)?.specialtyName ?? `especialidad ${filters.specialtyId}`);
+  const locationName = filters.locationId === null ? null : (report.byLocation.find((row) => row.locationId === filters.locationId)?.locationName ?? `sede ${filters.locationId}`);
+  const filterNames = [specialtyName, locationName].filter((name): name is string => name !== null);
+  const localFile =
+    filterNames.length > 0 ? () => ({ content: appointmentsCsv(report, filterNames.join(' · ')), filename: appointmentsCsvFilename(range, filterNames) }) : undefined;
+  const exportButton = <ExportCsvButton kind='appointments' range={range} localFile={localFile} disabled={totals.total === 0} />;
 
   if (totals.total === 0) {
     return (

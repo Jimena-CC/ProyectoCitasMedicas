@@ -96,7 +96,7 @@ export function NoShowTab({ range }: { range: ReportRange }) {
       </Card>
 
       <Card className='flex flex-col gap-4'>
-        <CardHeader title='Por especialidad' description='Verde: menos de 10 %. Naranja: menos de 20 %. Rojo: 20 % o más.' />
+        <CardHeader title='Por especialidad' description='Verde: menos de 10%. Naranja: menos de 20%. Rojo: 20% o más.' />
         <DataTable columns={columns} data={report.bySpecialty} emptyTitle='Sin datos por especialidad' getRowId={(row) => String(row.specialtyId)} />
       </Card>
     </div>

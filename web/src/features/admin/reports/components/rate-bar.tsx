@@ -1,7 +1,7 @@
 import * as ProgressBar from '@/components/ui/progress-bar';
+import { formatShare } from '@/features/admin/reports/report-format';
 import { toPercent, type BarColor } from '@/features/admin/reports/report-range';
 import { cn } from '@/lib/cn';
-import { formatRate } from '@/lib/formatters';
 
 const TEXT_COLOR: Record<BarColor, string> = {
   green: 'text-success-base',
@@ -25,7 +25,7 @@ export function RateBar({ rate, color, size = 'small', className }: RateBarProps
     <div className={cn('flex items-center gap-3', className)}>
       <ProgressBar.Root value={toPercent(rate)} max={100} color={color} className='flex-1' />
       <span className={cn('shrink-0 tabular-nums', size === 'large' ? 'text-title-h6' : 'w-14 text-right text-label-sm', TEXT_COLOR[color])}>
-        {formatRate(rate)}
+        {formatShare(rate)}
       </span>
     </div>
   );

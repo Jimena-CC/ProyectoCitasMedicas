@@ -1,4 +1,5 @@
 import type { StatusTotals } from '@/lib/api';
+import { formatShareOf } from '@/features/admin/reports/report-format';
 import { cn } from '@/lib/cn';
 import { formatInteger } from '@/lib/formatters';
 
@@ -19,10 +20,6 @@ function percentOf(value: number, total: number): number {
   return total === 0 ? 0 : (value / total) * 100;
 }
 
-function formatPercent(value: number): string {
-  return `${value.toFixed(1).replace('.', ',')} %`;
-}
-
 /** Gráfico de barras horizontales sin librerías: una barra por estado con cifra y porcentaje del total. */
 export function StatusBarChart({ totals, className }: { totals: StatusTotals; className?: string }) {
   const max = Math.max(...SEGMENTS.map((segment) => totals[segment.key]), 1);
@@ -39,7 +36,6 @@ export function StatusBarChart({ totals, className }: { totals: StatusTotals; cl
       <ul className='flex flex-col gap-3'>
         {SEGMENTS.map((segment) => {
           const value = totals[segment.key];
-          const share = percentOf(value, totals.total);
           return (
             <li key={segment.key} className='grid grid-cols-[120px_1fr_140px] items-center gap-3'>
               <span className='flex items-center gap-2 text-label-sm text-text-strong-950'>
@@ -50,7 +46,7 @@ export function StatusBarChart({ totals, className }: { totals: StatusTotals; cl
                 <div className={cn('h-full rounded-full transition-all duration-300 ease-out', segment.color)} style={{ width: `${(value / max) * 100}%` }} />
               </div>
               <span className='text-right text-paragraph-sm tabular-nums text-text-sub-600'>
-                <span className='text-label-sm text-text-strong-950'>{formatInteger(value)}</span> · {formatPercent(share)}
+                <span className='text-label-sm text-text-strong-950'>{formatInteger(value)}</span> · {formatShareOf(value, totals.total)}
               </span>
             </li>
           );
