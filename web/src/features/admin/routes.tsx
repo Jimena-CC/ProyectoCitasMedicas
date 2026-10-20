@@ -1,7 +1,7 @@
 import { Navigate, type RouteObject } from 'react-router';
-import { RiBarChartBoxLine, RiFileList3Line } from '@remixicon/react';
 
-import { UnderConstructionPage } from '@/app/pages/under-construction-page';
+import { AuditPage } from '@/features/admin/audit/audit-page';
+import { ReportsPage } from '@/features/admin/reports/reports-page';
 import { ADMIN_ROLES } from '@/features/auth/roles';
 import { RequireRole } from '@/features/auth/require-role';
 
@@ -12,7 +12,7 @@ import { UsersPage } from './users/users-page';
 
 /**
  * Rutas del módulo de Administración, rol ADMIN.
- * La siguiente fase reemplaza cada placeholder por la vista real (CU-021 a CU-027).
+ * Cada ruta muestra la vista de su caso de uso (CU-021 a CU-027).
  *
  *   /administracion                  → redirige a /administracion/usuarios
  *   /administracion/usuarios         usuarios del backoffice (CU-021)
@@ -34,17 +34,11 @@ export const adminRoutes: RouteObject[] = [
       { path: 'horarios', element: <SchedulesPage /> },
       {
         path: 'auditoria',
-        element: <UnderConstructionPage title='Auditoría' description='Revisa quién hizo qué y cuándo en el sistema.' icon={RiFileList3Line} />,
+        element: <AuditPage />,
       },
       {
         path: 'reportes',
-        element: (
-          <UnderConstructionPage
-            title='Reportes'
-            description='Citas por estado, tasa de inasistencia y ocupación, con exportación a CSV.'
-            icon={RiBarChartBoxLine}
-          />
-        ),
+        element: <ReportsPage />,
       },
     ],
   },
