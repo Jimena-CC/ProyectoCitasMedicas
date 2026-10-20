@@ -302,7 +302,7 @@ public class DemoDataLoader implements ApplicationRunner {
                 code = AppointmentCodeGenerator.compose(generator);
             } while (!usedCodes.add(code));
             Appointment appointment = new Appointment(code, fillers.get(patientIndex), slots.get(i), null,
-                    "Consulta programada por la central de citas", BookingChannel.FRONT_DESK,
+                    "Consulta programada en ventanilla", BookingChannel.FRONT_DESK,
                     UUID.nameUUIDFromBytes(("demo-slot-" + i).getBytes(StandardCharsets.UTF_8)), now);
             appointments.add(appointment);
             history.add(AppointmentHistory.record(appointment, AppointmentEvent.BOOKING, null,
@@ -385,12 +385,16 @@ public class DemoDataLoader implements ApplicationRunner {
     private static final int PAST_AGENDA_DAYS = 14;
     private static final LocalTime PAST_FIRST_HOUR = LocalTime.of(8, 0);
     private static final int PAST_SLOTS_PER_DAY = 6;
+    /** Citas por médico que quedan reservadas (sin asistencia registrada) en el último día pasado. */
+    private static final int PAST_PENDING_PER_DOCTOR = 2;
 
     /**
      * Crea, para seis médicos y los 14 días anteriores a hoy (sin domingos), seis cupos diarios de 08:00 a 10:00
      * con citas ya cerradas en un patrón determinista: la mitad atendidas, una quinta parte no asistidas, una
-     * décima parte anuladas y el resto cupos que quedaron libres. Así los reportes de citas, inasistencia y
-     * ocupación muestran cifras distintas de cero en la demo. Las citas del futuro no se tocan.
+     * décima parte anuladas y el resto cupos que quedaron libres. En el último de esos días, las dos primeras
+     * citas de cada médico siguen reservadas, sin asistencia registrada, para demostrar el registro tardío.
+     * Así los reportes de citas, inasistencia y ocupación muestran cifras distintas de cero en la demo.
+     * Las citas del futuro no se tocan.
      *
      * @param doctors   médicos de demostración ya guardados
      * @param fillers   pacientes de relleno
@@ -417,6 +421,7 @@ public class DemoDataLoader implements ApplicationRunner {
             AppUser doctorUser = appUserRepository.findByUsernameIgnoreCase(doctorUsername(doctor)).orElse(null);
             Location location = DOCTORS.get(m).sanIsidro() ? sanIsidro : laMolina;
             String room = "Consultorio " + (DOCTORS.get(m).sanIsidro() ? 201 + m : 101 + m);
+            int pendingOnLastDay = 0;
             for (int d = 0; d < pastDays.size(); d++) {
                 for (int s = 0; s < PAST_SLOTS_PER_DAY; s++) {
                     LocalTime start = PAST_FIRST_HOUR.plusMinutes((long) s * MINUTES_PER_SLOT);
@@ -432,6 +437,13 @@ public class DemoDataLoader implements ApplicationRunner {
                     if (outcome != AppointmentStatus.CANCELLED) {
                         slot.setStatus(SlotStatus.BOOKED);
                     }
+                    // En el último día pasado, las primeras citas de cada médico quedan sin cerrar para poder
+                    // mostrar el registro tardío de asistencia.
+                    boolean pending = d == pastDays.size() - 1 && outcome != AppointmentStatus.CANCELLED
+                            && pendingOnLastDay < PAST_PENDING_PER_DOCTOR;
+                    if (pending) {
+                        pendingOnLastDay++;
+                    }
                     Instant bookedAt = pastDays.get(d).minusDays(3).atTime(10, 0).atZone(clock.getZone()).toInstant();
                     Instant closedAt = outcome == AppointmentStatus.CANCELLED
                             ? slot.startAt(clock.getZone()).minus(Duration.ofHours(26))
@@ -444,11 +456,15 @@ public class DemoDataLoader implements ApplicationRunner {
                     Patient patient = fillers.get((ordinal + PAST_AGENDA_DOCTORS.length * (d * PAST_SLOTS_PER_DAY + s))
                             % FILLER_PATIENTS);
                     Appointment appointment = new Appointment(code, patient, slot, null,
-                            "Consulta programada por la central de citas", BookingChannel.FRONT_DESK,
+                            "Consulta programada en ventanilla", BookingChannel.FRONT_DESK,
                             UUID.nameUUIDFromBytes(("demo-past-slot-" + sequence++).getBytes(StandardCharsets.UTF_8)),
                             bookedAt);
                     history.add(AppointmentHistory.record(appointment, AppointmentEvent.BOOKING, null,
                             AppointmentStatus.BOOKED, null, slot, frontDesk, null, bookedAt));
+                    if (pending) {
+                        appointments.add(appointment);
+                        continue;
+                    }
                     if (outcome == AppointmentStatus.CANCELLED) {
                         appointment.cancel(closedAt);
                         history.add(AppointmentHistory.record(appointment, AppointmentEvent.CANCELLATION,

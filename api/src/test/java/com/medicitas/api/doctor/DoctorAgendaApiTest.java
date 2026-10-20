@@ -42,6 +42,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.nio.charset.StandardCharsets;
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -210,6 +211,26 @@ class DoctorAgendaApiTest extends ApiIntegrationTestSupport {
             List<String> startTimes = JsonPath.read(result.getResponse().getContentAsString(StandardCharsets.UTF_8),
                     "$.items[*].startTime");
             assertThat(startTimes).isSorted();
+        }
+
+        @Test
+        @DisplayName("La demo deja dos citas reservadas en el último día pasado para registrar la asistencia tarde")
+        void laDemoDejaCitasPendientesEnElUltimoDiaPasado() throws Exception {
+            LocalDate lastPastDay = today.minusDays(1);
+            if (lastPastDay.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                lastPastDay = lastPastDay.minusDays(1);
+            }
+            String token = loginAsDoctor();
+
+            MvcResult result = mockMvc.perform(get("/api/v1/doctor/agenda").param("date", lastPastDay.toString())
+                            .headers(bearer(token)))
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            // Solo la agenda de demostración (antes de las 14:00): las citas de estas pruebas van después.
+            List<String> demoBooked = JsonPath.read(result.getResponse().getContentAsString(StandardCharsets.UTF_8),
+                    "$.items[?(@.startTime < '14:00' && @.status == 'BOOKED')].appointmentId");
+            assertThat(demoBooked).hasSize(2);
         }
 
         @Test
