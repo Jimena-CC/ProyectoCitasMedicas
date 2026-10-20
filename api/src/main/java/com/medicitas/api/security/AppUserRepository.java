@@ -6,6 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Acceso a los usuarios del personal ({@code app_user}).
+ */
 public interface AppUserRepository extends JpaRepository<AppUser, Long> {
 
     /**
@@ -34,5 +37,11 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     @EntityGraph(attributePaths = "doctor")
     List<AppUser> findAllByOrderByUsernameAsc();
 
+    /**
+     * Indica si ya existe un usuario con ese nombre, sin distinguir mayúsculas.
+     *
+     * @param username nombre de usuario a comprobar
+     * @return {@code true} si el nombre ya está en uso
+     */
     boolean existsByUsernameIgnoreCase(String username);
 }

@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Inicio de sesión del personal y consulta del usuario autenticado.
+ */
 @RestController
 @RequestMapping("/api/v1/auth")
 @Tag(name = "Autenticación", description = "Inicio de sesión del personal y consulta del usuario autenticado")
@@ -26,12 +29,23 @@ public class AuthController {
         this.currentUserService = currentUserService;
     }
 
+    /**
+     * Valida usuario y contraseña y emite el token Bearer.
+     *
+     * @param request usuario y contraseña
+     * @return el token, su vencimiento y los datos del usuario
+     */
     @PostMapping("/login")
     @Operation(summary = "Iniciar sesión con usuario y contraseña; devuelve el token Bearer")
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
     }
 
+    /**
+     * Datos del usuario al que pertenece el token de la petición.
+     *
+     * @return el usuario autenticado
+     */
     @GetMapping("/me")
     @SecurityRequirement(name = ClinicSecurityScheme.BEARER)
     @Operation(summary = "Datos del usuario autenticado")

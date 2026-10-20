@@ -28,6 +28,11 @@ public class AdminUserController {
         this.clock = clock;
     }
 
+    /**
+     * Lista los usuarios del personal ordenados por nombre.
+     *
+     * @return los usuarios con su perfil, estado y último acceso
+     */
     @GetMapping
     @Transactional(readOnly = true)
     @Operation(summary = "Listar los usuarios del personal con su perfil y último acceso")

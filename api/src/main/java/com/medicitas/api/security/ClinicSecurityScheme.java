@@ -6,6 +6,7 @@ package com.medicitas.api.security;
  */
 public final class ClinicSecurityScheme {
 
+    /** Nombre del esquema {@code bearer} (JWT) registrado en el documento OpenAPI. */
     public static final String BEARER = "bearerAuth";
 
     private ClinicSecurityScheme() {
