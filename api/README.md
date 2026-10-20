@@ -38,12 +38,14 @@ curl "http://localhost:8080/api/v1/patients?documentType=DNI&documentNumber=4587
 
 ## Ejecutar con PostgreSQL (Docker)
 
-Desde la raíz del repositorio:
+Desde la raíz del repositorio, con la clave JWT definida en un archivo `.env` (o en el entorno):
 
 ```bash
+echo 'SECURITY_JWT_SECRET=una-clave-secreta-de-al-menos-32-caracteres' > .env
 docker compose up --build -d
 ```
 
+- `SECURITY_JWT_SECRET` es obligatoria: `docker compose` se detiene si no está definida y, fuera del perfil `h2`, la API no arranca sin ella.
 - `postgres-db` ejecuta [`docs/database/initial_schema.sql`](../docs/database/initial_schema.sql) la primera vez que crea el volumen.
 - `api-service` arranca con `SPRING_PROFILES_ACTIVE=postgres` y `ddl-auto=validate`: si una entidad no coincide con el script, la API no arranca.
 - En el primer arranque, con la base vacía, se cargan los mismos datos de demostración. Para desactivarlo usa `CLINIC_DEMO_DATA=false`. Como la agenda se genera a partir de la fecha de ese arranque, borra el volumen (`docker compose down -v`) si quieres regenerarla.
@@ -124,7 +126,7 @@ Base: `/api/v1`. Resumen; el detalle está en el [contrato](../docs/api-contract
 | `messaging.retry-minutes` | `10` | Espera entre intentos |
 | `messaging.reminder-hours-ahead` | `24` | Anticipación del recordatorio |
 | `messaging.job-interval-ms` | `300000` | Frecuencia de la tarea de recordatorios (proceso 07) |
-| `SECURITY_JWT_SECRET` (`security.jwt.secret`) | clave de desarrollo | Clave HMAC (mínimo 32 caracteres) con la que se firman los tokens. La clave versionada en `application.properties` es solo para desarrollo: en `docker compose` se toma de la variable `SECURITY_JWT_SECRET` (por ejemplo desde un archivo `.env`) |
+| `SECURITY_JWT_SECRET` (`security.jwt.secret`) | solo en `h2`: clave de desarrollo | Clave HMAC (mínimo 32 caracteres) con la que se firman los tokens. Únicamente el perfil `h2` (`application-h2.properties`) trae una clave de desarrollo; con `postgres` o cualquier otro perfil la variable es obligatoria y la API no arranca sin ella (`docker compose` la toma de un archivo `.env`) |
 | `SECURITY_JWT_EXPIRATION_MINUTES` (`security.jwt.expiration-minutes`) | `480` | Vigencia del token |
 | `SECURITY_CORS_ALLOWED_ORIGINS` (`security.cors.allowed-origins`) | `http://localhost:5173` | Orígenes del navegador autorizados (paneles web del personal), separados por coma |
 | `SECURITY_AUDIT_TRUST_FORWARDED_FOR` (`security.audit.trust-forwarded-for`) | `false` | Si la API corre detrás de un proxy inverso de confianza, registra en la auditoría la IP de `X-Forwarded-For`; apagado, usa la IP de la conexión para que ningún cliente pueda falsificarla |

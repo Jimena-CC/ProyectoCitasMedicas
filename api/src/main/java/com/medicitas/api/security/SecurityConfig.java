@@ -162,8 +162,8 @@ public class SecurityConfig {
     private static SecretKey secretKey(SecurityProperties properties) {
         String secret = properties.jwt().secret();
         if (secret == null || secret.getBytes(StandardCharsets.UTF_8).length < MIN_SECRET_BYTES) {
-            throw new IllegalStateException(
-                    "security.jwt.secret debe tener al menos " + MIN_SECRET_BYTES + " caracteres");
+            throw new IllegalStateException("security.jwt.secret (variable SECURITY_JWT_SECRET) no está definida o"
+                    + " tiene menos de " + MIN_SECRET_BYTES + " caracteres; solo el perfil h2 trae una clave de desarrollo");
         }
         return new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
     }
