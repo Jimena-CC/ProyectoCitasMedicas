@@ -38,7 +38,8 @@ public class SecurityConfig {
     private static final int MIN_SECRET_BYTES = 32;
 
     /**
-     * Rutas del kiosko y de la documentación que no requieren token.
+     * Rutas del kiosko y de la documentación que no requieren token. Las notificaciones del kiosko se
+     * consultan en {@code /appointments/{id}/notifications}, cubierto por el prefijo de citas.
      * Los prefijos del kiosko ({@code /patients}, {@code /appointments}, etc.) se abren completos porque
      * el paciente nunca inicia sesión. Por eso, todo endpoint nuevo del personal debe publicarse bajo
      * {@code /api/v1/doctor/**}, {@code /api/v1/front-desk/**} o {@code /api/v1/admin/**}; si se colocara
@@ -52,7 +53,6 @@ public class SecurityConfig {
             "/api/v1/specialties/**",
             "/api/v1/locations/**",
             "/api/v1/insurers/**",
-            "/api/v1/notifications/**",
             "/actuator/health",
             "/v3/api-docs/**",
             "/swagger-ui/**",

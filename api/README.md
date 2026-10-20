@@ -80,7 +80,7 @@ Rutas y roles (`SecurityConfig`):
 
 | Ruta | Acceso |
 |---|---|
-| `POST /api/v1/auth/login`, `/api/v1/patients/**`, `/api/v1/appointments/**`, `/api/v1/availability/**`, `/api/v1/specialties/**`, `/api/v1/locations/**`, `/api/v1/insurers/**`, `/api/v1/notifications/**`, `/actuator/health`, `/v3/api-docs/**`, `/swagger-ui/**` | Público (kiosko y documentación) |
+| `POST /api/v1/auth/login`, `/api/v1/patients/**`, `/api/v1/appointments/**`, `/api/v1/availability/**`, `/api/v1/specialties/**`, `/api/v1/locations/**`, `/api/v1/insurers/**`, `/actuator/health`, `/v3/api-docs/**`, `/swagger-ui/**` | Público (kiosko y documentación) |
 | `GET /api/v1/auth/me` | Cualquier usuario autenticado |
 | `/api/v1/doctor/**` | `DOCTOR` |
 | `/api/v1/front-desk/**` | `FRONT_DESK` o `ADMIN` |
