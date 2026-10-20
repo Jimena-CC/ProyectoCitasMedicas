@@ -75,7 +75,7 @@ class AppointmentAuditTest extends ApiIntegrationTestSupport {
                 () -> assertThat(entries).extracting(AuditLog::getUser).containsOnlyNulls(),
                 () -> assertThat(entries).extracting(AuditLog::getSourceIp).containsOnly("127.0.0.1"),
                 () -> assertThat(entries).allSatisfy(entry -> assertThat(entry.getRegisteredAt()).isAfterOrEqualTo(before)),
-                () -> assertThat(entries.get(0).getDetail()).contains("por canal KIOSK"),
+                () -> assertThat(entries.get(0).getDetail()).contains("desde el kiosko"),
                 () -> assertThat(entries.get(1).getDetail()).contains("del cupo " + slot.getId())
                         .contains("al cupo " + newSlot.getId()),
                 () -> assertThat(entries.get(2).getDetail()).contains("Motivo: Viaje fuera de Lima"));
@@ -105,7 +105,7 @@ class AppointmentAuditTest extends ApiIntegrationTestSupport {
                 () -> assertThat(entry.getAction()).isEqualTo(AuditAction.APPOINTMENT_BOOKED.name()),
                 () -> assertThat(entry.getUser()).isNotNull(),
                 () -> assertThat(entry.getUser().getUsername()).isEqualTo("admision"),
-                () -> assertThat(entry.getDetail()).contains("por canal FRONT_DESK"));
+                () -> assertThat(entry.getDetail()).contains("por admisión"));
 
         AppointmentHistory booking = appointmentHistoryRepository.findByAppointmentIdOrderByIdAsc(appointmentId).getFirst();
         assertThat(booking.getUser()).isNotNull();
@@ -113,7 +113,7 @@ class AppointmentAuditTest extends ApiIntegrationTestSupport {
     }
 
     @Test
-    @DisplayName("La consulta paginada filtra por entidad, acción, usuario y rango de fechas")
+    @DisplayName("La consulta paginada filtra por entidad, acción, usuario y rango de fechas, y pagina del más reciente al más antiguo")
     void laConsultaPaginadaFiltraPorEntidadAccionUsuarioYFechas() throws Exception {
         long patientId = registerPatient();
         Slot slot = nextFreeSlot();
@@ -132,7 +132,8 @@ class AppointmentAuditTest extends ApiIntegrationTestSupport {
         Page<AuditLog> byOtherUser = auditLogRepository.search(AuditEntities.APPOINTMENT, null,
                 frontDesk.getId() + 1_000, null, null, PageRequest.of(0, 50));
         Page<AuditLog> beforeTheTest = auditLogRepository.search(null, null, null, null, before, PageRequest.of(0, 50));
-        Page<AuditLog> everything = auditLogRepository.search(null, null, null, null, null, PageRequest.of(0, 5));
+        // Esta prueba por sí sola deja al menos tres registros: inicio de sesión, reserva y anulación.
+        Page<AuditLog> firstPage = auditLogRepository.search(null, null, null, null, null, PageRequest.of(0, 2));
 
         assertAll(
                 () -> assertThat(cancellations.getContent())
@@ -141,8 +142,10 @@ class AppointmentAuditTest extends ApiIntegrationTestSupport {
                         .allSatisfy(entry -> assertThat(entry.getUser().getUsername()).isEqualTo("admision")),
                 () -> assertThat(byOtherUser.getContent()).isEmpty(),
                 () -> assertThat(beforeTheTest.getContent()).extracting(AuditLog::getEntityId).doesNotContain(appointmentId),
-                () -> assertThat(everything.getSize()).isEqualTo(5),
-                () -> assertThat(everything.getContent()).isSortedAccordingTo(
+                () -> assertThat(firstPage.getContent()).hasSize(2),
+                () -> assertThat(firstPage.getTotalElements()).isGreaterThanOrEqualTo(3),
+                () -> assertThat(firstPage.getTotalPages()).isGreaterThanOrEqualTo(2),
+                () -> assertThat(firstPage.getContent()).isSortedAccordingTo(
                         (a, b) -> b.getRegisteredAt().compareTo(a.getRegisteredAt())));
     }
 }

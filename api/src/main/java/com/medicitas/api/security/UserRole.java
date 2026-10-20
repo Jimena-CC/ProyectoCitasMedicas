@@ -7,15 +7,30 @@ package com.medicitas.api.security;
 public enum UserRole {
 
     /** Administrador del sistema: gestiona usuarios, catálogos y consulta la auditoría. */
-    ADMIN,
+    ADMIN("Administrador"),
 
     /** Personal de admisión: atiende la central de citas y la recepción. */
-    FRONT_DESK,
+    FRONT_DESK("Admisión"),
 
     /** Médico: consulta su agenda y registra la atención de sus citas. */
-    DOCTOR;
+    DOCTOR("Médico");
 
     private static final String AUTHORITY_PREFIX = "ROLE_";
+
+    private final String label;
+
+    UserRole(String label) {
+        this.label = label;
+    }
+
+    /**
+     * Nombre del perfil en español para mostrar al usuario, por ejemplo en el registro de auditoría.
+     *
+     * @return la etiqueta legible del perfil
+     */
+    public String label() {
+        return label;
+    }
 
     /**
      * Nombre de la autoridad de Spring Security asociada al perfil, por ejemplo {@code ROLE_ADMIN}.

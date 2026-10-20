@@ -82,7 +82,7 @@ public class AuthService {
         user.touchLastAccess(now);
         String token = issueToken(user, now, expiresAt);
         auditService.record(user, AuditAction.USER_LOGGED_IN, user.getId(),
-                "Inicio de sesión de " + user.getUsername() + " (" + user.getRole() + ")");
+                "Inicio de sesión de " + user.getUsername() + " (perfil " + user.getRole().label() + ")");
 
         logger.info("Usuario {} ({}) inició sesión", user.getUsername(), user.getRole());
         return new LoginResponse(token, expiresAt.atZone(clock.getZone()).toOffsetDateTime(), UserInfo.from(user));

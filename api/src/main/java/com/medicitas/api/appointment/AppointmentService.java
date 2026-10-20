@@ -105,7 +105,7 @@ public class AppointmentService {
                 AppointmentStatus.BOOKED, null, slot, actor, null, now));
         auditService.record(actor, AuditAction.APPOINTMENT_BOOKED, appointment.getId(),
                 "Cita " + appointment.getCode() + " reservada en el cupo " + describe(slot)
-                        + " para el paciente " + patient.getId() + " por canal " + channel);
+                        + " para el paciente " + patient.getId() + " " + describe(channel));
         publish(notificationService.scheduleForBooking(appointment));
 
         logger.info("Cita {} reservada: cupo {} para el paciente {}", appointment.getCode(), slot.getId(), patient.getId());
@@ -252,6 +252,11 @@ public class AppointmentService {
             throw BusinessException.conflict(ErrorCodes.SLOT_NOT_AVAILABLE,
                     "Ese horario acaba de ser reservado por otra persona. Elige otro horario disponible.");
         }
+    }
+
+    /** Canal en forma legible para la auditoría, sin nombres técnicos (RNF-06). */
+    private static String describe(BookingChannel channel) {
+        return channel == BookingChannel.KIOSK ? "desde el kiosko" : "por admisión";
     }
 
     /** Cupo en forma legible para la auditoría: id, fecha, hora de inicio y médico. */
