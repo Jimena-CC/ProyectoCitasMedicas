@@ -115,7 +115,7 @@ export function RescheduleModal({ patientId, open, appointment, onClose }: Actio
 
   return (
     <Modal.Root open={open} onOpenChange={(next) => !next && !mutation.isPending && onClose()}>
-      <Modal.Content className='max-w-[960px]'>
+      <Modal.Content className='flex max-h-[calc(100dvh-2rem)] max-w-[960px] flex-col'>
         <Modal.Header
           icon={RiCalendarScheduleLine}
           title={appointment ? `Reprogramar la cita ${appointment.code}` : 'Reprogramar cita'}
@@ -125,7 +125,7 @@ export function RescheduleModal({ patientId, open, appointment, onClose }: Actio
               : undefined
           }
         />
-        <Modal.Body className='flex flex-col gap-5'>
+        <Modal.Body className='flex min-h-0 flex-col gap-5 overflow-y-auto'>
           {alert && (
             <Alert.Root variant='lighter' status='error' size='small'>
               <Alert.Icon as={RiErrorWarningFill} />
