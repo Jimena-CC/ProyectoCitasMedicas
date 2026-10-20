@@ -7,8 +7,17 @@ type ToastStatus = 'success' | 'error' | 'warning' | 'information';
 /** Posición de la pila de avisos; el <Toaster> de main.tsx usa la misma. */
 export const TOAST_POSITION = 'top-center';
 
+/**
+ * Los avisos de éxito solo confirman lo que el usuario acaba de hacer: duran menos para no quedarse sobre el
+ * título de la página. Los de error y advertencia mantienen la duración por defecto (4 s) para poder leerlos.
+ */
+const SUCCESS_DURATION_MS = 3000;
+
 function show(status: ToastStatus, message: string) {
-  return toast.custom((t) => <AlertToast.Root t={t} status={status} message={message} />, { position: TOAST_POSITION });
+  return toast.custom((t) => <AlertToast.Root t={t} status={status} message={message} />, {
+    position: TOAST_POSITION,
+    ...(status === 'success' && { duration: SUCCESS_DURATION_MS }),
+  });
 }
 
 /**
