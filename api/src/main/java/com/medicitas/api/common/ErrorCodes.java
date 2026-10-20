@@ -22,7 +22,7 @@ public final class ErrorCodes {
     public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
     public static final String USER_INACTIVE = "USER_INACTIVE";
 
-    // Issue #46: administración y reportes (docs/api-contract.md, secciones 7 y 8)
+    // Issue #46: administración y reportes (docs/api-contract.md, secciones 9 y 10)
     public static final String USERNAME_TAKEN = "USERNAME_TAKEN";
     public static final String DOCTOR_ALREADY_LINKED = "DOCTOR_ALREADY_LINKED";
     public static final String SELF_DEACTIVATION = "SELF_DEACTIVATION";
@@ -32,6 +32,9 @@ public final class ErrorCodes {
     public static final String SPECIALTY_NOT_OFFERED = "SPECIALTY_NOT_OFFERED";
     public static final String SLOT_NOT_FREE = "SLOT_NOT_FREE";
     public static final String SLOT_NOT_BLOCKED = "SLOT_NOT_BLOCKED";
+    // Issue #45: módulos de médico y admisión (docs/api-contract.md, sección 7)
+    /** El usuario con perfil DOCTOR no tiene un médico vinculado y no puede usar su agenda. */
+    public static final String DOCTOR_NOT_LINKED = "DOCTOR_NOT_LINKED";
 
     private ErrorCodes() {
     }

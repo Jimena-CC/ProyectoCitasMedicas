@@ -50,7 +50,11 @@ public enum AuditAction {
     SLOT_BLOCKED(AuditEntities.SLOT),
 
     /** Desbloqueo de un cupo: vuelve a estar disponible. */
-    SLOT_UNBLOCKED(AuditEntities.SLOT);
+    SLOT_UNBLOCKED(AuditEntities.SLOT),
+
+    // Issue #45: módulos de médico y admisión
+    /** Registro de asistencia o inasistencia de una cita por el médico (CU-012). */
+    ATTENDANCE_REGISTERED(AuditEntities.APPOINTMENT);
 
     private final String entity;
 

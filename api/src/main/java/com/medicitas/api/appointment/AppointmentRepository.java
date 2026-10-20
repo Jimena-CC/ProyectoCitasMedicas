@@ -59,6 +59,24 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             order by s.date desc, s.startTime desc""")
     List<Appointment> findAllByPatient(@Param("patientId") Long patientId);
 
+    // Issue #45: módulos de médico y admisión
+    /**
+     * Citas de un médico en una fecha, con paciente, cupo, sede y seguro ya cargados, ordenadas por hora de inicio.
+     * Incluye todos los estados para que la agenda muestre también las anuladas y las ya atendidas.
+     *
+     * @param doctorId médico
+     * @param date     fecha del cupo
+     * @return las citas del día en orden de hora
+     */
+    @Query("""
+            select a from Appointment a
+            join fetch a.patient
+            join fetch a.slot s join fetch s.doctor d join fetch d.specialty join fetch s.location
+            left join fetch a.patientInsurance pi left join fetch pi.plan pl left join fetch pl.insurer
+            where d.id = :doctorId and s.date = :date
+            order by s.startTime, a.id""")
+    List<Appointment> findByDoctorAndDate(@Param("doctorId") Long doctorId, @Param("date") LocalDate date);
+
     // Issue #46: reportes
 
     /**

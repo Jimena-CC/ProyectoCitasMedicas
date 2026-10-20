@@ -192,4 +192,23 @@ public class NotificationService {
         };
         return new OutgoingMessage(notification.getChannel(), notification.getDestination(), subject, body);
     }
+
+    // Issue #45: módulos de médico y admisión
+    /**
+     * Cancela toda notificación pendiente de una cita cuya atención ya concluyó (asistencia o inasistencia
+     * registrada): un recordatorio o una confirmación que aún no salió ya no tiene sentido.
+     *
+     * @param appointment cita con asistencia registrada
+     * @return cantidad de notificaciones canceladas
+     */
+    @Transactional
+    public int cancelPendingForAttendance(Appointment appointment) {
+        int cancelled = notificationRepository.cancelAllPending(appointment.getId(), NotificationStatus.PENDING,
+                NotificationStatus.CANCELLED);
+        if (cancelled > 0) {
+            logger.info("{} notificación(es) pendiente(s) cancelada(s) para la cita {} al registrar su asistencia",
+                    cancelled, appointment.getCode());
+        }
+        return cancelled;
+    }
 }
