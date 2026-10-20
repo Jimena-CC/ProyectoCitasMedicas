@@ -36,11 +36,16 @@ export function validateDocumentNumber(type: DocumentType, value: string): strin
   return null;
 }
 
-/** Convierte los parámetros de la URL (?documentType&documentNumber) en una búsqueda válida, o null. */
+/**
+ * Convierte los parámetros de la URL (?documentType&documentNumber) en una búsqueda válida, o null.
+ * Aplica las mismas reglas que el formulario, para que una URL editada a mano no salte la validación.
+ */
 export function lookupFromParams(params: URLSearchParams): PatientLookup | null {
   const documentType = params.get('documentType');
-  const documentNumber = params.get('documentNumber')?.trim() ?? '';
-  if (!isDocumentType(documentType) || documentNumber === '') return null;
+  const raw = params.get('documentNumber')?.trim() ?? '';
+  if (!isDocumentType(documentType) || raw === '') return null;
+  const documentNumber = sanitizeDocumentNumber(documentType, raw);
+  if (documentNumber !== raw.toUpperCase() || validateDocumentNumber(documentType, documentNumber)) return null;
   return { documentType, documentNumber };
 }
 

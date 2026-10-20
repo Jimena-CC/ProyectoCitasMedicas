@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import { RiArrowLeftLine, RiErrorWarningFill, RiLoader4Line, RiUserAddLine } from '@remixicon/react';
+import { RiAlertFill, RiArrowLeftLine, RiCalendarLine, RiLoader4Line, RiUserAddLine } from '@remixicon/react';
 
 import { Card, CardHeader } from '@/components/card';
 import { SelectField, TextField } from '@/components/form-field';
@@ -16,6 +16,7 @@ import { ApiError, frontDeskApi, type DocumentType, type PatientRequest } from '
 import { todayIso } from '@/lib/formatters';
 
 import { useUpdatePatientCache } from './hooks/use-patient';
+import { useSingleSubmit } from './hooks/use-single-submit';
 import {
   DOCUMENT_TYPE_OPTIONS,
   documentMaxLength,
@@ -67,7 +68,8 @@ export function PatientCreatePage() {
     };
   });
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
-  const [duplicate, setDuplicate] = React.useState<{ message: string; detailPath: string | null } | null>(null);
+  const [duplicate, setDuplicate] = React.useState<{ detailPath: string | null } | null>(null);
+  const submit = useSingleSubmit();
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -101,7 +103,7 @@ export function PatientCreatePage() {
           .searchPatient({ documentType: form.documentType, documentNumber: form.documentNumber.trim() })
           .catch(() => null);
         if (existing) updateCache(existing);
-        setDuplicate({ message: error.message, detailPath: existing ? patientDetailPath(existing) : null });
+        setDuplicate({ detailPath: existing ? patientDetailPath(existing) : null });
         return;
       }
       notify.fromError(error);
@@ -128,7 +130,7 @@ export function PatientCreatePage() {
     event.preventDefault();
     setDuplicate(null);
     if (!validate()) return;
-    mutation.mutate({
+    const body: PatientRequest = {
       documentType: form.documentType,
       documentNumber: form.documentNumber.trim(),
       firstNames: form.firstNames.trim(),
@@ -138,7 +140,8 @@ export function PatientCreatePage() {
       phone: form.phone.trim(),
       email: form.email.trim(),
       acceptsNotifications: form.acceptsNotifications,
-    });
+    };
+    submit(() => mutation.mutateAsync(body));
   };
 
   const isPending = mutation.isPending;
@@ -160,8 +163,9 @@ export function PatientCreatePage() {
       <form onSubmit={handleSubmit} noValidate className='flex flex-col gap-6'>
         {duplicate && (
           <Alert.Root variant='lighter' status='warning' size='small'>
-            <Alert.Icon as={RiErrorWarningFill} />
-            {duplicate.message}
+            <Alert.Icon as={RiAlertFill} />
+            {/* El mensaje de la API está pensado para la app del paciente; aquí se habla al personal de ventanilla. */}
+            Ya existe un paciente registrado con ese documento.
             {duplicate.detailPath && (
               <LinkButton.Root variant='modifiable' size='medium' underline asChild>
                 <Link to={duplicate.detailPath}>Abrir su ficha</Link>
@@ -238,11 +242,22 @@ export function PatientCreatePage() {
                 id='birth-date'
                 label='Fecha de nacimiento'
                 required
+                icon={RiCalendarLine}
+                hint='Día, mes y año.'
                 error={fieldErrors.birthDate}
                 inputProps={{
                   type: 'date',
                   value: form.birthDate,
                   onChange: (e) => update('birthDate', e.target.value),
+                  // Todo el campo abre el calendario; se oculta el icono nativo para no duplicar el de AlignUI.
+                  onClick: (e) => {
+                    try {
+                      e.currentTarget.showPicker();
+                    } catch {
+                      // Algunos navegadores no permiten abrirlo por código; queda el ingreso manual.
+                    }
+                  },
+                  className: '[&::-webkit-calendar-picker-indicator]:hidden',
                   max: todayIso(),
                   disabled: isPending,
                 }}

@@ -27,6 +27,8 @@ interface AvailabilityPickerProps {
   selectedSlotId: number | null;
   onSelect: (selection: SelectedSlot) => void;
   disabled?: boolean;
+  /** Día con el que arranca la grilla (p. ej. el del cupo que se acaba de perder); por defecto, hoy. */
+  initialDate?: IsoDate | null;
 }
 
 function toDate(iso: IsoDate): Date {
@@ -38,10 +40,11 @@ function toDate(iso: IsoDate): Date {
  * la grilla de horarios agrupada por médico. El cupo elegido se resalta con el anillo primario.
  * Lo comparten el asistente de agendar (paso 3) y el modal de reprogramar.
  */
-export function AvailabilityPicker({ specialtyId, locationId, selectedSlotId, onSelect, disabled = false }: AvailabilityPickerProps) {
+export function AvailabilityPicker({ specialtyId, locationId, selectedSlotId, onSelect, disabled = false, initialDate = null }: AvailabilityPickerProps) {
   const today = todayIso();
-  const [windowStart, setWindowStart] = React.useState<IsoDate>(today);
-  const [selectedDate, setSelectedDate] = React.useState<IsoDate | null>(null);
+  const startDate = initialDate && initialDate > today ? initialDate : null;
+  const [windowStart, setWindowStart] = React.useState<IsoDate>(startDate ?? today);
+  const [selectedDate, setSelectedDate] = React.useState<IsoDate | null>(startDate);
   const windowEnd = toIsoDate(addDays(toDate(windowStart), WINDOW_DAYS - 1));
 
   const query = useQuery({
@@ -104,7 +107,7 @@ export function AvailabilityPicker({ specialtyId, locationId, selectedSlotId, on
         </div>
       </div>
 
-      <div className='grid grid-cols-7 gap-2'>
+      <div className='grid grid-cols-7 gap-2' role='radiogroup' aria-label='Día de la cita'>
         {days.map((day) => {
           const isSelected = day.date === selectedDay?.date;
           const isEmpty = day.freeSlots === 0;
@@ -114,9 +117,12 @@ export function AvailabilityPicker({ specialtyId, locationId, selectedSlotId, on
               type='button'
               onClick={() => setSelectedDate(day.date)}
               disabled={isEmpty || disabled || query.isPending}
-              aria-pressed={isSelected}
+              role='radio'
+              aria-checked={isSelected}
+              aria-label={`${formatLongDate(day.date)}, ${isEmpty ? 'sin cupos' : `${day.freeSlots} ${day.freeSlots === 1 ? 'cupo libre' : 'cupos libres'}`}`}
               className={cn(
                 'flex flex-col items-center gap-0.5 rounded-10 px-2 py-2.5 text-center transition duration-200 ease-out',
+                'focus:outline-none focus-visible:shadow-button-primary-focus',
                 'ring-1 ring-inset ring-stroke-soft-200 bg-bg-white-0 text-text-strong-950 hover:bg-bg-weak-50',
                 'disabled:cursor-not-allowed disabled:bg-bg-weak-50 disabled:text-text-disabled-300 disabled:hover:bg-bg-weak-50',
                 isSelected && 'bg-primary-base text-static-white ring-primary-base hover:bg-primary-darker',
@@ -178,7 +184,7 @@ export function AvailabilityPicker({ specialtyId, locationId, selectedSlotId, on
                   </span>
                 </div>
               </div>
-              <div className='grid grid-cols-6 gap-2'>
+              <div className='grid grid-cols-6 gap-2' role='radiogroup' aria-label={`Horario con ${group.doctor.fullName}`}>
                 {group.slots.map((slot) => {
                   const isSelected = slot.slotId === selectedSlotId;
                   return (
@@ -186,10 +192,13 @@ export function AvailabilityPicker({ specialtyId, locationId, selectedSlotId, on
                       key={slot.slotId}
                       type='button'
                       disabled={disabled}
-                      aria-pressed={isSelected}
+                      role='radio'
+                      aria-checked={isSelected}
+                      aria-label={`${formatTime(slot.startTime)} a ${formatTime(slot.endTime)} con ${slot.doctor.fullName}${slot.room ? `, ${slot.room}` : ''}`}
                       onClick={() => onSelect({ date: selectedDay.date, slot })}
                       className={cn(
                         'flex flex-col items-center rounded-10 bg-bg-white-0 px-3 py-2 text-center ring-1 ring-inset ring-stroke-soft-200 transition duration-200 ease-out',
+                        'focus:outline-none focus-visible:shadow-button-primary-focus',
                         'hover:bg-bg-white-0 hover:ring-stroke-sub-300 disabled:cursor-not-allowed disabled:opacity-60',
                         isSelected && 'bg-primary-alpha-10 ring-2 ring-primary-base hover:ring-primary-base',
                       )}

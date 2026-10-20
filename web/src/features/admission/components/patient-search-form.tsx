@@ -88,6 +88,8 @@ export function PatientSearchForm({
                 placeholder={documentPlaceholder(documentType)}
                 maxLength={documentMaxLength(documentType)}
                 value={documentNumber}
+                aria-invalid={Boolean(error)}
+                aria-describedby={error || hint ? 'document-number-hint' : undefined}
                 onChange={(e) => {
                   setDocumentNumber(sanitizeDocumentNumber(documentType, e.target.value));
                   if (error) setError(null);
@@ -115,12 +117,12 @@ export function PatientSearchForm({
         </Button.Root>
       </div>
       {error ? (
-        <Hint.Root hasError>
+        <Hint.Root hasError id='document-number-hint' role='alert'>
           <Hint.Icon as={RiErrorWarningFill} />
           {error}
         </Hint.Root>
       ) : hint ? (
-        <Hint.Root>
+        <Hint.Root id='document-number-hint'>
           <Hint.Icon as={RiInformationFill} />
           {hint}
         </Hint.Root>

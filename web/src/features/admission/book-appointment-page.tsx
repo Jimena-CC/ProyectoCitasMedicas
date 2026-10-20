@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router';
 import {
+  RiAlertFill,
   RiArrowLeftLine,
   RiArrowRightLine,
   RiCalendarCheckFill,
@@ -24,7 +25,7 @@ import * as Alert from '@/components/ui/alert';
 import * as Button from '@/components/ui/button';
 import * as Divider from '@/components/ui/divider';
 import * as HorizontalStepper from '@/components/ui/horizontal-stepper';
-import { ApiError, catalogApi, frontDeskApi, getErrorMessage, newIdempotencyKey, type Appointment, type Patient } from '@/lib/api';
+import { ApiError, catalogApi, frontDeskApi, getErrorMessage, newIdempotencyKey, type Appointment, type Patient, type PatientLookup } from '@/lib/api';
 import { cn } from '@/lib/cn';
 import { formatDocument, formatLongDate, formatTime } from '@/lib/formatters';
 
@@ -32,6 +33,8 @@ import { AvailabilityPicker, type SelectedSlot } from './components/availability
 import { PatientSearchForm } from './components/patient-search-form';
 import { PatientSummaryCard } from './components/patient-summary-card';
 import { isPatientNotFound, usePatient, usePatientLookupParams, usePatientSearch } from './hooks/use-patient';
+import { useSingleSubmit } from './hooks/use-single-submit';
+import { lookupToParams } from './lib/documents';
 import { admissionKeys, insuranceLabel, patientDetailPath, patientFullName, registerPatientPath } from './lib/patients';
 
 const STEPS = [
@@ -49,13 +52,22 @@ interface Notice {
 }
 
 /**
+ * Los mensajes de estos códigos en la API están escritos para el paciente ("Ya tienes una cita…").
+ * En ventanilla se reemplazan por textos dirigidos al personal de admisión (RNF-16).
+ */
+const OPERATOR_MESSAGES: Record<string, string> = {
+  DUPLICATE_APPOINTMENT: 'El paciente ya tiene una cita reservada que se cruza con ese horario. Elige otro horario.',
+  COVERAGE_NOT_ACTIVE: 'La cobertura elegida ya no está vigente. Elige otro seguro o continúa como particular.',
+};
+
+/**
  * Agendar cita desde ventanilla (CU-018, RF-07/RF-08): asistente de 4 pasos con HorizontalStepper
  * (horizontal-stepper-demo). Acepta ?paciente=<id> (más el documento) para empezar con el paciente cargado.
  */
 export function BookAppointmentPage() {
   const queryClient = useQueryClient();
   const [params, setParams] = useSearchParams();
-  const { lookup, setLookup } = usePatientLookupParams();
+  const { lookup } = usePatientLookupParams();
   const preloadedId = /^\d+$/.test(params.get('paciente') ?? '') ? Number(params.get('paciente')) : null;
 
   const byId = usePatient(preloadedId, lookup);
@@ -73,6 +85,9 @@ export function BookAppointmentPage() {
   const [notice, setNotice] = React.useState<Notice | null>(null);
   const [idempotencyKey, setIdempotencyKey] = React.useState<string | null>(null);
   const [result, setResult] = React.useState<Appointment | null>(null);
+  // Día del último cupo perdido por "cupo tomado", para que la grilla vuelva a esa misma semana.
+  const [lostSlotDate, setLostSlotDate] = React.useState<string | null>(null);
+  const submit = useSingleSubmit();
 
   const locationsQuery = useQuery({ queryKey: admissionKeys.locations, queryFn: catalogApi.listLocations, staleTime: 10 * 60_000 });
   const specialtiesQuery = useQuery({
@@ -117,18 +132,27 @@ export function BookAppointmentPage() {
         return;
       }
       if (error.isValidation) {
-        setFieldErrors(error.fieldErrors());
+        const errors = error.fieldErrors();
+        setFieldErrors(errors);
+        // Solo el motivo tiene campo visible en este paso; cualquier otro error de campo se muestra como aviso.
+        if (Object.keys(errors).some((field) => field !== 'visitReason')) setNotice({ status: 'error', message: error.message });
         return;
       }
       if (error.code === 'SLOT_NOT_AVAILABLE') {
+        setLostSlotDate(selection?.date ?? null);
         setSelection(null);
         void queryClient.invalidateQueries({ queryKey: ['admission', 'availability'] });
         setNotice({ status: 'warning', message: 'Ese horario acaba de ser tomado. Elige otro cupo disponible.' });
         setStep(2);
         return;
       }
+      if (error.code === 'COVERAGE_NOT_ACTIVE') {
+        // Se vuelve a validar el seguro y se deja de proponer la cobertura vencida.
+        void queryClient.invalidateQueries({ queryKey: admissionKeys.insurance((patient as Patient).id) });
+        setInsuranceChoice(null);
+      }
       if (error.code === 'DUPLICATE_APPOINTMENT' || error.code === 'COVERAGE_NOT_ACTIVE') {
-        setNotice({ status: 'error', message: error.message });
+        setNotice({ status: 'error', message: OPERATOR_MESSAGES[error.code] });
         return;
       }
       notify.fromError(error);
@@ -155,11 +179,12 @@ export function BookAppointmentPage() {
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
     setNotice(null);
-    bookMutation.mutate();
+    submit(() => bookMutation.mutateAsync());
   };
 
   const resetForAnother = () => {
     setResult(null);
+    setLostSlotDate(null);
     setSelection(null);
     setVisitReason('');
     setInsuranceChoice(null);
@@ -180,6 +205,19 @@ export function BookAppointmentPage() {
     goTo(0);
   };
 
+  // Búsqueda manual en el paso 1: también se quita ?paciente=, para que la consulta pase a ser por documento.
+  const searchPatient = (next: PatientLookup) => {
+    setParams(
+      (current) => {
+        const updated = new URLSearchParams(current);
+        updated.delete('paciente');
+        Object.entries(lookupToParams(next)).forEach(([key, value]) => updated.set(key, value));
+        return updated;
+      },
+      { replace: true },
+    );
+  };
+
   if (result && patient) {
     return <BookingConfirmation appointment={result} patient={patient} onAnother={resetForAnother} />;
   }
@@ -193,6 +231,7 @@ export function BookAppointmentPage() {
             <React.Fragment key={item.label}>
               <HorizontalStepper.Item
                 state={step > index ? 'completed' : step === index ? 'active' : 'default'}
+                aria-current={step === index ? 'step' : undefined}
                 onClick={() => index < step && goTo(index)}
                 disabled={index > step}
                 type='button'
@@ -205,10 +244,14 @@ export function BookAppointmentPage() {
           ))}
         </HorizontalStepper.Root>
         <Divider.Root />
+        {/* Anuncia el paso actual a los lectores de pantalla. */}
+        <h2 className='sr-only' aria-live='polite'>
+          Paso {step + 1} de {STEPS.length}: {STEPS[step].label}
+        </h2>
 
         {notice && (
           <Alert.Root variant='lighter' status={notice.status} size='small'>
-            <Alert.Icon as={RiErrorWarningFill} />
+            <Alert.Icon as={notice.status === 'warning' ? RiAlertFill : RiErrorWarningFill} />
             {notice.message}
           </Alert.Root>
         )}
@@ -218,6 +261,8 @@ export function BookAppointmentPage() {
             {patient ? (
               <PatientSummaryCard
                 patient={patient}
+                bare
+                className='rounded-10 bg-bg-weak-50 p-4'
                 actions={
                   <Button.Root variant='neutral' mode='stroke' size='small' onClick={changePatient}>
                     <Button.Icon as={RiUserSearchLine} />
@@ -227,9 +272,17 @@ export function BookAppointmentPage() {
               />
             ) : (
               <>
-                <PatientSearchForm initial={preloadedId ? null : lookup} onSearch={setLookup} isPending={lookup !== null && patientQuery.isFetching} autoFocus />
+                <PatientSearchForm initial={preloadedId ? null : lookup} onSearch={searchPatient} isPending={lookup !== null && patientQuery.isFetching} autoFocus />
                 {lookup && patientQuery.isPending && <LoadingState rows={2} label='Buscando al paciente…' />}
-                {lookup && patientQuery.isError && isPatientNotFound(patientQuery.error) && (
+                {preloadedId !== null && patientQuery.isError && (
+                  <EmptyState
+                    size='small'
+                    icon={RiErrorWarningFill}
+                    title='No pudimos cargar al paciente del enlace'
+                    description={`${getErrorMessage(patientQuery.error)} Usa el buscador de arriba.`}
+                  />
+                )}
+                {!preloadedId && lookup && patientQuery.isError && isPatientNotFound(patientQuery.error) && (
                   <EmptyState
                     size='small'
                     icon={RiUserAddLine}
@@ -245,7 +298,7 @@ export function BookAppointmentPage() {
                     }
                   />
                 )}
-                {lookup && patientQuery.isError && !isPatientNotFound(patientQuery.error) && (
+                {!preloadedId && lookup && patientQuery.isError && !isPatientNotFound(patientQuery.error) && (
                   <EmptyState
                     size='small'
                     icon={RiErrorWarningFill}
@@ -317,6 +370,7 @@ export function BookAppointmentPage() {
             specialtyId={specialty.id}
             locationId={location.id}
             selectedSlotId={selection?.slot.slotId ?? null}
+            initialDate={selection?.date ?? lostSlotDate}
             onSelect={(next) => {
               setSelection(next);
               setNotice(null);
@@ -350,7 +404,7 @@ export function BookAppointmentPage() {
                 label='Seguro a usar'
                 required
                 placeholder={insuranceQuery.isPending ? 'Validando cobertura…' : 'Selecciona el seguro'}
-                value={insuranceChoice ?? undefined}
+                value={insuranceChoice ?? ''}
                 onValueChange={setInsuranceChoice}
                 options={[
                   ...validCoverages.map((coverage) => ({
@@ -384,7 +438,7 @@ export function BookAppointmentPage() {
               <Button.Icon as={RiArrowRightLine} />
             </Button.Root>
           ) : (
-            <Button.Root variant='primary' mode='filled' size='medium' onClick={handleBook} disabled={bookMutation.isPending || insuranceQuery.isPending}>
+            <Button.Root variant='primary' mode='filled' size='medium' onClick={handleBook} disabled={bookMutation.isPending || insuranceQuery.isPending || insuranceChoice === null}>
               <Button.Icon as={bookMutation.isPending ? RiLoader4Line : RiCalendarCheckLine} className={bookMutation.isPending ? 'animate-spin' : undefined} />
               {bookMutation.isPending ? 'Reservando…' : 'Reservar cita'}
             </Button.Root>
@@ -418,15 +472,12 @@ function BookingSummary({ patient, selection, specialtyName, locationName }: Boo
         <RiCalendarLine className='size-5 text-text-sub-600' />
         <span className='text-label-md text-text-strong-950'>Resumen de la cita</span>
       </div>
-      <dl className='flex flex-col'>
-        {rows.map((row, index) => (
-          <React.Fragment key={row.label}>
-            <div className='flex items-start justify-between gap-4 py-2.5'>
-              <dt className='shrink-0 text-paragraph-sm text-text-sub-600'>{row.label}</dt>
-              <dd className='text-right text-label-sm text-text-strong-950'>{row.value}</dd>
-            </div>
-            {index < rows.length - 1 && <Divider.Root />}
-          </React.Fragment>
+      <dl className='flex flex-col divide-y divide-stroke-soft-200'>
+        {rows.map((row) => (
+          <div key={row.label} className='flex items-start justify-between gap-4 py-2.5'>
+            <dt className='shrink-0 text-paragraph-sm text-text-sub-600'>{row.label}</dt>
+            <dd className='text-right text-label-sm text-text-strong-950'>{row.value}</dd>
+          </div>
         ))}
       </dl>
     </div>
@@ -466,15 +517,12 @@ function BookingConfirmation({ appointment, patient, onAnother }: BookingConfirm
           <RiCalendarCheckFill className='size-6 text-primary-base' />
           <span className='text-title-h5 tracking-wide text-text-strong-950'>{appointment.code}</span>
         </div>
-        <dl className='w-full text-left'>
-          {rows.map((row, index) => (
-            <React.Fragment key={row.label}>
-              <div className='flex items-start justify-between gap-4 py-2.5'>
-                <dt className='shrink-0 text-paragraph-sm text-text-sub-600'>{row.label}</dt>
-                <dd className='text-right text-label-sm text-text-strong-950'>{row.value}</dd>
-              </div>
-              {index < rows.length - 1 && <Divider.Root />}
-            </React.Fragment>
+        <dl className='flex w-full flex-col divide-y divide-stroke-soft-200 text-left'>
+          {rows.map((row) => (
+            <div key={row.label} className='flex items-start justify-between gap-4 py-2.5'>
+              <dt className='shrink-0 text-paragraph-sm text-text-sub-600'>{row.label}</dt>
+              <dd className='text-right text-label-sm text-text-strong-950'>{row.value}</dd>
+            </div>
           ))}
         </dl>
         <div className='flex w-full items-center gap-3'>
