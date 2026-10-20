@@ -7,6 +7,7 @@ import com.medicitas.api.appointment.AppointmentHistoryRepository;
 import com.medicitas.api.appointment.AppointmentRepository;
 import com.medicitas.api.appointment.AppointmentStatus;
 import com.medicitas.api.audit.AuditAction;
+import com.medicitas.api.audit.AuditFormats;
 import com.medicitas.api.audit.AuditService;
 import com.medicitas.api.catalog.Doctor;
 import com.medicitas.api.common.BusinessException;
@@ -131,9 +132,8 @@ public class DoctorAgendaService {
         appointmentHistoryRepository.save(AppointmentHistory.record(appointment, AppointmentEvent.ATTENDANCE,
                 AppointmentStatus.BOOKED, outcome, null, appointment.getSlot(), user, note, now));
         auditService.record(user, AuditAction.ATTENDANCE_REGISTERED, appointment.getId(),
-                "Cita " + appointment.getCode() + ": " + describe(outcome) + " (cupo " + appointment.getSlot().getId()
-                        + " del " + appointment.getSlot().getDate() + " " + appointment.getSlot().getStartTime()
-                        + ", " + doctor.getFullName() + ")" + (note == null ? "" : ". Nota: " + note));
+                "Cita " + appointment.getCode() + " de " + AuditFormats.patient(appointment.getPatient()) + ": "
+                        + describe(outcome) + " (" + AuditFormats.slot(appointment.getSlot()) + ")" + (note == null ? "" : ". Nota: " + note));
         notificationService.cancelPendingForAttendance(appointment);
 
         logger.info("Cita {}: asistencia registrada como {} por el usuario {}", appointment.getCode(), outcome,

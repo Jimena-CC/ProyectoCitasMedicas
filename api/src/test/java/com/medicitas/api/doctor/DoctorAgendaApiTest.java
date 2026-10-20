@@ -47,6 +47,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -303,7 +304,11 @@ class DoctorAgendaApiTest extends ApiIntegrationTestSupport {
                     () -> assertThat(audit.getFirst().getAction()).isEqualTo(AuditAction.ATTENDANCE_REGISTERED.name()),
                     () -> assertThat(audit.getFirst().getUser().getUsername()).isEqualTo(DOCTOR_USERNAME),
                     () -> assertThat(audit.getFirst().getDetail()).contains(appointment.getCode())
-                            .contains("Nota: Paciente de control"),
+                            .contains("Nota: Paciente de control")
+                            .contains(appointment.getPatient().getDocumentNumber())
+                            .contains(DateTimeFormatter.ofPattern("dd/MM/yyyy").format(appointment.getSlot().getDate()))
+                            .doesNotContain("cupo " + appointment.getSlot().getId())
+                            .doesNotContain(appointment.getSlot().getDate().toString()),
                     () -> assertThat(notifications).extracting(Notification::getStatus)
                             .containsOnly(NotificationStatus.CANCELLED));
         }

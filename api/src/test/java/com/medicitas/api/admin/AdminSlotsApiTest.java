@@ -2,6 +2,7 @@ package com.medicitas.api.admin;
 
 import com.medicitas.api.ApiIntegrationTestSupport;
 import com.medicitas.api.audit.AuditAction;
+import com.medicitas.api.audit.AuditFormats;
 import com.medicitas.api.audit.AuditAction.AuditEntities;
 import com.medicitas.api.audit.AuditLog;
 import com.medicitas.api.audit.AuditLogRepository;
@@ -252,6 +253,11 @@ class AdminSlotsApiTest extends ApiIntegrationTestSupport {
             List<AuditLog> entries = auditLogRepository.findByEntityAndEntityIdOrderByIdAsc(AuditEntities.SLOT, slot.getId());
             assertThat(entries).extracting(AuditLog::getAction)
                     .containsExactly(AuditAction.SLOT_BLOCKED.name(), AuditAction.SLOT_UNBLOCKED.name());
+            String readableDate = AuditFormats.date(slot.getDate());
+            assertThat(entries).extracting(AuditLog::getDetail).allSatisfy(detail -> assertThat(detail)
+                    .startsWith("Cupo del " + readableDate + " ")
+                    .doesNotContain(slot.getId() + " (")
+                    .doesNotContain(slot.getDate().toString()));
         }
 
         @Test

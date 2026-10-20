@@ -2,6 +2,7 @@ package com.medicitas.api.admin;
 
 import com.medicitas.api.admin.AdminSlotDtos.SlotDetail;
 import com.medicitas.api.audit.AuditAction;
+import com.medicitas.api.audit.AuditFormats;
 import com.medicitas.api.audit.AuditService;
 import com.medicitas.api.catalog.DoctorRepository;
 import com.medicitas.api.common.BusinessException;
@@ -105,9 +106,8 @@ public class AdminSlotService {
                 .orElseThrow(() -> BusinessException.notFound(ErrorCodes.RESOURCE_NOT_FOUND, "El cupo no existe."));
     }
 
-    /** Cupo en forma legible para la auditoría: id, fecha, hora de inicio, médico y sede. */
+    /** Cupo en forma legible para la auditoría: fecha, hora de inicio, médico y sede. */
     private static String describe(Slot slot) {
-        return slot.getId() + " (" + slot.getDate() + " " + slot.getStartTime() + ", " + slot.getDoctor().getFullName()
-                + ", " + slot.getLocation().getName() + ")";
+        return "del " + AuditFormats.slot(slot) + " en " + slot.getLocation().getName();
     }
 }

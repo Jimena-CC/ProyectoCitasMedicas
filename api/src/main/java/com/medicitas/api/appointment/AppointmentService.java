@@ -5,6 +5,7 @@ import com.medicitas.api.appointment.AppointmentDtos.AppointmentResponse;
 import com.medicitas.api.appointment.AppointmentDtos.BookingResult;
 import com.medicitas.api.appointment.AppointmentDtos.RescheduleRequest;
 import com.medicitas.api.audit.AuditAction;
+import com.medicitas.api.audit.AuditFormats;
 import com.medicitas.api.audit.AuditService;
 import com.medicitas.api.common.BusinessException;
 import com.medicitas.api.common.ErrorCodes;
@@ -104,8 +105,8 @@ public class AppointmentService {
         appointmentHistoryRepository.save(AppointmentHistory.record(appointment, AppointmentEvent.BOOKING, null,
                 AppointmentStatus.BOOKED, null, slot, actor, null, now));
         auditService.record(actor, AuditAction.APPOINTMENT_BOOKED, appointment.getId(),
-                "Cita " + appointment.getCode() + " reservada en el cupo " + describe(slot)
-                        + " para el paciente " + patient.getId() + " " + describe(channel));
+                "Cita " + appointment.getCode() + " reservada para " + AuditFormats.patient(patient) + " el "
+                        + AuditFormats.slot(slot) + ", " + describe(channel));
         publish(notificationService.scheduleForBooking(appointment));
 
         logger.info("Cita {} reservada: cupo {} para el paciente {}", appointment.getCode(), slot.getId(), patient.getId());
@@ -162,9 +163,9 @@ public class AppointmentService {
         appointmentHistoryRepository.save(AppointmentHistory.record(appointment, AppointmentEvent.RESCHEDULE,
                 AppointmentStatus.BOOKED, AppointmentStatus.BOOKED, previousSlot, newSlot, actor, null, now));
         auditService.record(actor, AuditAction.APPOINTMENT_RESCHEDULED, appointment.getId(),
-                "Cita " + appointment.getCode() + " reprogramada del cupo " + describe(previousSlot)
-                        + " al cupo " + describe(newSlot) + " (reprogramación n.º " + appointment.getRescheduleCount()
-                        + ")");
+                "Cita " + appointment.getCode() + " de " + AuditFormats.patient(appointment.getPatient())
+                        + " reprogramada del " + AuditFormats.slot(previousSlot) + " al " + AuditFormats.slot(newSlot)
+                        + " (reprogramación n.º " + appointment.getRescheduleCount() + ")");
         publish(notificationService.scheduleForReschedule(appointment));
 
         logger.info("Cita {} reprogramada del cupo {} al cupo {}", appointment.getCode(), previousSlot.getId(), newSlot.getId());
@@ -189,7 +190,8 @@ public class AppointmentService {
                 AppointmentStatus.BOOKED, AppointmentStatus.CANCELLED, appointment.getSlot(), null, actor, detail,
                 now));
         auditService.record(actor, AuditAction.APPOINTMENT_CANCELLED, appointment.getId(),
-                "Cita " + appointment.getCode() + " anulada; cupo " + describe(appointment.getSlot()) + " liberado"
+                "Cita " + appointment.getCode() + " de " + AuditFormats.patient(appointment.getPatient())
+                        + " anulada; se liberó el horario del " + AuditFormats.slot(appointment.getSlot())
                         + (detail == null ? "" : ". Motivo: " + detail));
         publish(notificationService.scheduleForCancellation(appointment));
 
@@ -257,12 +259,6 @@ public class AppointmentService {
     /** Canal en forma legible para la auditoría, sin nombres técnicos (RNF-06). */
     private static String describe(BookingChannel channel) {
         return channel == BookingChannel.KIOSK ? "desde el kiosko" : "por admisión";
-    }
-
-    /** Cupo en forma legible para la auditoría: id, fecha, hora de inicio y médico. */
-    private static String describe(Slot slot) {
-        return slot.getId() + " (" + slot.getDate() + " " + slot.getStartTime() + ", "
-                + slot.getDoctor().getFullName() + ")";
     }
 
     private void publish(List<Long> notificationIds) {

@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -75,13 +76,28 @@ class AppointmentAuditTest extends ApiIntegrationTestSupport {
                 () -> assertThat(entries).extracting(AuditLog::getUser).containsOnlyNulls(),
                 () -> assertThat(entries).extracting(AuditLog::getSourceIp).containsOnly("127.0.0.1"),
                 () -> assertThat(entries).allSatisfy(entry -> assertThat(entry.getRegisteredAt()).isAfterOrEqualTo(before)),
-                () -> assertThat(entries.get(0).getDetail()).contains("desde el kiosko"),
-                () -> assertThat(entries.get(1).getDetail()).contains("del cupo " + slot.getId())
-                        .contains("al cupo " + newSlot.getId()),
-                () -> assertThat(entries.get(2).getDetail()).contains("Motivo: Viaje fuera de Lima"));
+                () -> assertThat(entries.get(0).getDetail()).contains("desde el kiosko")
+                        .contains("reservada para Prueba Kiosko Integración (DNI ")
+                        .contains(" el " + readable(slot)),
+                () -> assertThat(entries.get(1).getDetail()).contains("del " + readable(slot))
+                        .contains("al " + readable(newSlot)),
+                () -> assertThat(entries.get(2).getDetail()).contains("Motivo: Viaje fuera de Lima"),
+                // El administrador lee el detalle tal cual: sin IDs internos ni fechas en formato ISO.
+                () -> assertThat(entries).extracting(AuditLog::getDetail).allSatisfy(detail -> assertThat(detail)
+                        .contains("Prueba Kiosko Integración (DNI ")
+                        .doesNotContain("paciente " + patientId)
+                        .doesNotContain("cupo " + slot.getId())
+                        .doesNotContain("cupo " + newSlot.getId())
+                        .doesNotContain(slot.getDate().toString())
+                        .doesNotContain(newSlot.getDate().toString())));
 
         List<AppointmentHistory> history = appointmentHistoryRepository.findByAppointmentIdOrderByIdAsc(appointmentId);
         assertThat(history).hasSize(3).allSatisfy(event -> assertThat(event.getUser()).isNull());
+    }
+
+    /** Fecha y hora del cupo como aparecen en el detalle de la auditoría, p. ej. {@code 21/10/2026 09:00}. */
+    private static String readable(Slot slot) {
+        return DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm").format(slot.getStart());
     }
 
     @Test
