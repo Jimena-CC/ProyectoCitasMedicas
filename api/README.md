@@ -112,6 +112,17 @@ Base: `/api/v1`. Resumen; el detalle está en el [contrato](../docs/api-contract
 | POST | `/auth/login` | Inicio de sesión del personal; devuelve el token Bearer |
 | GET | `/auth/me` | Usuario autenticado (requiere token) |
 | GET | `/admin/users` | Listar usuarios del personal (rol `ADMIN`) |
+| GET | `/doctor/agenda?date` | Agenda del día del médico autenticado; por defecto hoy (rol `DOCTOR`, CU-011) |
+| PATCH | `/doctor/appointments/{id}/attendance` | Registrar asistencia o inasistencia (`ATTENDED` / `NO_SHOW`) de una cita reservada de hoy o pasada (rol `DOCTOR`, CU-012) |
+| GET | `/front-desk/patients?documentType&documentNumber` | Buscar paciente desde ventanilla (`FRONT_DESK` o `ADMIN`, CU-013) |
+| POST | `/front-desk/patients` | Registrar paciente desde ventanilla (RF-01) |
+| GET | `/front-desk/patients/{id}/insurance` | Validar aseguradora: coberturas con `valid` y mensaje; si ninguna es válida, atención particular (CU-014) |
+| PUT | `/front-desk/patients/{id}/insurance` | Asociar o actualizar seguro, o dejar como particular (RF-03) |
+| GET | `/front-desk/patients/{id}/appointments?upcoming` | Citas del paciente |
+| POST | `/front-desk/appointments` + cabecera `Idempotency-Key` | Reservar con canal `FRONT_DESK` (CU-015, RF-07, RF-08) |
+| PATCH | `/front-desk/appointments/{id}/reschedule` | Reprogramar desde ventanilla (CU-016) |
+| PATCH | `/front-desk/appointments/{id}/cancellation` | Anular desde ventanilla con motivo obligatorio (CU-016) |
+<!-- Issue #45: filas de /doctor/** y /front-desk/**. La disponibilidad para ventanilla es el endpoint público /availability. -->
 
 ## Configuración
 
@@ -150,6 +161,10 @@ Ejemplo: `./mvnw spring-boot:run -Dspring-boot.run.arguments=--messaging.simulat
   - caída del servicio de mensajería;
   - acceso por rol (`SecurityAccessTest`): 401 sin token, 403 con rol incorrecto, login correcto e incorrecto, kiosko público;
   - auditoría de citas (`AppointmentAuditTest`): reservar, reprogramar y anular generan sus filas en `audit_log`, con o sin usuario.
+  <!-- Issue #45 -->
+  - agenda y asistencia del médico (`DoctorAgendaApiTest`): cada médico ve solo su agenda, fecha por defecto hoy, marcar `ATTENDED`/`NO_SHOW` actualiza estado, historial `ATTENDANCE` con usuario, auditoría `ATTENDANCE_REGISTERED` y cancela notificaciones pendientes; no se marca una cita futura, anulada ni de otro médico; 401/403 por rol;
+  - ventanilla (`FrontDeskApiTest`): búsqueda y registro de pacientes, validación de aseguradora vigente/suspendida/vencida/sin seguro, reserva con canal `FRONT_DESK` auditada con el usuario `admision`, cupo tomado (409) y cita duplicada (409), reprogramación y anulación con motivo obligatorio (400 sin motivo), `DOCTOR` recibe 403 y `ADMIN` sí opera.
+- **Unitarias de médico y admisión** (`DoctorAgendaServiceTest`, `FrontDeskServiceTest`, Mockito): reglas de fecha, estado y pertenencia de la cita; validez de coberturas; delegación en los servicios del kiosko.
 - **Esquema PostgreSQL** (`PostgresSchemaTest`): levanta un PostgreSQL 15 embebido, sin Docker, ejecuta `initial_schema.sql` y arranca la API con `ddl-auto=validate` y los datos de demostración.
 
 ## Estructura
@@ -164,5 +179,7 @@ com.medicitas.api
 ├── notification  Notificaciones, proveedor de mensajería simulado y tarea programada
 ├── patient       Paciente y seguro
 ├── schedule      Cupo y consulta de disponibilidad
-└── security      Usuarios y roles, login con JWT, reglas de acceso y usuario actual
+├── security      Usuarios y roles, login con JWT, reglas de acceso y usuario actual
+├── doctor        Agenda del día y registro de asistencia del médico (Issue #45)
+└── frontdesk     Operaciones de ventanilla: pacientes, seguro y citas con canal FRONT_DESK (Issue #45)
 ```
