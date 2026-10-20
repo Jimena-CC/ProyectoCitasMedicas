@@ -40,9 +40,17 @@ export function FormModal({
   className,
   children,
 }: FormModalProps) {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  // Guardia síncrona: isPending llega en el siguiente render, así que dos envíos en el mismo instante pasarían ambos.
+  const submitting = React.useRef(false);
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!isPending) void onSubmit();
+    if (isPending || submitting.current) return;
+    submitting.current = true;
+    try {
+      await onSubmit();
+    } finally {
+      submitting.current = false;
+    }
   };
 
   return (
