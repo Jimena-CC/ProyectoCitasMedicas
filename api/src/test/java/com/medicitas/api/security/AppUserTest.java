@@ -6,8 +6,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
@@ -52,38 +50,16 @@ class AppUserTest {
                 () -> assertThat(user.getPasswordHash()).isEqualTo("$2a$10$otro"));
     }
 
-    @ParameterizedTest(name = "{0} -> {1}")
+    @ParameterizedTest(name = "{0} -> {1} / {2}")
     @CsvSource({
-            "ADMIN, ROLE_ADMIN",
-            "FRONT_DESK, ROLE_FRONT_DESK",
-            "DOCTOR, ROLE_DOCTOR"
+            "ADMIN, ROLE_ADMIN, Administrador",
+            "FRONT_DESK, ROLE_FRONT_DESK, Admisión",
+            "DOCTOR, ROLE_DOCTOR, Médico"
     })
-    @DisplayName("Cada perfil se traduce a su autoridad ROLE_<perfil>, también desde el claim del JWT")
-    void cadaPerfilTieneSuAutoridad(UserRole role, String authority) {
-        Jwt jwt = Jwt.withTokenValue("token")
-                .header("alg", "HS256")
-                .subject("usuario")
-                .claim(JwtRoleAuthenticationConverter.ROLE_CLAIM, role.name())
-                .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusSeconds(60))
-                .build();
-
+    @DisplayName("Cada perfil tiene su autoridad ROLE_<perfil> y una etiqueta en español")
+    void cadaPerfilTieneSuAutoridadYEtiqueta(UserRole role, String authority, String label) {
         assertAll(
                 () -> assertThat(role.authority()).isEqualTo(authority),
-                () -> assertThat(new JwtRoleAuthenticationConverter().convert(jwt).getAuthorities())
-                        .containsExactly(new SimpleGrantedAuthority(authority)));
-    }
-
-    @Test
-    @DisplayName("Un JWT sin claim role no recibe autoridades")
-    void jwtSinRolNoTieneAutoridades() {
-        Jwt jwt = Jwt.withTokenValue("token")
-                .header("alg", "HS256")
-                .subject("usuario")
-                .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusSeconds(60))
-                .build();
-
-        assertThat(new JwtRoleAuthenticationConverter().convert(jwt).getAuthorities()).isEmpty();
+                () -> assertThat(role.label()).isEqualTo(label));
     }
 }

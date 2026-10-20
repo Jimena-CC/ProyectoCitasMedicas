@@ -6,14 +6,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -29,6 +27,8 @@ import java.util.List;
 /**
  * Reglas de acceso de la API: los endpoints del kiosko son públicos y los paneles del personal
  * exigen un token JWT con el rol correspondiente. La API no guarda sesión ni usa CSRF.
+ * No se declara {@code UserDetailsService}: el login lo resuelve {@link AuthService} y, al existir un
+ * {@link JwtDecoder}, Spring Boot no genera el usuario "user" con contraseña aleatoria.
  */
 @Configuration
 @EnableWebSecurity
@@ -37,7 +37,13 @@ public class SecurityConfig {
     /** Longitud mínima de la clave HMAC para HS256 (256 bits). */
     private static final int MIN_SECRET_BYTES = 32;
 
-    /** Rutas del kiosko y de la documentación que no requieren token. */
+    /**
+     * Rutas del kiosko y de la documentación que no requieren token.
+     * Los prefijos del kiosko ({@code /patients}, {@code /appointments}, etc.) se abren completos porque
+     * el paciente nunca inicia sesión. Por eso, todo endpoint nuevo del personal debe publicarse bajo
+     * {@code /api/v1/doctor/**}, {@code /api/v1/front-desk/**} o {@code /api/v1/admin/**}; si se colocara
+     * bajo un prefijo del kiosko quedaría público sin querer.
+     */
     static final String[] PUBLIC_PATHS = {
             "/api/v1/auth/login",
             "/api/v1/patients/**",
@@ -53,6 +59,19 @@ public class SecurityConfig {
             "/swagger-ui.html"
     };
 
+    /**
+     * Cadena de filtros de la API: rutas públicas del kiosko, rutas del personal por rol y validación
+     * del token Bearer con respuestas de error en el formato del contrato.
+     *
+     * @param http                    configuración de seguridad web
+     * @param jwtDecoder              decodificador que verifica firma, vigencia y emisor del token
+     * @param authenticationConverter traduce el token a la autenticación con su rol
+     * @param entryPoint              responde {@code 401} o {@code 403 USER_INACTIVE} según la causa
+     * @param accessDeniedHandler     responde {@code 403} cuando el rol no corresponde
+     * @param corsConfigurationSource orígenes del navegador autorizados
+     * @return la cadena de filtros
+     * @throws Exception si la configuración no puede construirse
+     */
     @Bean
     public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http, JwtDecoder jwtDecoder,
                                                       JwtRoleAuthenticationConverter authenticationConverter,
@@ -84,6 +103,13 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Configuración CORS para los paneles web del personal: orígenes de {@code security.cors.allowed-origins},
+     * métodos REST habituales y las cabeceras {@code Authorization}, {@code Content-Type} e {@code Idempotency-Key}.
+     *
+     * @param properties propiedades de seguridad
+     * @return la fuente de configuración CORS aplicada a toda la API
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource(SecurityProperties properties) {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -97,34 +123,40 @@ public class SecurityConfig {
         return source;
     }
 
+    /**
+     * Codificador BCrypt con el que se guardan y verifican las contraseñas de {@code app_user}.
+     *
+     * @return el codificador de contraseñas
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     /**
-     * Expone los usuarios de {@code app_user} a Spring Security. Evita además que Spring Boot genere
-     * el usuario "user" con contraseña aleatoria en el arranque.
+     * Firma los tokens con HS256 y la clave simétrica de {@code security.jwt.secret}.
+     *
+     * @param properties propiedades de seguridad
+     * @return el codificador de tokens
      */
-    @Bean
-    public UserDetailsService userDetailsService(AppUserRepository appUserRepository) {
-        return username -> appUserRepository.findByUsernameIgnoreCase(username)
-                .map(user -> User.withUsername(user.getUsername())
-                        .password(user.getPasswordHash())
-                        .authorities(user.getRole().authority())
-                        .disabled(!user.isActive())
-                        .build())
-                .orElseThrow(() -> new UsernameNotFoundException(username));
-    }
-
     @Bean
     public JwtEncoder jwtEncoder(SecurityProperties properties) {
         return NimbusJwtEncoder.withSecretKey(secretKey(properties)).algorithm(MacAlgorithm.HS256).build();
     }
 
+    /**
+     * Verifica la firma, la vigencia y el emisor ({@link AuthService#ISSUER}) de los tokens recibidos.
+     *
+     * @param properties propiedades de seguridad
+     * @return el decodificador de tokens
+     */
     @Bean
     public JwtDecoder jwtDecoder(SecurityProperties properties) {
-        return NimbusJwtDecoder.withSecretKey(secretKey(properties)).macAlgorithm(MacAlgorithm.HS256).build();
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(secretKey(properties))
+                .macAlgorithm(MacAlgorithm.HS256)
+                .build();
+        decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(AuthService.ISSUER));
+        return decoder;
     }
 
     private static SecretKey secretKey(SecurityProperties properties) {

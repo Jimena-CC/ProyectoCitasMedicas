@@ -6,10 +6,19 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwsHeader;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+
+import java.time.Instant;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.matchesPattern;
@@ -31,6 +40,38 @@ class SecurityAccessTest extends ApiIntegrationTestSupport {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtEncoder jwtEncoder;
+
+    /** Inicia sesión con el usuario de demostración del rol indicado. */
+    private String loginAsRole(UserRole role) throws Exception {
+        return switch (role) {
+            case ADMIN -> loginAsAdmin();
+            case FRONT_DESK -> loginAsFrontDesk();
+            case DOCTOR -> loginAs(DOCTOR_USERNAME, DemoDataLoader.DOCTOR_PASSWORD);
+        };
+    }
+
+    /** Firma con la clave de la API un token con el emisor, usuario y rol indicados, vigente 10 minutos. */
+    private String issueToken(String issuer, long userId, UserRole role) {
+        Instant now = Instant.now(clock);
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuer(issuer)
+                .issuedAt(now)
+                .expiresAt(now.plusSeconds(600))
+                .subject("usuario")
+                .claim(JwtRoleAuthenticationConverter.ROLE_CLAIM, role.name())
+                .claim(JwtRoleAuthenticationConverter.USER_ID_CLAIM, userId)
+                .build();
+        return jwtEncoder.encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims))
+                .getTokenValue();
+    }
+
+    /** Crea un usuario activo de admisión con el nombre indicado. */
+    private AppUser createFrontDeskUser(String username, String password) {
+        return appUserRepository.save(new AppUser(username, passwordEncoder.encode(password), UserRole.FRONT_DESK, null));
+    }
 
     @Nested
     @DisplayName("Sin sesión")
@@ -61,6 +102,17 @@ class SecurityAccessTest extends ApiIntegrationTestSupport {
                     .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
                     .andExpect(jsonPath("$.message").value("Tu sesión no es válida o ya venció. Vuelve a iniciar sesión."));
+        }
+
+        @Test
+        @DisplayName("Un token firmado con la clave de la API pero con otro emisor responde 401")
+        void tokenDeOtroEmisorResponde401() throws Exception {
+            AppUser admin = appUserRepository.findByUsernameIgnoreCase(DemoDataLoader.ADMIN_USERNAME).orElseThrow();
+            String foreignToken = issueToken("otro-sistema", admin.getId(), UserRole.ADMIN);
+
+            mockMvc.perform(get("/api/v1/admin/users").headers(bearer(foreignToken)))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
         }
     }
 
@@ -174,14 +226,69 @@ class SecurityAccessTest extends ApiIntegrationTestSupport {
                     .andExpect(jsonPath("$.message").value("No tienes permiso para realizar esta acción."));
         }
 
-        @Test
-        @DisplayName("Admisión en /doctor/** recibe 403 FORBIDDEN")
-        void admisionEnDoctorResponde403() throws Exception {
-            String token = loginAsFrontDesk();
+        /**
+         * Matriz rol/ruta de {@code SecurityConfig}. Las rutas {@code /doctor/**} y {@code /front-desk/**} aún no
+         * tienen controlador: cuando el rol pasa la autorización, la API responde {@code 404 RESOURCE_NOT_FOUND}
+         * en lugar de {@code 403}, lo que demuestra que la regla dejó pasar la petición.
+         */
+        @ParameterizedTest(name = "{0} en {1} responde {2} {3}")
+        @CsvSource({
+                "DOCTOR,     /api/v1/doctor/agenda,    404, RESOURCE_NOT_FOUND",
+                "FRONT_DESK, /api/v1/doctor/agenda,    403, FORBIDDEN",
+                "ADMIN,      /api/v1/doctor/agenda,    403, FORBIDDEN",
+                "FRONT_DESK, /api/v1/front-desk/ping,  404, RESOURCE_NOT_FOUND",
+                "ADMIN,      /api/v1/front-desk/ping,  404, RESOURCE_NOT_FOUND",
+                "DOCTOR,     /api/v1/front-desk/ping,  403, FORBIDDEN",
+                "ADMIN,      /api/v1/admin/users,      200, ",
+                "FRONT_DESK, /api/v1/admin/users,      403, FORBIDDEN",
+                "DOCTOR,     /api/v1/admin/users,      403, FORBIDDEN"
+        })
+        @DisplayName("Cada rol solo pasa la autorización de las rutas que le corresponden")
+        void cadaRolSoloAccedeASusRutas(UserRole role, String path, int expectedStatus, String expectedCode)
+                throws Exception {
+            String token = loginAsRole(role);
 
-            mockMvc.perform(get("/api/v1/doctor/agenda").headers(bearer(token)))
+            var result = mockMvc.perform(get(path).headers(bearer(token)))
+                    .andExpect(status().is(expectedStatus));
+            if (expectedCode != null) {
+                result.andExpect(jsonPath("$.code").value(expectedCode));
+            }
+        }
+
+        @Test
+        @DisplayName("Un usuario desactivado después de iniciar sesión recibe 403 USER_INACTIVE aunque su token siga vigente")
+        void usuarioDesactivadoTrasElLoginPierdeElAccesoDeInmediato() throws Exception {
+            String username = "admision.temporal." + UUID.randomUUID().toString().substring(0, 8);
+            AppUser user = createFrontDeskUser(username, "clave123");
+            String token = loginAs(username, "clave123");
+            mockMvc.perform(get("/api/v1/auth/me").headers(bearer(token))).andExpect(status().isOk());
+
+            user.setActive(false);
+            appUserRepository.save(user);
+
+            mockMvc.perform(get("/api/v1/front-desk/ping").headers(bearer(token)))
                     .andExpect(status().isForbidden())
-                    .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+                    .andExpect(jsonPath("$.code").value("USER_INACTIVE"))
+                    .andExpect(jsonPath("$.message").value(
+                            "Tu usuario está desactivado. Comunícate con el administrador del sistema."));
+            mockMvc.perform(get("/api/v1/auth/me").headers(bearer(token)))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.code").value("USER_INACTIVE"));
+            // Tampoco puede operar como admisión en las rutas del kiosko con ese token.
+            mockMvc.perform(get("/api/v1/locations").headers(bearer(token)))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.code").value("USER_INACTIVE"));
+        }
+
+        @Test
+        @DisplayName("Un token bien firmado cuyo usuario no existe responde 401")
+        void tokenDeUsuarioInexistenteResponde401() throws Exception {
+            String token = issueToken(AuthService.ISSUER, 999_999L, UserRole.ADMIN);
+
+            mockMvc.perform(get("/api/v1/auth/me").headers(bearer(token)))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
+                    .andExpect(jsonPath("$.message").value("Tu sesión no es válida o ya venció. Vuelve a iniciar sesión."));
         }
 
         @Test

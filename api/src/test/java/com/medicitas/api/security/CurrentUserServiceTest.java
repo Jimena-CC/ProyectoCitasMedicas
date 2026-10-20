@@ -107,7 +107,7 @@ class CurrentUserServiceTest {
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plusSeconds(60))
                 .build();
-        SecurityContextHolder.getContext().setAuthentication(new JwtRoleAuthenticationConverter().convert(jwt));
-        assertThat(SecurityContextHolder.getContext().getAuthentication()).isInstanceOf(JwtAuthenticationToken.class);
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt,
+                List.of(new SimpleGrantedAuthority(UserRole.ADMIN.authority())), jwt.getSubject()));
     }
 }
