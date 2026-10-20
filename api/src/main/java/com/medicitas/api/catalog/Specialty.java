@@ -56,4 +56,28 @@ public class Specialty {
     public boolean isActive() {
         return active;
     }
+
+    // Issue #46: edición desde el panel de administración
+
+    /**
+     * Actualiza los datos editables de la especialidad.
+     *
+     * @param name               nombre único de la especialidad
+     * @param description        descripción visible en el kiosko, puede ser nula
+     * @param appointmentMinutes duración de cada cita en minutos
+     */
+    public void update(String name, String description, short appointmentMinutes) {
+        this.name = name;
+        this.description = description;
+        this.appointmentMinutes = appointmentMinutes;
+    }
+
+    /**
+     * Activa o desactiva la especialidad; una especialidad inactiva no se ofrece en el kiosko.
+     *
+     * @param active {@code true} para ofrecerla
+     */
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 }
