@@ -58,4 +58,19 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             where a.patient.id = :patientId
             order by s.date desc, s.startTime desc""")
     List<Appointment> findAllByPatient(@Param("patientId") Long patientId);
+
+    // Issue #46: reportes
+
+    /**
+     * Citas cuyo cupo cae en el rango de fechas, en cualquier estado, con médico, especialidad y sede cargados.
+     *
+     * @param from primera fecha de cita (inclusive)
+     * @param to   última fecha de cita (inclusive)
+     * @return las citas del rango
+     */
+    @Query("""
+            select a from Appointment a
+            join fetch a.slot s join fetch s.doctor d join fetch d.specialty join fetch s.location
+            where s.date between :from and :to""")
+    List<Appointment> findWithDetailBySlotDateBetween(@Param("from") LocalDate from, @Param("to") LocalDate to);
 }

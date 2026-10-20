@@ -141,4 +141,25 @@ public class Appointment {
     public Instant getUpdatedAt() {
         return updatedAt;
     }
+
+    // Issue #46: resultado de la atención (usado por los datos de demostración y los reportes)
+
+    /**
+     * Cierra una cita reservada con su resultado: atendida o no asistió.
+     *
+     * @param outcome {@link AppointmentStatus#ATTENDED} o {@link AppointmentStatus#NO_SHOW}
+     * @param now     instante del registro
+     * @throws IllegalArgumentException si el resultado no es atendida ni inasistencia
+     * @throws IllegalStateException    si la cita no está reservada
+     */
+    public void registerOutcome(AppointmentStatus outcome, Instant now) {
+        if (outcome != AppointmentStatus.ATTENDED && outcome != AppointmentStatus.NO_SHOW) {
+            throw new IllegalArgumentException("El resultado de la atención debe ser ATTENDED o NO_SHOW");
+        }
+        if (status != AppointmentStatus.BOOKED) {
+            throw new IllegalStateException("Solo una cita reservada puede registrar su resultado");
+        }
+        this.status = outcome;
+        this.updatedAt = now;
+    }
 }
