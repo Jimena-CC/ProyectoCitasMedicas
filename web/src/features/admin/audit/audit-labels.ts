@@ -68,3 +68,11 @@ export function auditActionKind(action: string): AuditActionKind {
 export function auditEntityLabel(entity: string): string {
   return isAuditEntity(entity) ? AUDIT_ENTITY_LABELS[entity] : entity;
 }
+
+const LOOPBACK_ADDRESSES = new Set(['127.0.0.1', '::1', '0:0:0:0:0:0:0:1']);
+
+/** Dirección de origen legible: las conexiones desde el mismo servidor se muestran como «Este equipo». */
+export function auditSourceLabel(sourceIp: string | null): string {
+  if (!sourceIp) return '—';
+  return LOOPBACK_ADDRESSES.has(sourceIp) ? 'Este equipo' : sourceIp;
+}

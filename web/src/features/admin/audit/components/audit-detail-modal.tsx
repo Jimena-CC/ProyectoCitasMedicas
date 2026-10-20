@@ -5,7 +5,7 @@ import * as Button from '@/components/ui/button';
 import * as Modal from '@/components/ui/modal';
 import { AuditActionBadge } from '@/features/admin/audit/components/audit-action-badge';
 import { AuditUserCell } from '@/features/admin/audit/components/audit-user-cell';
-import { auditEntityLabel } from '@/features/admin/audit/audit-labels';
+import { auditEntityLabel, auditSourceLabel } from '@/features/admin/audit/audit-labels';
 import type { AuditEntry } from '@/lib/api';
 import { formatLongDate, formatTime } from '@/lib/formatters';
 
@@ -46,7 +46,7 @@ export function AuditDetailModal({ entry, onClose }: AuditDetailModalProps) {
                 {auditEntityLabel(entry.entity)}
                 {entry.entityId !== null && <span className='text-text-sub-600'> · #{entry.entityId}</span>}
               </Row>
-              <Row label='Dirección de origen'>{entry.sourceIp ?? '—'}</Row>
+              <Row label='Dirección de origen'>{auditSourceLabel(entry.sourceIp)}</Row>
             </div>
             <Row label='Detalle'>
               <p className='whitespace-pre-wrap break-words rounded-10 bg-bg-weak-50 p-3 text-paragraph-sm text-text-strong-950'>{entry.detail}</p>
