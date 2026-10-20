@@ -2,7 +2,6 @@ import { Navigate, type RouteObject } from 'react-router';
 import {
   RiBarChartBoxLine,
   RiFileList3Line,
-  RiGroupLine,
   RiHeartPulseLine,
   RiStethoscopeLine,
   RiTimeLine,
@@ -11,6 +10,8 @@ import {
 import { UnderConstructionPage } from '@/app/pages/under-construction-page';
 import { ADMIN_ROLES } from '@/features/auth/roles';
 import { RequireRole } from '@/features/auth/require-role';
+
+import { UsersPage } from './users/users-page';
 
 /**
  * Rutas del módulo de Administración, rol ADMIN.
@@ -30,10 +31,7 @@ export const adminRoutes: RouteObject[] = [
     element: <RequireRole roles={ADMIN_ROLES} />,
     children: [
       { index: true, element: <Navigate to='/administracion/usuarios' replace /> },
-      {
-        path: 'usuarios',
-        element: <UnderConstructionPage title='Usuarios' description='Crea, edita y desactiva los usuarios del backoffice.' icon={RiGroupLine} />,
-      },
+      { path: 'usuarios', element: <UsersPage /> },
       {
         path: 'medicos',
         element: <UnderConstructionPage title='Médicos' description='Registra y actualiza los médicos de la clínica.' icon={RiStethoscopeLine} />,
