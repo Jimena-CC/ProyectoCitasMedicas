@@ -1,16 +1,14 @@
 import { Navigate, type RouteObject } from 'react-router';
-import {
-  RiBarChartBoxLine,
-  RiFileList3Line,
-  RiGroupLine,
-  RiHeartPulseLine,
-  RiStethoscopeLine,
-  RiTimeLine,
-} from '@remixicon/react';
+import { RiBarChartBoxLine, RiFileList3Line } from '@remixicon/react';
 
 import { UnderConstructionPage } from '@/app/pages/under-construction-page';
 import { ADMIN_ROLES } from '@/features/auth/roles';
 import { RequireRole } from '@/features/auth/require-role';
+
+import { DoctorsPage } from './doctors/doctors-page';
+import { SchedulesPage } from './schedules/schedules-page';
+import { SpecialtiesPage } from './specialties/specialties-page';
+import { UsersPage } from './users/users-page';
 
 /**
  * Rutas del módulo de Administración, rol ADMIN.
@@ -30,28 +28,10 @@ export const adminRoutes: RouteObject[] = [
     element: <RequireRole roles={ADMIN_ROLES} />,
     children: [
       { index: true, element: <Navigate to='/administracion/usuarios' replace /> },
-      {
-        path: 'usuarios',
-        element: <UnderConstructionPage title='Usuarios' description='Crea, edita y desactiva los usuarios del backoffice.' icon={RiGroupLine} />,
-      },
-      {
-        path: 'medicos',
-        element: <UnderConstructionPage title='Médicos' description='Registra y actualiza los médicos de la clínica.' icon={RiStethoscopeLine} />,
-      },
-      {
-        path: 'especialidades',
-        element: (
-          <UnderConstructionPage
-            title='Especialidades'
-            description='Administra las especialidades, su duración de cita y las sedes donde se atienden.'
-            icon={RiHeartPulseLine}
-          />
-        ),
-      },
-      {
-        path: 'horarios',
-        element: <UnderConstructionPage title='Horarios' description='Genera y bloquea los cupos de atención de cada médico.' icon={RiTimeLine} />,
-      },
+      { path: 'usuarios', element: <UsersPage /> },
+      { path: 'medicos', element: <DoctorsPage /> },
+      { path: 'especialidades', element: <SpecialtiesPage /> },
+      { path: 'horarios', element: <SchedulesPage /> },
       {
         path: 'auditoria',
         element: <UnderConstructionPage title='Auditoría' description='Revisa quién hizo qué y cuándo en el sistema.' icon={RiFileList3Line} />,
