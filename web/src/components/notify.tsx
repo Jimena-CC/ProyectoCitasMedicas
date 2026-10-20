@@ -4,8 +4,11 @@ import { getErrorMessage } from '@/lib/api/client';
 
 type ToastStatus = 'success' | 'error' | 'warning' | 'information';
 
+/** Posición de la pila de avisos; el <Toaster> de main.tsx usa la misma. */
+export const TOAST_POSITION = 'top-center';
+
 function show(status: ToastStatus, message: string) {
-  return toast.custom((t) => <AlertToast.Root t={t} status={status} message={message} />);
+  return toast.custom((t) => <AlertToast.Root t={t} status={status} message={message} />, { position: TOAST_POSITION });
 }
 
 /**
