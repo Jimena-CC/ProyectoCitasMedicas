@@ -22,6 +22,8 @@ import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,8 @@ import java.util.function.Supplier;
 public class PersonalDataAndInsuranceScreen extends Screen {
 
     private static final String SELF_PAY = "SELF_PAY";
+    /** Formato que ve y escribe el paciente, igual al texto de ayuda del campo ("dd/mm/aaaa"). */
+    private static final DateTimeFormatter BIRTH_DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     // Datos personales
     private final VBox dataSection = new VBox(16);
@@ -64,6 +68,25 @@ public class PersonalDataAndInsuranceScreen extends Screen {
         birthDate.setId("birthDate");
         birthDate.setPromptText("dd/mm/aaaa");
         birthDate.setMaxWidth(Double.MAX_VALUE);
+        birthDate.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(LocalDate date) {
+                return date == null ? "" : BIRTH_DATE_FORMAT.format(date);
+            }
+
+            @Override
+            public LocalDate fromString(String text) {
+                if (text == null || text.isBlank()) {
+                    return null;
+                }
+                try {
+                    return LocalDate.parse(text.trim(), BIRTH_DATE_FORMAT);
+                } catch (DateTimeParseException e) {
+                    // Texto incompleto o con otro formato: se deja sin valor y la validación lo indicará.
+                    return null;
+                }
+            }
+        });
         acceptsNotifications.setSelected(true);
         acceptsNotifications.setId("acceptsNotifications");
 
