@@ -23,6 +23,7 @@ import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,6 +46,8 @@ public class SlotGenerationService {
     static final Set<DayOfWeek> DEFAULT_WEEKDAYS = EnumSet.range(DayOfWeek.MONDAY, DayOfWeek.SATURDAY);
 
     private static final Logger logger = LoggerFactory.getLogger(SlotGenerationService.class);
+    /** Formato de fecha legible para el detalle de auditoría, por ejemplo {@code 21/10/2026}. */
+    private static final DateTimeFormatter AUDIT_DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final DoctorRepository doctorRepository;
     private final LocationRepository locationRepository;
@@ -195,7 +198,7 @@ public class SlotGenerationService {
 
         auditService.record(AuditAction.SLOTS_GENERATED, null,
                 "Se generaron " + slots.size() + " cupos de " + duration + " min para " + doctor.getFullName()
-                        + " en " + location.getName() + " del " + request.from() + " al " + request.to() + " ("
+                        + " en " + location.getName() + " del " + AUDIT_DATE.format(request.from()) + " al " + AUDIT_DATE.format(request.to()) + " ("
                         + request.startTime() + " a " + request.endTime() + ")"
                         + (plan.skipped() == 0 ? "" : "; " + plan.skipped() + " omitidos por cruzarse con cupos existentes"));
         logger.info("Agenda generada para el médico {}: {} cupos creados, {} omitidos", doctor.getId(), slots.size(),

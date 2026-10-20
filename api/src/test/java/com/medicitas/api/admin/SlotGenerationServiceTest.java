@@ -201,6 +201,8 @@ class SlotGenerationServiceTest {
                     () -> assertThat(savedSlots.getValue().getFirst().getStartTime()).isEqualTo(LocalTime.of(8, 20)),
                     () -> assertThat(savedSlots.getValue().getFirst().getEndTime()).isEqualTo(LocalTime.of(8, 40)));
             verify(auditService).record(eq(AuditAction.SLOTS_GENERATED), isNull(), contains("11 cupos de 20 min"));
+            verify(auditService).record(eq(AuditAction.SLOTS_GENERATED), isNull(),
+                    contains("del 19/10/2026 al 20/10/2026 (08:00 a 10:00)"));
         }
 
         @Test
