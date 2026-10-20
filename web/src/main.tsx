@@ -17,7 +17,12 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <Tooltip.Provider delayDuration={200}>
           <RouterProvider router={router} />
-          <Toaster />
+          {/*
+            Misma posición que fija toast.custom de AlignUI (evita una segunda pila vacía) y pila
+            siempre desplegada: plegada, sonner encoge los avisos anteriores detrás del último y
+            se ven como tarjetas vacías.
+          */}
+          <Toaster position='bottom-center' expand />
         </Tooltip.Provider>
       </AuthProvider>
     </QueryClientProvider>
