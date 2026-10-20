@@ -1,0 +1,80 @@
+@startuml
+title 11 - Capa de conexión a la API del Kiosko - MediCitas Anglo
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultTextAlignment center
+skinparam ArrowColor #374151
+skinparam node {
+  BackgroundColor #FFFFFF
+  BorderColor #6B7280
+}
+skinparam package {
+  BackgroundColor #F5F7FA
+  BorderColor #4B5563
+}
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #9CA3AF
+}
+
+node "Kiosko de Autoatención — JavaFX 21 (/desktop)" as KIOSK {
+
+  package "app — arranque" as APP {
+    component "KioskLauncher\nKioskApp" as KAPP
+  }
+
+  package "screens — pantallas y estado de la visita" as SCREENS {
+    component "KioskShell\n<<implements KioskContext>>" as SHELL
+    component "Identification · PersonalDataAndInsurance\nSpecialtyAndLocation · DateAndTime\nConfirmation · MyAppointments" as PANTALLAS
+    component "BookingSession\nValidations · Dates" as SESSION
+  }
+
+  package "ui — componentes reutilizables" as UI {
+    component "Banner · Stepper · Keypad\nDateStrip · SlotGrid · InsurerCard\nSummaryCard · Async · Icons" as COMPONENTES
+  }
+
+  package "api — conexión a la API (equivale a la \"clase de conexión a BD\")" as APIPKG {
+    component "ApiClient\nHttpClient (JDK) + Jackson\nCompletableFuture" as CLIENT
+    component "Dtos\nregistros del contrato REST" as DTOS
+    component "ApiException\nmensaje apto para el paciente" as EXC
+    component "KioskConfig\nresuelve api.url" as CFG
+  }
+
+  package "dev — solo desarrollo (carga por reflexión)" as DEV {
+    component "DemoStub\nDemoCapture" as STUB
+  }
+}
+
+interface "HTTP / JSON\n/api/v1" as REST
+
+node "API MediCitas — Spring Boot (/api)" as API {
+  component "Controladores REST" as CTRL
+  database "PostgreSQL" as DB
+}
+
+KAPP --> SHELL : crea con ApiClient.fromProperties()
+KAPP ..> STUB : --demo-stub / --capture
+SHELL --> PANTALLAS : muestra y navega
+PANTALLAS --> SESSION : lee y actualiza
+PANTALLAS --> COMPONENTES : compone
+PANTALLAS --> CLIENT : ctx.api()
+COMPONENTES --> EXC : Async entrega ApiException\nen el hilo de JavaFX
+CLIENT --> DTOS : serializa / deserializa
+CLIENT --> EXC : convierte errores HTTP
+CLIENT --> CFG : lee la URL
+CLIENT --> REST : consume
+REST --> CTRL : expone
+CTRL --> DB : JDBC (solo en la API)
+STUB ..> REST : simula en 127.0.0.1
+
+legend bottom
+  == Equivalente a la "clase de conexión a base de datos" ==
+  El kiosko no tiene driver JDBC ni credenciales de PostgreSQL. Su capa de
+  acceso a datos es el paquete api: ApiClient abre conexiones HTTP, Dtos
+  define los datos que viajan, ApiException traduce los errores y
+  KioskConfig resuelve a qué servidor conectarse. KioskContext inyecta ese
+  cliente a cada pantalla, como un DataSource compartido.
+endlegend
+
+@enduml
