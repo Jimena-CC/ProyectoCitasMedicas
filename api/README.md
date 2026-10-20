@@ -1,6 +1,6 @@
 # Módulo Backend - API REST MediCitas Anglo
 
-API en **Spring Boot 4.1.1 / Java 21** que atiende al Kiosko de Autoatención: identificación y registro de pacientes, catálogos, disponibilidad de cupos y reserva, reprogramación y anulación de citas con sus notificaciones. Incluye el módulo de seguridad del personal (admisión, médicos y administración) con JWT y el registro de auditoría de las citas.
+API en **Spring Boot 4.1.1 / Java 21** que atiende al Kiosko de Autoatención: identificación y registro de pacientes, catálogos, disponibilidad de cupos y reserva, reprogramación y anulación de citas con sus notificaciones. Incluye el módulo de seguridad del personal (admisión, médicos y administración) con JWT, el registro de auditoría y el panel de administración (usuarios, catálogo, agendas, auditoría y reportes).
 
 El contrato completo (endpoints, JSON y códigos de error) está en [`docs/api-contract.md`](../docs/api-contract.md) y el modelo de datos en [`docs/diagrams/03-entity-relationship-diagram.puml`](../docs/diagrams/03-entity-relationship-diagram.puml).
 
@@ -20,7 +20,8 @@ Arranca con el perfil `h2`: una base en memoria que se recrea en cada arranque y
 
 - las sedes San Isidro y La Molina, 12 especialidades y 20 médicos ficticios;
 - 4 aseguradoras con 2 planes cada una (copagos inventados);
-- 14 días de agenda (lunes a sábado, 07:00 a 13:00, cupos de 20 minutos), con cerca del 30 % ya ocupado.
+- 14 días de agenda (lunes a sábado, 07:00 a 13:00, cupos de 20 minutos), con cerca del 30 % ya ocupado;
+- para los reportes, 14 días de agenda pasada de seis médicos (08:00 a 10:00) con citas ya cerradas: atendidas, no asistidas y anuladas.
 
 | Documento | Paciente | Situación |
 |---|---|---|
@@ -91,7 +92,9 @@ Los prefijos del kiosko se abren completos porque el paciente nunca inicia sesi�
 
 Respuestas de error, con el mismo formato `ErrorResponse` del contrato: `401 UNAUTHORIZED` sin token, con token vencido, manipulado o emitido por otro sistema (se valida la firma, la vigencia y el emisor `medicitas-api`), `403 FORBIDDEN` con un rol que no corresponde, `401 INVALID_CREDENTIALS` si el usuario o la contraseña no coinciden (sin decir cuál) y `403 USER_INACTIVE` si el usuario fue desactivado. El estado y el rol del usuario se comprueban en **cada petición con token**, no solo al iniciar sesión: la autoridad `ROLE_<rol>` se construye con el rol guardado en `app_user` (el claim `role` del token es solo informativo), así que desactivar a un usuario o cambiarle el rol surte efecto de inmediato aunque su token no haya vencido.
 
-**Auditoría.** Cada reserva, reprogramación y anulación escribe una fila en `audit_log` (`APPOINTMENT_BOOKED`, `APPOINTMENT_RESCHEDULED`, `APPOINTMENT_CANCELLED`) con el usuario responsable, la IP de origen y un detalle legible en español, sin nombres técnicos (por ejemplo «Cita MCA-7K2Q9 reservada en el cupo 12 (2026-10-21 09:00, Carla Benavides Ortiz) para el paciente 5 desde el kiosko»); cuando actúa el paciente desde el kiosko el usuario queda en nulo. El inicio de sesión también se audita (`USER_LOGGED_IN`). Las mismas operaciones guardan en `appointment_history` el usuario del personal que las realizó, y una reserva hecha con token se registra con canal `FRONT_DESK`.
+**Administración (issue #46).** El rol `ADMIN` gestiona bajo `/api/v1/admin/**` los usuarios (alta, perfil, médico vinculado, estado y contraseña; un administrador no puede desactivarse a sí mismo), las especialidades con sus sedes y médicos (lo que se desactiva deja de verse en el kiosko), la agenda de cada médico (generación de cupos sin duplicados y bloqueo de cupos libres), la consulta paginada de la auditoría y los reportes de citas por estado, tasa de inasistencia y ocupación, exportables a CSV. El detalle de cada endpoint está en las secciones 7 y 8 del [contrato](../docs/api-contract.md).
+
+**Auditoría.** Cada reserva, reprogramación y anulación escribe una fila en `audit_log` (`APPOINTMENT_BOOKED`, `APPOINTMENT_RESCHEDULED`, `APPOINTMENT_CANCELLED`) con el usuario responsable, la IP de origen y un detalle legible en español, sin nombres técnicos (por ejemplo «Cita MCA-7K2Q9 reservada en el cupo 12 (2026-10-21 09:00, Carla Benavides Ortiz) para el paciente 5 desde el kiosko»); cuando actúa el paciente desde el kiosko el usuario queda en nulo. El inicio de sesión también se audita (`USER_LOGGED_IN`), igual que cada cambio del panel de administración (`USER_*`, `SPECIALTY_*`, `DOCTOR_*`, `SLOTS_GENERATED`, `SLOT_BLOCKED`, `SLOT_UNBLOCKED`). Las mismas operaciones guardan en `appointment_history` el usuario del personal que las realizó, y una reserva hecha con token se registra con canal `FRONT_DESK`.
 
 ## Endpoints
 
@@ -112,6 +115,16 @@ Base: `/api/v1`. Resumen; el detalle está en el [contrato](../docs/api-contract
 | POST | `/auth/login` | Inicio de sesión del personal; devuelve el token Bearer |
 | GET | `/auth/me` | Usuario autenticado (requiere token) |
 | GET | `/admin/users` | Listar usuarios del personal (rol `ADMIN`) |
+| GET / POST | `/admin/users`, `/admin/users/{id}` + PUT, `/admin/users/{id}/password` (PUT) | Gestión de usuarios: alta, edición de perfil/médico/estado y contraseña (`ADMIN`) |
+| GET | `/admin/locations` | Todas las sedes, incluidas inactivas (`ADMIN`) |
+| GET / POST / PUT | `/admin/specialties`, `/admin/specialties/{id}` | Especialidades con sus sedes, duración de cita y estado (`ADMIN`) |
+| GET / POST / PUT | `/admin/doctors`, `/admin/doctors/{id}` | Médicos con especialidad y estado (`ADMIN`) |
+| GET | `/admin/slots?doctorId&from&to` | Cupos de un médico con su estado (`ADMIN`) |
+| POST | `/admin/slots/generate` | Generar cupos por médico, sede, consultorio, rango, horario y días, sin duplicar (`ADMIN`) |
+| PATCH | `/admin/slots/{id}/block`, `/admin/slots/{id}/unblock` | Bloquear un cupo libre / desbloquearlo (`ADMIN`) |
+| GET | `/admin/audit?entity&action&userId&from&to&page&size` | Auditoría paginada (`ADMIN`) |
+| GET | `/admin/reports/appointments`, `/no-show-rate`, `/occupancy` (`?from&to`) | Citas por estado, tasa de inasistencia y ocupación (`ADMIN`) |
+| GET | `/admin/reports/export?report&from&to` | Descargar un reporte en CSV UTF-8 (`ADMIN`) |
 
 ## Configuración
 
@@ -149,13 +162,17 @@ Ejemplo: `./mvnw spring-boot:run -Dspring-boot.run.arguments=--messaging.simulat
   - reprogramación y anulación que liberan cupos;
   - caída del servicio de mensajería;
   - acceso por rol (`SecurityAccessTest`): 401 sin token, 403 con rol incorrecto, login correcto e incorrecto, kiosko público;
-  - auditoría de citas (`AppointmentAuditTest`): reservar, reprogramar y anular generan sus filas en `audit_log`, con o sin usuario.
+  - auditoría de citas (`AppointmentAuditTest`): reservar, reprogramar y anular generan sus filas en `audit_log`, con o sin usuario;
+  - administración (`AdminUsersApiTest`, `AdminCatalogApiTest`, `AdminSlotsApiTest`, `AdminAuditApiTest`): usuarios, especialidades y médicos con su reflejo en el kiosko, generación y bloqueo de cupos, consulta de auditoría, y 403 para los demás roles;
+  - reportes (`ReportApiTest`): cifras exactas sobre citas con estados conocidos y exportación CSV.
+- **Unitarias de administración y reportes** (`SlotGenerationServiceTest`, `ReportServiceTest`): cálculo de horarios sin duplicados y reglas de generación; citas por estado, tasa de inasistencia, ocupación, redondeo de tasas y CSV.
 - **Esquema PostgreSQL** (`PostgresSchemaTest`): levanta un PostgreSQL 15 embebido, sin Docker, ejecuta `initial_schema.sql` y arranca la API con `ddl-auto=validate` y los datos de demostración.
 
 ## Estructura
 
 ```text
 com.medicitas.api
+├── admin         Panel de administración: usuarios, catálogo, agendas (generación y bloqueo) y consulta de auditoría
 ├── appointment   Cita, historial y reglas de reserva / reprogramación / anulación
 ├── audit         Registro de auditoría (audit_log) y su servicio
 ├── catalog       Sede, especialidad, médico, aseguradora y plan
@@ -163,6 +180,7 @@ com.medicitas.api
 ├── demo          Datos de demostración (incluye los usuarios por rol)
 ├── notification  Notificaciones, proveedor de mensajería simulado y tarea programada
 ├── patient       Paciente y seguro
+├── report        Reportes de citas, inasistencia y ocupación con exportación CSV
 ├── schedule      Cupo y consulta de disponibilidad
 └── security      Usuarios y roles, login con JWT, reglas de acceso y usuario actual
 ```
