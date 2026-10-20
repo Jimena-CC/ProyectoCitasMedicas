@@ -119,7 +119,7 @@ export function AvailabilityPicker({ specialtyId, locationId, selectedSlotId, on
               disabled={isEmpty || disabled || query.isPending}
               role='radio'
               aria-checked={isSelected}
-              aria-label={`${formatLongDate(day.date)}, ${isEmpty ? 'sin cupos' : `${day.freeSlots} ${day.freeSlots === 1 ? 'cupo libre' : 'cupos libres'}`}`}
+              aria-label={`${formatLongDate(day.date)}, ${query.isPending ? 'cargando cupos' : isEmpty ? 'sin cupos' : `${day.freeSlots} ${day.freeSlots === 1 ? 'cupo libre' : 'cupos libres'}`}`}
               className={cn(
                 'flex flex-col items-center gap-0.5 rounded-10 px-2 py-2.5 text-center transition duration-200 ease-out',
                 'focus:outline-none focus-visible:shadow-button-primary-focus',
