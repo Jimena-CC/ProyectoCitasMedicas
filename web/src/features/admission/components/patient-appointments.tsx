@@ -1,6 +1,5 @@
-import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { RiCalendarCheckLine } from '@remixicon/react';
 
 import { CardHeader } from '@/components/card';
@@ -24,8 +23,21 @@ interface PatientAppointmentsProps {
  * reprogramar y anular. Lo comparten la pestaña "Citas" de la ficha y la vista de Citas.
  */
 export function PatientAppointments({ patient, withHeader = false }: PatientAppointmentsProps) {
-  const [scope, setScope] = React.useState<'upcoming' | 'all'>('upcoming');
+  // El filtro viaja en la URL (?citas=todas), igual que la búsqueda y la pestaña, para que recargar lo conserve.
+  const [params, setParams] = useSearchParams();
+  const scope: 'upcoming' | 'all' = params.get('citas') === 'todas' ? 'all' : 'upcoming';
   const upcoming = scope === 'upcoming';
+  const setScope = (next: 'upcoming' | 'all') => {
+    setParams(
+      (current) => {
+        const updated = new URLSearchParams(current);
+        if (next === 'all') updated.set('citas', 'todas');
+        else updated.delete('citas');
+        return updated;
+      },
+      { replace: true },
+    );
+  };
   const query = useQuery({
     queryKey: admissionKeys.appointments(patient.id, upcoming),
     queryFn: () => frontDeskApi.listPatientAppointments(patient.id, upcoming),

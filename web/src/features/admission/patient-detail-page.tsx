@@ -2,11 +2,12 @@ import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams, useSearchParams } from 'react-router';
 import {
+  RiAlertFill,
   RiCalendarCheckLine,
   RiCalendarLine,
   RiCheckboxCircleFill,
-  RiErrorWarningFill,
   RiErrorWarningLine,
+  RiInformationFill,
   RiMailLine,
   RiPhoneLine,
   RiSearchLine,
@@ -21,12 +22,11 @@ import { EmptyState } from '@/components/empty-state';
 import { LoadingState } from '@/components/loading-state';
 import { PageHeader } from '@/components/page-header';
 import * as Alert from '@/components/ui/alert';
-import * as Avatar from '@/components/ui/avatar';
 import * as Button from '@/components/ui/button';
 import * as Divider from '@/components/ui/divider';
 import * as TabMenuHorizontal from '@/components/ui/tab-menu-horizontal';
 import { frontDeskApi, getErrorMessage, type Patient } from '@/lib/api';
-import { DOCUMENT_TYPE_LABELS, formatDocument, formatNumericDate, initialsOf } from '@/lib/formatters';
+import { DOCUMENT_TYPE_LABELS, formatDocument, formatNumericDate } from '@/lib/formatters';
 
 import { CoverageTable } from './components/coverage-table';
 import { InsuranceForm } from './components/insurance-form';
@@ -126,7 +126,8 @@ export function PatientDetailPage() {
 
       <Card className='flex flex-col gap-5'>
         <TabMenuHorizontal.Root value={tab} onValueChange={setTab}>
-          <TabMenuHorizontal.List>
+          {/* Sin borde superior: dentro de la Card la línea quedaría suelta a 20 px del borde. */}
+          <TabMenuHorizontal.List className='border-t-0'>
             <TabMenuHorizontal.Trigger value='datos'>
               <TabMenuHorizontal.Icon as={RiUserLine} />
               Datos
@@ -159,16 +160,7 @@ function PatientDataTab({ patient }: { patient: Patient }) {
   const age = patientAge(patient.birthDate);
   return (
     <div className='flex flex-col gap-6'>
-      <div className='flex items-center gap-4'>
-        <Avatar.Root size='56' color='blue'>
-          {initialsOf(patientFullName(patient))}
-        </Avatar.Root>
-        <div className='flex flex-col gap-0.5'>
-          <span className='text-label-lg text-text-strong-950'>{patientFullName(patient)}</span>
-          <span className='text-paragraph-sm text-text-sub-600'>{formatDocument(patient.documentType, patient.documentNumber)}</span>
-        </div>
-      </div>
-      <Divider.Root />
+      {/* El nombre y el documento ya están en la cabecera de la página. */}
       <dl className='grid grid-cols-3 gap-x-6 gap-y-5'>
         <PatientFact icon={RiIdCardLine} label='Documento'>
           {DOCUMENT_TYPE_LABELS[patient.documentType]} {patient.documentNumber}
@@ -184,7 +176,7 @@ function PatientDataTab({ patient }: { patient: Patient }) {
         <PatientFact icon={RiPhoneLine} label='Celular'>
           {patient.phone || '—'}
         </PatientFact>
-        <PatientFact icon={RiMailLine} label='Correo electrónico'>
+        <PatientFact icon={RiMailLine} label='Correo electrónico' title={patient.email || undefined}>
           {patient.email || '—'}
         </PatientFact>
       </dl>
@@ -198,23 +190,28 @@ function PatientInsuranceTab({ patient }: { patient: Patient }) {
     queryKey: admissionKeys.insurance(patient.id),
     queryFn: () => frontDeskApi.getInsuranceValidation(patient.id),
   });
+  const hasCoverages = (query.data?.coverages.length ?? 0) > 0;
 
   return (
     <div className='flex flex-col gap-6'>
       <div className='flex flex-col gap-4'>
         <CardHeader title='Validación de cobertura' description='Se consulta al momento para saber si puede atenderse con su seguro.' />
         {query.isSuccess && (
-          <Alert.Root variant='lighter' status={query.data.valid ? 'success' : 'warning'} size='small'>
-            <Alert.Icon as={query.data.valid ? RiCheckboxCircleFill : RiErrorWarningFill} />
+          // Sin coberturas registradas es un paciente particular: se informa sin tono de alerta.
+          <Alert.Root variant='lighter' status={query.data.valid ? 'success' : hasCoverages ? 'warning' : 'information'} size='small'>
+            <Alert.Icon as={query.data.valid ? RiCheckboxCircleFill : hasCoverages ? RiAlertFill : RiInformationFill} />
             {query.data.message}
           </Alert.Root>
         )}
-        <CoverageTable
-          coverages={query.data?.coverages}
-          isLoading={query.isPending}
-          errorMessage={query.isError ? getErrorMessage(query.error) : null}
-          onRetry={() => void query.refetch()}
-        />
+        {/* La tabla solo se muestra si hay coberturas; así el formulario queda a la vista. */}
+        {(!query.isSuccess || hasCoverages) && (
+          <CoverageTable
+            coverages={query.data?.coverages}
+            isLoading={query.isPending}
+            errorMessage={query.isError ? getErrorMessage(query.error) : null}
+            onRetry={() => void query.refetch()}
+          />
+        )}
       </div>
       <Divider.Root />
       <InsuranceForm patient={patient} />
