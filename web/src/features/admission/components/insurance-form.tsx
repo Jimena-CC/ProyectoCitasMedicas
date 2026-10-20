@@ -11,6 +11,7 @@ import { ApiError, catalogApi, frontDeskApi, type Patient } from '@/lib/api';
 import { formatCurrency } from '@/lib/formatters';
 
 import { useUpdatePatientCache } from '../hooks/use-patient';
+import { useSingleSubmit } from '../hooks/use-single-submit';
 import { admissionKeys } from '../lib/patients';
 
 interface InsuranceFormProps {
@@ -38,6 +39,7 @@ export function InsuranceForm({ patient }: InsuranceFormProps) {
   const [policyNumber, setPolicyNumber] = React.useState(patient.insurance?.policyNumber ?? '');
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [confirmParticular, setConfirmParticular] = React.useState(false);
+  const submit = useSingleSubmit();
 
   const insurerId = chosenInsurerId ?? (currentInsurer ? String(currentInsurer.id) : '');
   const planId = chosenPlanId ?? (currentPlan ? String(currentPlan.id) : '');
@@ -83,7 +85,7 @@ export function InsuranceForm({ patient }: InsuranceFormProps) {
     if (policyNumber.trim().length > 30) errors.policyNumber = 'El número de póliza no puede superar los 30 caracteres.';
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
-    saveMutation.mutate();
+    submit(() => saveMutation.mutateAsync());
   };
 
   const isPending = saveMutation.isPending || particularMutation.isPending;
@@ -168,7 +170,7 @@ export function InsuranceForm({ patient }: InsuranceFormProps) {
         title='¿Dejar al paciente como particular?'
         description='Se suspenderá su cobertura vigente. Las citas ya reservadas con ese seguro no cambian.'
         confirmLabel='Sí, dejar como particular'
-        onConfirm={() => particularMutation.mutate()}
+        onConfirm={() => submit(() => particularMutation.mutateAsync())}
         isPending={particularMutation.isPending}
       />
     </form>

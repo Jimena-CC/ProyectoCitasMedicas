@@ -9,6 +9,11 @@ export interface AppointmentActionTarget {
   appointment: Appointment;
   /** Cambia en cada apertura para que el modal arranque con el estado limpio (se usa como key). */
   session: number;
+  /**
+   * false mientras el modal se cierra: se conserva la cita y la sesión para que la key no cambie
+   * y el modal pueda mostrar su animación de salida.
+   */
+  open: boolean;
 }
 
 /**
@@ -23,12 +28,12 @@ export function useAppointmentActions(patientId: number) {
 
   const openAction = React.useCallback((action: AppointmentAction, appointment: Appointment) => {
     sessionRef.current += 1;
-    setTarget({ action, appointment, session: sessionRef.current });
+    setTarget({ action, appointment, session: sessionRef.current, open: true });
   }, []);
 
   const reschedule = React.useCallback((appointment: Appointment) => openAction('reschedule', appointment), [openAction]);
   const cancel = React.useCallback((appointment: Appointment) => openAction('cancel', appointment), [openAction]);
-  const onClose = React.useCallback(() => setTarget(null), []);
+  const onClose = React.useCallback(() => setTarget((current) => (current ? { ...current, open: false } : current)), []);
 
   return { reschedule, cancel, modalProps: { patientId, target, onClose } };
 }

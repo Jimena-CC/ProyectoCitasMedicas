@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { RiCalendarScheduleLine, RiCloseCircleLine, RiErrorWarningFill, RiLoader4Line } from '@remixicon/react';
+import { RiAlertFill, RiCalendarScheduleLine, RiCloseCircleLine, RiErrorWarningFill, RiLoader4Line } from '@remixicon/react';
 
 import { ConfirmModal } from '@/components/confirm-modal';
 import { SelectField, TextareaField } from '@/components/form-field';
@@ -12,6 +12,7 @@ import { ApiError, catalogApi, frontDeskApi, type Appointment } from '@/lib/api'
 import { formatShortDate, formatTime } from '@/lib/formatters';
 
 import type { AppointmentActionTarget } from '../hooks/use-appointment-actions';
+import { useSingleSubmit } from '../hooks/use-single-submit';
 import { admissionKeys, formatAppointmentWhen } from '../lib/patients';
 import { AvailabilityPicker, type SelectedSlot } from './availability-picker';
 
@@ -21,19 +22,25 @@ interface AppointmentActionModalsProps {
   onClose: () => void;
 }
 
-/** Monta los modales de reprogramar y anular; cada apertura recibe una key nueva para arrancar limpio. */
+/**
+ * Monta los modales de reprogramar y anular. Cada apertura recibe una key nueva para arrancar limpio; al cerrar,
+ * la key se mantiene (target.open pasa a false) para que el modal muestre su animación de salida.
+ */
 export function AppointmentActionModals({ patientId, target, onClose }: AppointmentActionModalsProps) {
+  const session = target?.session ?? 0;
   return (
     <>
       <RescheduleModal
-        key={`reschedule-${target?.session ?? 0}`}
+        key={`reschedule-${session}`}
         patientId={patientId}
+        open={target?.action === 'reschedule' && target.open}
         appointment={target?.action === 'reschedule' ? target.appointment : null}
         onClose={onClose}
       />
       <CancelModal
-        key={`cancel-${target?.session ?? 0}`}
+        key={`cancel-${session}`}
         patientId={patientId}
+        open={target?.action === 'cancel' && target.open}
         appointment={target?.action === 'cancel' ? target.appointment : null}
         onClose={onClose}
       />
@@ -55,6 +62,8 @@ function useInvalidateAppointments(patientId: number) {
 
 interface ActionModalProps {
   patientId: number;
+  open: boolean;
+  /** Se conserva mientras el modal se cierra para no vaciar su contenido durante la animación. */
   appointment: Appointment | null;
   onClose: () => void;
 }
@@ -63,12 +72,12 @@ interface ActionModalProps {
  * Reprogramar cita (CU-019): modal grande con la misma grilla de disponibilidad del asistente, limitada a la
  * especialidad de la cita. La API solo devuelve nombres de especialidad y sede, así que se resuelven contra el catálogo.
  */
-export function RescheduleModal({ patientId, appointment, onClose }: ActionModalProps) {
-  const open = appointment !== null;
+export function RescheduleModal({ patientId, open, appointment, onClose }: ActionModalProps) {
   const invalidate = useInvalidateAppointments(patientId);
   const [selection, setSelection] = React.useState<SelectedSlot | null>(null);
   const [chosenLocationId, setChosenLocationId] = React.useState<string | null>(null);
   const [alert, setAlert] = React.useState<string | null>(null);
+  const submit = useSingleSubmit();
 
   const locationsQuery = useQuery({ queryKey: admissionKeys.locations, queryFn: catalogApi.listLocations, staleTime: 10 * 60_000, enabled: open });
   const specialtiesQuery = useQuery({
@@ -125,7 +134,7 @@ export function RescheduleModal({ patientId, appointment, onClose }: ActionModal
           )}
           {appointment && catalogsLoaded && !specialty ? (
             <Alert.Root variant='lighter' status='warning' size='small'>
-              <Alert.Icon as={RiErrorWarningFill} />
+              <Alert.Icon as={RiAlertFill} />
               No pudimos identificar la especialidad de esta cita en el catálogo. Anúlala y agenda una nueva.
             </Alert.Root>
           ) : (
@@ -172,7 +181,9 @@ export function RescheduleModal({ patientId, appointment, onClose }: ActionModal
             size='small'
             className='w-full'
             disabled={!selection || mutation.isPending}
-            onClick={() => selection && mutation.mutate(selection.slot.slotId)}
+            onClick={() => {
+              if (selection) submit(() => mutation.mutateAsync(selection.slot.slotId));
+            }}
           >
             {mutation.isPending && <Button.Icon as={RiLoader4Line} className='animate-spin' />}
             {selection ? `Reprogramar para el ${formatShortDate(selection.date)} ${formatTime(selection.slot.startTime)}` : 'Elige un nuevo horario'}
@@ -184,11 +195,11 @@ export function RescheduleModal({ patientId, appointment, onClose }: ActionModal
 }
 
 /** Anular cita (CU-020): confirmación en rojo con el motivo obligatorio (≤ 200 caracteres). */
-export function CancelModal({ patientId, appointment, onClose }: ActionModalProps) {
-  const open = appointment !== null;
+export function CancelModal({ patientId, open, appointment, onClose }: ActionModalProps) {
   const invalidate = useInvalidateAppointments(patientId);
   const [reason, setReason] = React.useState('');
   const [fieldError, setFieldError] = React.useState<string | null>(null);
+  const submit = useSingleSubmit();
 
   const mutation = useMutation({
     mutationFn: () => frontDeskApi.cancelAppointment((appointment as Appointment).id, { reason: reason.trim() }),
@@ -198,8 +209,16 @@ export function CancelModal({ patientId, appointment, onClose }: ActionModalProp
       onClose();
     },
     onError: (error) => {
-      if (error instanceof ApiError && error.isValidation) setFieldError(error.fieldMessage('reason') ?? error.message);
-      else notify.fromError(error);
+      if (error instanceof ApiError && error.isValidation) {
+        setFieldError(error.fieldMessage('reason') ?? error.message);
+        return;
+      }
+      notify.fromError(error);
+      // La cita cambió en otro puesto (ya anulada, atendida o inexistente): se refresca la lista y se cierra el modal.
+      if (error instanceof ApiError && (error.status === 404 || error.status === 409 || error.status === 422)) {
+        void invalidate();
+        onClose();
+      }
     },
   });
 
@@ -208,7 +227,7 @@ export function CancelModal({ patientId, appointment, onClose }: ActionModalProp
       setFieldError('Indica el motivo de la anulación.');
       return;
     }
-    mutation.mutate();
+    submit(() => mutation.mutateAsync());
   };
 
   return (
@@ -227,7 +246,6 @@ export function CancelModal({ patientId, appointment, onClose }: ActionModalProp
       cancelLabel='Volver'
       onConfirm={handleConfirm}
       isPending={mutation.isPending}
-      confirmDisabled={reason.trim() === ''}
     >
       <TextareaField
         id='cancel-reason'
