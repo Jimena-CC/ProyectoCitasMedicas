@@ -15,7 +15,11 @@ public enum AuditAction {
     APPOINTMENT_CANCELLED(AuditEntities.APPOINTMENT),
 
     /** Inicio de sesión correcto de un usuario del personal. */
-    USER_LOGGED_IN(AuditEntities.APP_USER);
+    USER_LOGGED_IN(AuditEntities.APP_USER),
+
+    // Issue #45: módulos de médico y admisión
+    /** Registro de asistencia o inasistencia de una cita por el médico (CU-012). */
+    ATTENDANCE_REGISTERED(AuditEntities.APPOINTMENT);
 
     private final String entity;
 

@@ -22,6 +22,10 @@ public final class ErrorCodes {
     public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
     public static final String USER_INACTIVE = "USER_INACTIVE";
 
+    // Issue #45: módulos de médico y admisión (docs/api-contract.md, sección 7)
+    /** El usuario con perfil DOCTOR no tiene un médico vinculado y no puede usar su agenda. */
+    public static final String DOCTOR_NOT_LINKED = "DOCTOR_NOT_LINKED";
+
     private ErrorCodes() {
     }
 }

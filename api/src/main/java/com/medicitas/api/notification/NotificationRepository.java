@@ -35,4 +35,21 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
                       @Param("type") NotificationType type,
                       @Param("pending") NotificationStatus pending,
                       @Param("cancelled") NotificationStatus cancelled);
+
+    // Issue #45: módulos de médico y admisión
+    /**
+     * Cancela todas las notificaciones pendientes de una cita, sin importar su tipo.
+     *
+     * @param appointmentId cita
+     * @param pending       estado que se busca ({@link NotificationStatus#PENDING})
+     * @param cancelled     estado que se asigna ({@link NotificationStatus#CANCELLED})
+     * @return cantidad de notificaciones canceladas
+     */
+    @Modifying(flushAutomatically = true)
+    @Query("""
+            update Notification n set n.status = :cancelled
+            where n.appointment.id = :appointmentId and n.status = :pending""")
+    int cancelAllPending(@Param("appointmentId") Long appointmentId,
+                         @Param("pending") NotificationStatus pending,
+                         @Param("cancelled") NotificationStatus cancelled);
 }
