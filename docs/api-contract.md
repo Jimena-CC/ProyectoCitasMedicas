@@ -1,6 +1,6 @@
 # Contrato de la API - Kiosko de Autoatención
 
-Contrato REST entre el **Kiosko (JavaFX)** y la **API MediCitas (Spring Boot)** para las 5 pantallas funcionales de la Fase 1. El modelo de datos que lo respalda es el [Entity Relationship Diagram](diagrams/03-entity-relationship-diagram.puml).
+Contrato REST entre el **Kiosko (JavaFX)** y la **API MediCitas (Spring Boot)** para las 5 pantallas funcionales de la Fase 1, más los endpoints de autenticación del personal (sección 6). El modelo de datos que lo respalda es el [Entity Relationship Diagram](diagrams/03-entity-relationship-diagram.puml).
 
 Los identificadores del contrato (rutas, campos, estados y códigos de error) están en inglés. Los textos dirigidos al paciente —el campo `message` de cada error— van en español.
 
@@ -235,3 +235,89 @@ Todas las respuestas de error usan la misma forma. `message` está pensado para 
 | 409 | `DUPLICATE_APPOINTMENT` | RF-08 |
 | 422 | `COVERAGE_NOT_ACTIVE`, `APPOINTMENT_NOT_MODIFIABLE` | Regla de negocio incumplida |
 | 500 | `INTERNAL_ERROR` | Mensaje genérico; el detalle solo va al log |
+| 401 | `UNAUTHORIZED` | Ruta del personal sin token, o con token vencido o manipulado |
+| 401 | `INVALID_CREDENTIALS` | Usuario o contraseña incorrectos en el login (no se indica cuál) |
+| 403 | `FORBIDDEN` | Hay sesión, pero el rol no puede usar esa ruta |
+| 403 | `USER_INACTIVE` | El usuario fue desactivado por el administrador |
+
+---
+
+## 6. Autenticación y roles
+
+Los endpoints de las secciones 1 a 4 son **públicos**: el kiosko no envía token y no cambia. El personal de la clínica se autentica con usuario y contraseña y recibe un **JWT** (HS256, vigente 480 minutos por defecto) que envía en cada petición protegida:
+
+```http
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
+```
+
+Claims del token: `sub` (usuario), `role` (`ADMIN`, `FRONT_DESK` o `DOCTOR`), `uid` (id en `app_user`), `iss` = `medicitas-api`, `iat` y `exp`.
+
+| Ruta | Rol requerido |
+|---|---|
+| `POST /auth/login` | Ninguno |
+| `GET /auth/me` | Cualquier usuario autenticado |
+| `/doctor/**` | `DOCTOR` |
+| `/front-desk/**` | `FRONT_DESK` o `ADMIN` |
+| `/admin/**` | `ADMIN` |
+
+### `POST /auth/login`
+
+```json
+{ "username": "admin", "password": "admin123" }
+```
+
+`200 OK`:
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "expiresAt": "2026-10-20T16:00:00-05:00",
+  "user": { "id": 1, "username": "admin", "role": "ADMIN", "fullName": "admin", "doctorId": null }
+}
+```
+
+`fullName` es el nombre completo del médico vinculado (perfil `DOCTOR`) o el nombre de usuario en los demás perfiles; `doctorId` solo tiene valor para los médicos.
+
+Errores: `400 INVALID_DATA` (campos vacíos) · `401 INVALID_CREDENTIALS` · `403 USER_INACTIVE`.
+
+### `GET /auth/me`
+
+Requiere token. `200 OK` con el mismo objeto `user` del login:
+
+```json
+{ "id": 3, "username": "dr.benavides", "role": "DOCTOR", "fullName": "Carla Benavides Ortiz", "doctorId": 1 }
+```
+
+Errores: `401 UNAUTHORIZED` · `403 USER_INACTIVE`.
+
+### `GET /admin/users`
+
+Requiere rol `ADMIN`. `200 OK`:
+
+```json
+[
+  { "id": 1, "username": "admin", "role": "ADMIN", "fullName": "admin", "doctorId": null, "active": true, "lastAccess": "2026-10-20T08:00:00-05:00" },
+  { "id": 2, "username": "admision", "role": "FRONT_DESK", "fullName": "admision", "doctorId": null, "active": true, "lastAccess": null },
+  { "id": 3, "username": "dr.benavides", "role": "DOCTOR", "fullName": "Carla Benavides Ortiz", "doctorId": 1, "active": true, "lastAccess": null }
+]
+```
+
+Errores: `401 UNAUTHORIZED` · `403 FORBIDDEN`.
+
+### Ejemplos de error
+
+Sin token en una ruta protegida:
+
+```json
+{ "code": "UNAUTHORIZED", "message": "Debes iniciar sesión para continuar.", "fields": [], "timestamp": "2026-10-20T08:00:00-05:00" }
+```
+
+Con token de `DOCTOR` en `/admin/**`:
+
+```json
+{ "code": "FORBIDDEN", "message": "No tienes permiso para realizar esta acción.", "fields": [], "timestamp": "2026-10-20T08:00:00-05:00" }
+```
+
+### Auditoría
+
+Toda reserva, reprogramación y anulación de cita (desde el kiosko o con token) escribe una fila en `audit_log` con la acción (`APPOINTMENT_BOOKED`, `APPOINTMENT_RESCHEDULED`, `APPOINTMENT_CANCELLED`), la entidad `APPOINTMENT`, el id de la cita, el usuario responsable (`null` desde el kiosko), la IP de origen y un detalle legible. El inicio de sesión se audita como `USER_LOGGED_IN`. Las citas reservadas con token se registran con `bookingChannel = FRONT_DESK`.
