@@ -4,6 +4,8 @@ import com.medicitas.api.appointment.AppointmentDtos.AppointmentRequest;
 import com.medicitas.api.appointment.AppointmentDtos.AppointmentResponse;
 import com.medicitas.api.appointment.AppointmentDtos.BookingResult;
 import com.medicitas.api.appointment.AppointmentDtos.RescheduleRequest;
+import com.medicitas.api.audit.AuditAction;
+import com.medicitas.api.audit.AuditService;
 import com.medicitas.api.common.BusinessException;
 import com.medicitas.api.common.ErrorCodes;
 import com.medicitas.api.notification.NotificationService;
@@ -14,6 +16,8 @@ import com.medicitas.api.patient.PatientInsuranceRepository;
 import com.medicitas.api.patient.PatientRepository;
 import com.medicitas.api.schedule.Slot;
 import com.medicitas.api.schedule.SlotRepository;
+import com.medicitas.api.security.AppUser;
+import com.medicitas.api.security.CurrentUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -29,7 +33,9 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Reglas de agendamiento del kiosko: reserva, reprogramación y anulación (RF-06 a RF-11, RNF-07).
+ * Reglas de agendamiento: reserva, reprogramación y anulación (RF-06 a RF-11, RNF-07).
+ * Cada operación deja su traza en el historial de la cita y en el registro de auditoría con el usuario
+ * del personal responsable, o sin usuario cuando actúa el paciente desde el kiosko.
  */
 @Service
 public class AppointmentService {
@@ -47,6 +53,8 @@ public class AppointmentService {
     private final NotificationService notificationService;
     private final AppointmentCodeGenerator appointmentCodeGenerator;
     private final ApplicationEventPublisher eventPublisher;
+    private final AuditService auditService;
+    private final CurrentUserService currentUserService;
     private final Clock clock;
 
     public AppointmentService(AppointmentRepository appointmentRepository, SlotRepository slotRepository,
@@ -54,7 +62,8 @@ public class AppointmentService {
                               AppointmentHistoryRepository appointmentHistoryRepository,
                               NotificationService notificationService,
                               AppointmentCodeGenerator appointmentCodeGenerator,
-                              ApplicationEventPublisher eventPublisher, Clock clock) {
+                              ApplicationEventPublisher eventPublisher, AuditService auditService,
+                              CurrentUserService currentUserService, Clock clock) {
         this.appointmentRepository = appointmentRepository;
         this.slotRepository = slotRepository;
         this.patientRepository = patientRepository;
@@ -63,6 +72,8 @@ public class AppointmentService {
         this.notificationService = notificationService;
         this.appointmentCodeGenerator = appointmentCodeGenerator;
         this.eventPublisher = eventPublisher;
+        this.auditService = auditService;
+        this.currentUserService = currentUserService;
         this.clock = clock;
     }
 
@@ -84,12 +95,17 @@ public class AppointmentService {
         validateNoOverlap(patient.getId(), slot, NO_EXCLUSION);
         takeSlot(slot.getId());
 
+        AppUser actor = currentUserService.current().orElse(null);
+        BookingChannel channel = actor == null ? BookingChannel.KIOSK : BookingChannel.FRONT_DESK;
         Instant now = Instant.now(clock);
         Appointment appointment = new Appointment(appointmentCodeGenerator.generate(), patient, slot, insurance,
-                request.visitReason().trim(), BookingChannel.KIOSK, idempotencyKey, now);
+                request.visitReason().trim(), channel, idempotencyKey, now);
         appointmentRepository.save(appointment);
         appointmentHistoryRepository.save(AppointmentHistory.record(appointment, AppointmentEvent.BOOKING, null,
-                AppointmentStatus.BOOKED, null, slot, null, now));
+                AppointmentStatus.BOOKED, null, slot, actor, null, now));
+        auditService.record(actor, AuditAction.APPOINTMENT_BOOKED, appointment.getId(),
+                "Cita " + appointment.getCode() + " reservada en el cupo " + describe(slot)
+                        + " para el paciente " + patient.getId() + " por canal " + channel);
         publish(notificationService.scheduleForBooking(appointment));
 
         logger.info("Cita {} reservada: cupo {} para el paciente {}", appointment.getCode(), slot.getId(), patient.getId());
@@ -140,10 +156,15 @@ public class AppointmentService {
         takeSlot(newSlot.getId());
         slotRepository.release(previousSlot.getId());
 
+        AppUser actor = currentUserService.current().orElse(null);
         Instant now = Instant.now(clock);
         appointment.reschedule(newSlot, now);
         appointmentHistoryRepository.save(AppointmentHistory.record(appointment, AppointmentEvent.RESCHEDULE,
-                AppointmentStatus.BOOKED, AppointmentStatus.BOOKED, previousSlot, newSlot, null, now));
+                AppointmentStatus.BOOKED, AppointmentStatus.BOOKED, previousSlot, newSlot, actor, null, now));
+        auditService.record(actor, AuditAction.APPOINTMENT_RESCHEDULED, appointment.getId(),
+                "Cita " + appointment.getCode() + " reprogramada del cupo " + describe(previousSlot)
+                        + " al cupo " + describe(newSlot) + " (reprogramación n.º " + appointment.getRescheduleCount()
+                        + ")");
         publish(notificationService.scheduleForReschedule(appointment));
 
         logger.info("Cita {} reprogramada del cupo {} al cupo {}", appointment.getCode(), previousSlot.getId(), newSlot.getId());
@@ -160,11 +181,16 @@ public class AppointmentService {
         validateModifiable(appointment);
 
         slotRepository.release(appointment.getSlot().getId());
+        AppUser actor = currentUserService.current().orElse(null);
         Instant now = Instant.now(clock);
         appointment.cancel(now);
         String detail = reason == null || reason.isBlank() ? null : reason.trim();
         appointmentHistoryRepository.save(AppointmentHistory.record(appointment, AppointmentEvent.CANCELLATION,
-                AppointmentStatus.BOOKED, AppointmentStatus.CANCELLED, appointment.getSlot(), null, detail, now));
+                AppointmentStatus.BOOKED, AppointmentStatus.CANCELLED, appointment.getSlot(), null, actor, detail,
+                now));
+        auditService.record(actor, AuditAction.APPOINTMENT_CANCELLED, appointment.getId(),
+                "Cita " + appointment.getCode() + " anulada; cupo " + describe(appointment.getSlot()) + " liberado"
+                        + (detail == null ? "" : ". Motivo: " + detail));
         publish(notificationService.scheduleForCancellation(appointment));
 
         logger.info("Cita {} anulada; cupo {} liberado", appointment.getCode(), appointment.getSlot().getId());
@@ -226,6 +252,12 @@ public class AppointmentService {
             throw BusinessException.conflict(ErrorCodes.SLOT_NOT_AVAILABLE,
                     "Ese horario acaba de ser reservado por otra persona. Elige otro horario disponible.");
         }
+    }
+
+    /** Cupo en forma legible para la auditoría: id, fecha, hora de inicio y médico. */
+    private static String describe(Slot slot) {
+        return slot.getId() + " (" + slot.getDate() + " " + slot.getStartTime() + ", "
+                + slot.getDoctor().getFullName() + ")";
     }
 
     private void publish(List<Long> notificationIds) {

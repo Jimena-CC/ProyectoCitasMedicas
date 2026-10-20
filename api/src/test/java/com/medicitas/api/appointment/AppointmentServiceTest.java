@@ -2,6 +2,7 @@ package com.medicitas.api.appointment;
 
 import com.medicitas.api.appointment.AppointmentDtos.AppointmentRequest;
 import com.medicitas.api.appointment.AppointmentDtos.BookingResult;
+import com.medicitas.api.audit.AuditService;
 import com.medicitas.api.catalog.Doctor;
 import com.medicitas.api.catalog.Location;
 import com.medicitas.api.catalog.Specialty;
@@ -15,6 +16,7 @@ import com.medicitas.api.patient.PatientInsuranceRepository;
 import com.medicitas.api.patient.PatientRepository;
 import com.medicitas.api.schedule.Slot;
 import com.medicitas.api.schedule.SlotRepository;
+import com.medicitas.api.security.CurrentUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,6 +65,10 @@ class AppointmentServiceTest {
     private AppointmentCodeGenerator appointmentCodeGenerator;
     @Mock
     private ApplicationEventPublisher eventPublisher;
+    @Mock
+    private AuditService auditService;
+    @Mock
+    private CurrentUserService currentUserService;
 
     private AppointmentService appointmentService;
     private Patient patient;
@@ -72,7 +78,7 @@ class AppointmentServiceTest {
     void preparar() {
         appointmentService = new AppointmentService(appointmentRepository, slotRepository, patientRepository,
                 patientInsuranceRepository, appointmentHistoryRepository, notificationService,
-                appointmentCodeGenerator, eventPublisher, CLOCK);
+                appointmentCodeGenerator, eventPublisher, auditService, currentUserService, CLOCK);
         patient = new Patient(DocumentType.DNI, "45871236", "Lucía", "Paredes Quispe", LocalDate.of(1991, 4, 18),
                 "F", "987654321", "lucia.paredes@correo.pe", true, CLOCK.instant());
         ReflectionTestUtils.setField(patient, "id", 1L);

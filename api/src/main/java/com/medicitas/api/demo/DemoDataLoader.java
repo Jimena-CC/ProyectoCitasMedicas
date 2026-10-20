@@ -272,7 +272,7 @@ public class DemoDataLoader implements ApplicationRunner {
                     UUID.nameUUIDFromBytes(("demo-slot-" + i).getBytes(StandardCharsets.UTF_8)), now);
             appointments.add(appointment);
             history.add(AppointmentHistory.record(appointment, AppointmentEvent.BOOKING, null,
-                    AppointmentStatus.BOOKED, null, slots.get(i), null, now));
+                    AppointmentStatus.BOOKED, null, slots.get(i), null, null, now));
         }
 
         Appointment luciaAppointment = new Appointment(LUCIA_APPOINTMENT_CODE, lucia, luciaSlot, luciaInsurance,
@@ -280,7 +280,7 @@ public class DemoDataLoader implements ApplicationRunner {
                 UUID.nameUUIDFromBytes("demo-appointment-lucia".getBytes(StandardCharsets.UTF_8)), now);
         appointments.add(luciaAppointment);
         history.add(AppointmentHistory.record(luciaAppointment, AppointmentEvent.BOOKING, null,
-                AppointmentStatus.BOOKED, null, luciaSlot, null, now));
+                AppointmentStatus.BOOKED, null, luciaSlot, null, null, now));
         appointmentRepository.saveAll(appointments);
         appointmentHistoryRepository.saveAll(history);
 
