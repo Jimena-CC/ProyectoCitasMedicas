@@ -19,6 +19,23 @@ public final class Dtos {
         public String description() {
             return insurer + " · " + plan;
         }
+
+        /**
+         * Estado de la cobertura en palabras del paciente, nunca el código de la API (RNF-06).
+         *
+         * @return {@code "vigente"}, {@code "suspendida"}, {@code "vencida"} o vacío si no se conoce
+         */
+        public String coverageStatusText() {
+            if (coverageStatus == null) {
+                return "";
+            }
+            return switch (coverageStatus) {
+                case "ACTIVE" -> "vigente";
+                case "SUSPENDED" -> "suspendida";
+                case "EXPIRED" -> "vencida";
+                default -> "";
+            };
+        }
     }
 
     public record Patient(Long id, String documentType, String documentNumber, String firstNames,
@@ -31,8 +48,11 @@ public final class Dtos {
             return firstNames.trim().split("\\s+")[0];
         }
 
+        /** Nombre completo sin mostrar {@code null} cuando falta alguna parte. */
         public String fullName() {
-            return firstNames + " " + lastNames;
+            String first = firstNames == null ? "" : firstNames.trim();
+            String last = lastNames == null ? "" : lastNames.trim();
+            return (first + " " + last).trim();
         }
     }
 

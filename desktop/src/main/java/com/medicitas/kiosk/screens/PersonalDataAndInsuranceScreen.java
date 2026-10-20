@@ -264,9 +264,11 @@ public class PersonalDataAndInsuranceScreen extends Screen {
         Dtos.Patient p = ctx.session().getPatient();
         Dtos.InsuranceSummary insurance = p == null ? null : p.insurance();
         if (p != null) {
+            String status = insurance == null ? "" : insurance.coverageStatusText();
             currentCoverage.setText(insurance == null
                     ? "Cobertura registrada: atención particular."
-                    : "Cobertura registrada: " + insurance.description() + " · " + insurance.coverageStatus());
+                    : "Cobertura registrada: " + insurance.description()
+                            + (status.isEmpty() ? "" : " (" + status + ")") + ".");
         }
         currentCoverage.setVisible(p != null && !ctx.session().isNewPatient());
         currentCoverage.setManaged(currentCoverage.isVisible());
