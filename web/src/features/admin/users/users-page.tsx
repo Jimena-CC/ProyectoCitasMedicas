@@ -21,6 +21,7 @@ import { ROLE_LABELS, formatDateTime } from '@/lib/formatters';
 import { ActiveBadge } from '../components/active-badge';
 import { RoleBadge } from '../components/role-badge';
 import { SearchInput } from '../components/search-input';
+import { useSearchParamState } from '../components/use-search-param';
 import { adminKeys, useDoctorsQuery, useUsersQuery } from '../queries';
 import { PasswordModal } from './password-modal';
 import { UserFormModal } from './user-form-modal';
@@ -43,8 +44,10 @@ export function UsersPage() {
   const usersQuery = useUsersQuery();
   const doctorsQuery = useDoctorsQuery();
 
-  const [search, setSearch] = React.useState('');
-  const [roleFilter, setRoleFilter] = React.useState<RoleFilter>('ALL');
+  // Búsqueda y perfil viven en la URL (?q=…&perfil=…) para conservarse al recargar.
+  const [search, setSearch] = useSearchParamState('q');
+  const [roleParam, setRoleParam] = useSearchParamState('perfil', 'ALL');
+  const roleFilter: RoleFilter = ROLE_FILTERS.some((f) => f.value === roleParam) ? (roleParam as RoleFilter) : 'ALL';
   const [modal, setModalState] = React.useState<ModalState>(null);
   // Cada apertura remonta el formulario del modal (key) para que parta limpio.
   const [formKey, setFormKey] = React.useState(0);
@@ -53,6 +56,8 @@ export function UsersPage() {
     if (next !== null) setFormKey((k) => k + 1);
   }, []);
   const [toggleError, setToggleError] = React.useState<string | null>(null);
+  // Guardia síncrona: isPending recién cambia en el siguiente render y un doble clic enviaría la acción dos veces.
+  const toggleInFlight = React.useRef(false);
 
   const doctorNames = React.useMemo(() => new Map((doctorsQuery.data ?? []).map((d) => [d.id, d.fullName])), [doctorsQuery.data]);
 
@@ -79,6 +84,9 @@ export function UsersPage() {
       setModal(null);
     },
     onError: (error) => setToggleError(getErrorMessage(error)),
+    onSettled: () => {
+      toggleInFlight.current = false;
+    },
   });
 
   const columns = React.useMemo<ColumnDef<UserSummary>[]>(
@@ -191,7 +199,7 @@ export function UsersPage() {
       <Card className='flex flex-col gap-4'>
         <div className='flex flex-wrap items-center justify-between gap-3'>
           <SearchInput id='users-search' value={search} onChange={setSearch} placeholder='Buscar por usuario, nombre o médico' />
-          <SegmentedControl.Root value={roleFilter} onValueChange={(value) => setRoleFilter(value as RoleFilter)} className='w-auto'>
+          <SegmentedControl.Root value={roleFilter} onValueChange={setRoleParam} className='w-auto'>
             <SegmentedControl.List>
               {ROLE_FILTERS.map((filter) => (
                 <SegmentedControl.Trigger key={filter.value} value={filter.value}>
@@ -246,7 +254,9 @@ export function UsersPage() {
         confirmLabel={toggleTarget?.active ? 'Desactivar' : 'Activar'}
         isPending={toggleMutation.isPending}
         onConfirm={() => {
-          if (toggleTarget) toggleMutation.mutate(toggleTarget);
+          if (!toggleTarget || toggleInFlight.current) return;
+          toggleInFlight.current = true;
+          toggleMutation.mutate(toggleTarget);
         }}
       >
         {toggleError && (

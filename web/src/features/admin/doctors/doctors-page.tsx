@@ -12,6 +12,7 @@ import type { DoctorDetail } from '@/lib/api/types';
 
 import { ActiveBadge } from '../components/active-badge';
 import { SearchInput } from '../components/search-input';
+import { useSearchParamState } from '../components/use-search-param';
 import { useDoctorsQuery, useSpecialtiesQuery } from '../queries';
 import { DoctorFormModal } from './doctor-form-modal';
 
@@ -24,8 +25,9 @@ export function DoctorsPage() {
   const doctorsQuery = useDoctorsQuery();
   const specialtiesQuery = useSpecialtiesQuery();
 
-  const [search, setSearch] = React.useState('');
-  const [specialtyFilter, setSpecialtyFilter] = React.useState(ALL);
+  // Búsqueda y especialidad viven en la URL (?q=…&especialidad=…) para conservarse al recargar.
+  const [search, setSearch] = useSearchParamState('q');
+  const [specialtyFilter, setSpecialtyFilter] = useSearchParamState('especialidad', ALL);
   const [modal, setModalState] = React.useState<ModalState>(null);
   // Cada apertura remonta el formulario del modal (key) para que parta limpio.
   const [formKey, setFormKey] = React.useState(0);
