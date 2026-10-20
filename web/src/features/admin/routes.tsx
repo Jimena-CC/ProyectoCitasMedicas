@@ -1,7 +1,6 @@
 import { Navigate, type RouteObject } from 'react-router';
 import {
   RiBarChartBoxLine,
-  RiFileList3Line,
   RiGroupLine,
   RiHeartPulseLine,
   RiStethoscopeLine,
@@ -9,6 +8,7 @@ import {
 } from '@remixicon/react';
 
 import { UnderConstructionPage } from '@/app/pages/under-construction-page';
+import { AuditPage } from '@/features/admin/audit/audit-page';
 import { ADMIN_ROLES } from '@/features/auth/roles';
 import { RequireRole } from '@/features/auth/require-role';
 
@@ -54,7 +54,7 @@ export const adminRoutes: RouteObject[] = [
       },
       {
         path: 'auditoria',
-        element: <UnderConstructionPage title='Auditoría' description='Revisa quién hizo qué y cuándo en el sistema.' icon={RiFileList3Line} />,
+        element: <AuditPage />,
       },
       {
         path: 'reportes',
