@@ -42,3 +42,4 @@ Los `.puml` generan sus PNG y SVG en `diagrams/img/` automáticamente al abrir u
 | `10-physical-model.puml` | Modelo físico de datos (PostgreSQL 15). |
 | `11-process-doctor-attendance.puml` | Proceso TO-BE del Médico en el Backoffice web: inicio de sesión, agenda del día, registro de asistencia o inasistencia, historial y auditoría. |
 | `12-process-front-desk-booking.puml` | Proceso TO-BE de agendamiento en ventanilla por el Personal de Admisión: búsqueda de paciente, validación de aseguradora, reserva con canal FRONT_DESK y auditoría. |
+| `13-kiosk-api-layer.puml` | Capa de conexión a la API del Kiosko: paquetes `app`, `screens`, `ui`, `api` y `dev`, y por qué `ApiClient` equivale a la "clase de conexión a base de datos". |

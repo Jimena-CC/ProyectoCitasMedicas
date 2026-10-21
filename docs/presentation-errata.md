@@ -32,6 +32,7 @@ La presentación del equipo (documento externo, no versionado en este repositori
 | 3.6 | Proceso de reserva en el Kiosco (01 TO-BE) | Se completó la rama "No" de "¿Documento ya existe?", se agregó la verificación de cupo futuro y cobertura vigente, y se precisó el canal de cada notificación (confirmación por correo, recordatorio por SMS 24 h antes). |
 | 3.7 | Modelos conceptual, lógico y físico | Sus títulos decían "05", "06" y "07" (duplicando a la arquitectura y a los procesos). Ahora dicen **08**, **09** y **10**, igual que sus archivos. En el lógico y el físico `patient.birth_date` y `appointment.visit_reason` pasan a obligatorios y el lógico incluye `slot.version`, como en el esquema SQL. |
 | 3.8 | Procesos nuevos | Agregar dos figuras: **11 - Atención del Médico** (agenda del día → asistencia/inasistencia → historial y auditoría) y **12 - Agendamiento en ventanilla** por Admisión. |
+| 3.9 | Capa de conexión del Kiosco (nueva) | Agregar la figura **13 - Capa de conexión a la API del Kiosko** al apartado de la presentación sobre la capa de conexión (issue #43): muestra que el kiosco solo habla con la API por HTTP/JSON mediante `ApiClient` y nunca accede directamente a PostgreSQL. |
 
 ## 4. Textos y tablas
 
