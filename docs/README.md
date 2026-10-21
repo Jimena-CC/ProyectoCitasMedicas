@@ -34,7 +34,3 @@ Los `.puml` generan sus PNG y SVG en `diagrams/img/` automáticamente al abrir u
 | `06-process-reschedule.puml` | Proceso TO-BE para reprogramar una cita, con reintento ante cupo tomado. |
 | `06-process-cancellation.puml` | Proceso TO-BE para anular una cita y liberar su cupo. |
 | `07-process-notifications.puml` | Proceso TO-BE de envío de confirmaciones y recordatorios con reintentos. |
-| `08-conceptual-model.puml` | Modelo conceptual de datos. |
-| `09-logical-model.puml` | Modelo lógico de datos. |
-| `10-physical-model.puml` | Modelo físico de datos en PostgreSQL 15. |
-| `11-kiosk-api-layer.puml` | Capa de conexión a la API del Kiosko: paquetes `app`, `screens`, `ui`, `api` y `dev`, y por qué `ApiClient` equivale a la "clase de conexión a base de datos". |
