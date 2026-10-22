@@ -20,7 +20,7 @@
 **Aplicación separada (SPA) en `web/`** con:
 
 - **React 19 + Vite + TypeScript** (plantilla `react-ts`, lint con oxlint).
-- **Tailwind CSS v4 + AlignUI** vía el registro de shadcn (`npx shadcn add @alignui/<componente>`), con la fuente Inter.
+- **Tailwind CSS v4 + AlignUI** vía el registro de shadcn (`npx shadcn add @alignui/<componente>`), con la fuente Bricolage Grotesque de Google Fonts, autoalojada con Fontsource.
 - **React Router 7** (modo declarativo con `createBrowserRouter`) y **TanStack Query** para el estado de servidor.
 - Consumo de la API con `fetch` y **JWT Bearer**.
 

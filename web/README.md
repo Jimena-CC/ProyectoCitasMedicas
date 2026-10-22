@@ -49,7 +49,7 @@ web/
 ├── components.json            # registro @alignui para `npx shadcn add`
 ├── src/
 │   ├── main.tsx               # QueryClientProvider + AuthProvider + Tooltip.Provider + Router + Toaster
-│   ├── styles/globals.css     # Tailwind v4 + tokens AlignUI + fuente Inter
+│   ├── styles/globals.css     # Tailwind v4 + tokens AlignUI + fuente Bricolage Grotesque
 │   ├── app/                   # router, AppShell (sidebar + contenido), navegación por rol, páginas genéricas
 │   │   ├── router.tsx         # createBrowserRouter; importa las rutas de cada feature
 │   │   ├── app-shell.tsx      # layout autenticado (sidebar fija, contenido con scroll, autologout)

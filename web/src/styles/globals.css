@@ -1,11 +1,21 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "../lib/alignui.css";
-@import "@fontsource-variable/inter";
+/* Bricolage Grotesque (Google Fonts), autoalojada con Fontsource: opsz.css trae los ejes de peso y tamaño óptico */
+@import "@fontsource-variable/bricolage-grotesque/opsz.css";
 
-/* AlignUI está diseñado para Inter: se expone como --font-sans (equivalente a next/font + @theme inline) */
+/* Fuente del backoffice, expuesta como --font-sans para las utilidades de Tailwind y los componentes AlignUI */
 @theme inline {
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+ * alignui.css declara `font-family: Inter, …` en body fuera de cualquier capa, así que le gana a Tailwind
+ * y, sin Inter instalada en el equipo, el navegador terminaba usando Arial. Esta regla, también sin capa
+ * y declarada después, la reemplaza para que toda la app use --font-sans.
+ */
+body {
+  @apply font-sans;
 }
 
 @layer base {
