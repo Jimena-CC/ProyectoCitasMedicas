@@ -86,7 +86,7 @@ export function PatientCreatePage() {
     onSuccess: (patient) => {
       updateCache(patient);
       notify.success(`Paciente ${patient.firstNames} ${patient.lastNames} registrado.`);
-      navigate(patientDetailPath(patient), { replace: true });
+      navigate(patientDetailPath(patient), { replace: true, viewTransition: true });
     },
     onError: async (error) => {
       if (!(error instanceof ApiError)) {
@@ -153,7 +153,7 @@ export function PatientCreatePage() {
         description='Crea el perfil de un paciente que se atiende por primera vez. Luego podrás asociarle un seguro desde su ficha.'
         actions={
           <Button.Root variant='neutral' mode='stroke' size='small' asChild>
-            <Link to='/ventanilla/pacientes'>
+            <Link viewTransition to='/ventanilla/pacientes'>
               <Button.Icon as={RiArrowLeftLine} />
               Volver a buscar
             </Link>
@@ -168,7 +168,7 @@ export function PatientCreatePage() {
             Ya existe un paciente registrado con ese documento.
             {duplicate.detailPath && (
               <LinkButton.Root variant='modifiable' size='medium' underline asChild>
-                <Link to={duplicate.detailPath}>Abrir su ficha</Link>
+                <Link viewTransition to={duplicate.detailPath}>Abrir su ficha</Link>
               </LinkButton.Root>
             )}
           </Alert.Root>
@@ -328,7 +328,7 @@ export function PatientCreatePage() {
 
         <div className='flex items-center justify-end gap-3'>
           <Button.Root variant='neutral' mode='stroke' size='medium' asChild>
-            <Link to='/ventanilla/pacientes'>Cancelar</Link>
+            <Link viewTransition to='/ventanilla/pacientes'>Cancelar</Link>
           </Button.Root>
           <Button.Root type='submit' variant='primary' mode='filled' size='medium' disabled={isPending}>
             <Button.Icon as={isPending ? RiLoader4Line : RiUserAddLine} className={isPending ? 'animate-spin' : undefined} />

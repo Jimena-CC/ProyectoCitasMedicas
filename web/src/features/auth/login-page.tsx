@@ -72,7 +72,7 @@ export function LoginPage() {
       const from = (location.state as { from?: string } | null)?.from;
       // Solo se vuelve a la ruta pedida si el usuario que entra puede abrirla; si no, va a su inicio.
       const destination = from && canAccessPath(loggedUser.role, from) ? from : roleHome(loggedUser.role);
-      navigate(destination, { replace: true });
+      navigate(destination, { replace: true, viewTransition: true });
     } catch (error) {
       if (error instanceof ApiError && error.isValidation) {
         setFieldErrors(error.fieldErrors());

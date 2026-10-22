@@ -31,7 +31,7 @@ export function AppointmentsPage() {
               bare
               actions={
                 <Button.Root variant='neutral' mode='stroke' size='small' asChild>
-                  <Link to={patientDetailPath(patient)}>
+                  <Link viewTransition to={patientDetailPath(patient)}>
                     <Button.Icon as={RiUserLine} />
                     Ver ficha
                   </Link>

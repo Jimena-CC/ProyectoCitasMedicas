@@ -11,7 +11,7 @@ export function AppShell() {
   return (
     <div className='flex h-screen min-w-[1280px] overflow-hidden bg-bg-weak-50'>
       <Sidebar />
-      <main className='flex min-w-0 flex-1 flex-col overflow-y-auto'>
+      <main className='flex min-w-0 flex-1 flex-col overflow-y-auto [view-transition-name:app-content]'>
         <div className='flex w-full flex-1 flex-col gap-6 p-8'>
           <Outlet />
         </div>

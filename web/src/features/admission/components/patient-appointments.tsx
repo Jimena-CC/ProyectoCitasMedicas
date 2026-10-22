@@ -55,7 +55,7 @@ export function PatientAppointments({ patient, withHeader = false }: PatientAppo
 
   const bookButton = (
     <Button.Root variant='primary' mode='filled' size='small' asChild>
-      <Link to={bookingPath(patient)}>
+      <Link viewTransition to={bookingPath(patient)}>
         <Button.Icon as={RiCalendarCheckLine} />
         Agendar cita
       </Link>

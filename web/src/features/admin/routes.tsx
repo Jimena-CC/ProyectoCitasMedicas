@@ -1,4 +1,4 @@
-import { Navigate, type RouteObject } from 'react-router';
+import { redirect, type RouteObject } from 'react-router';
 
 import { AuditPage } from '@/features/admin/audit/audit-page';
 import { ReportsPage } from '@/features/admin/reports/reports-page';
@@ -27,7 +27,8 @@ export const adminRoutes: RouteObject[] = [
     path: 'administracion',
     element: <RequireRole roles={ADMIN_ROLES} />,
     children: [
-      { index: true, element: <Navigate to='/administracion/usuarios' replace /> },
+      // La redirección va en el loader: así el router la resuelve antes de dibujar, también durante una transición de vista.
+      { index: true, loader: () => redirect('/administracion/usuarios') },
       { path: 'usuarios', element: <UsersPage /> },
       { path: 'medicos', element: <DoctorsPage /> },
       { path: 'especialidades', element: <SpecialtiesPage /> },

@@ -92,6 +92,8 @@ Convenciones:
 - Datos de servidor con TanStack Query (`useQuery` / `useMutation`) y las funciones de `@/lib/api`.
 - Solo tokens de diseño de AlignUI (`bg-bg-white-0`, `text-text-sub-600`, `ring-stroke-soft-200`, `text-label-sm`, `rounded-20`…); nunca colores crudos de Tailwind.
 - Rutas en español y kebab-case (`/ventanilla/pacientes`, `/administracion/horarios`).
+- Los cambios de página se animan con la View Transitions API: todo enlace o navegación que cambie de ruta lleva `viewTransition` (`<Link viewTransition to='…'>` o `navigate(ruta, { viewTransition: true })`). La animación está en `src/styles/globals.css` y se desactiva con `prefers-reduced-motion`. Los filtros que solo cambian parámetros de la URL no la usan, para que la vista no parpadee mientras se escribe.
+- Las redirecciones entre rutas van en el `loader` con `redirect('/ruta')`, no con `<Navigate>`: si un `<Navigate>` se dispara durante una transición de vista, React Router cambia la URL pero la página queda en blanco.
 
 ## Sesión y seguridad
 

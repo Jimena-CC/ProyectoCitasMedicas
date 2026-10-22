@@ -24,7 +24,7 @@ export function Sidebar() {
   const groups = navGroupsFor(user.role);
 
   return (
-    <aside className='flex w-64 shrink-0 flex-col gap-4 border-r border-stroke-soft-200 bg-bg-white-0 px-4 py-5'>
+    <aside className='flex w-64 shrink-0 flex-col gap-4 border-r border-stroke-soft-200 bg-bg-white-0 px-4 py-5 [view-transition-name:app-sidebar]'>
       <div className='flex flex-col gap-2 px-2 pt-1'>
         <BrandLogo className='h-auto w-full text-primary-dark' />
         <div className='text-paragraph-xs text-text-sub-600'>MediCitas · Backoffice</div>
@@ -41,6 +41,7 @@ export function Sidebar() {
                 key={item.to}
                 to={item.to}
                 end={item.end}
+                viewTransition
                 className={({ isActive }) =>
                   cn(
                     'flex items-center gap-2 rounded-10 px-3 py-2 text-label-sm transition-colors',

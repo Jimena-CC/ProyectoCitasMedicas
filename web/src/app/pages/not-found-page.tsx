@@ -21,7 +21,7 @@ export function NotFoundPage() {
           description='La dirección que ingresaste no existe o fue movida. Usa el menú de la izquierda para continuar.'
           action={
             <Button.Root variant='neutral' mode='stroke' size='small' asChild>
-              <Link to={roleHome(user.role)}>
+              <Link viewTransition to={roleHome(user.role)}>
                 <Button.Icon as={RiArrowLeftLine} />
                 Ir a mi inicio
               </Link>

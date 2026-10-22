@@ -1,4 +1,4 @@
-import { Navigate, type RouteObject } from 'react-router';
+import { redirect, type RouteObject } from 'react-router';
 
 import { FRONT_DESK_ROLES } from '@/features/auth/roles';
 import { RequireRole } from '@/features/auth/require-role';
@@ -24,7 +24,8 @@ export const admissionRoutes: RouteObject[] = [
     path: 'ventanilla',
     element: <RequireRole roles={FRONT_DESK_ROLES} />,
     children: [
-      { index: true, element: <Navigate to='/ventanilla/pacientes' replace /> },
+      // La redirección va en el loader: así el router la resuelve antes de dibujar, también durante una transición de vista.
+      { index: true, loader: () => redirect('/ventanilla/pacientes') },
       { path: 'pacientes', element: <PatientSearchPage /> },
       { path: 'pacientes/nuevo', element: <PatientCreatePage /> },
       { path: 'pacientes/:patientId', element: <PatientDetailPage /> },

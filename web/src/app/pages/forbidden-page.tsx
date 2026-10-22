@@ -22,7 +22,7 @@ export function ForbiddenPage() {
           description={`Tu perfil de ${formatRole(user.role)} no incluye esta opción. Si crees que es un error, comunícate con el administrador del sistema.`}
           action={
             <Button.Root variant='neutral' mode='stroke' size='small' asChild>
-              <Link to={roleHome(user.role)}>
+              <Link viewTransition to={roleHome(user.role)}>
                 <Button.Icon as={RiArrowLeftLine} />
                 Ir a mi inicio
               </Link>

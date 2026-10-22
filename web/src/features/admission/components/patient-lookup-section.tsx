@@ -59,7 +59,7 @@ export function PatientLookupSection({
         }
         action={
           <Button.Root variant='primary' mode='filled' size='small' asChild>
-            <Link to={registerPatientPath(lookup)}>
+            <Link viewTransition to={registerPatientPath(lookup)}>
               <Button.Icon as={RiUserAddLine} />
               Registrar paciente
             </Link>

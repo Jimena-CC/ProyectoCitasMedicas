@@ -290,7 +290,7 @@ export function BookAppointmentPage() {
                     description={`Revisa el número ${formatDocument(lookup.documentType, lookup.documentNumber)} o regístralo para poder agendarle una cita.`}
                     action={
                       <Button.Root variant='primary' mode='filled' size='small' asChild>
-                        <Link to={registerPatientPath(lookup)}>
+                        <Link viewTransition to={registerPatientPath(lookup)}>
                           <Button.Icon as={RiUserAddLine} />
                           Registrar paciente
                         </Link>
@@ -530,7 +530,7 @@ function BookingConfirmation({ appointment, patient, onAnother }: BookingConfirm
             Agendar otra
           </Button.Root>
           <Button.Root variant='primary' mode='filled' size='medium' className='w-full' asChild>
-            <Link to={patientDetailPath(patient, 'citas')}>
+            <Link viewTransition to={patientDetailPath(patient, 'citas')}>
               <Button.Icon as={RiCalendarLine} />
               Ver citas del paciente
             </Link>

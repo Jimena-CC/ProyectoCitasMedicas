@@ -77,7 +77,7 @@ export function PatientDetailPage() {
             description={patientId === null ? 'El enlace no corresponde a un paciente válido.' : getErrorMessage(query.error)}
             action={
               <Button.Root variant='primary' mode='filled' size='small' asChild>
-                <Link to='/ventanilla/pacientes'>
+                <Link viewTransition to='/ventanilla/pacientes'>
                   <Button.Icon as={RiSearchLine} />
                   Buscar paciente
                 </Link>
@@ -111,13 +111,13 @@ export function PatientDetailPage() {
         actions={
           <>
             <Button.Root variant='neutral' mode='stroke' size='small' asChild>
-              <Link to='/ventanilla/pacientes'>
+              <Link viewTransition to='/ventanilla/pacientes'>
                 <Button.Icon as={RiSearchLine} />
                 Buscar otro
               </Link>
             </Button.Root>
             <Button.Root variant='primary' mode='filled' size='small' asChild>
-              <Link to={bookingPath(patient)}>
+              <Link viewTransition to={bookingPath(patient)}>
                 <Button.Icon as={RiCalendarCheckLine} />
                 Agendar cita
               </Link>

@@ -26,3 +26,38 @@ body {
     @apply bg-bg-white-0 text-text-strong-950 antialiased;
   }
 }
+
+/*
+ * Transiciones entre páginas con la View Transitions API. React Router las activa en los enlaces y en las
+ * navegaciones que llevan la opción `viewTransition`. El menú lateral se mantiene en su lugar y solo el
+ * contenido se desvanece y entra con un leve desplazamiento hacia arriba.
+ */
+::view-transition-old(app-content) {
+  animation: 120ms cubic-bezier(0.4, 0, 1, 1) both vt-fade-out;
+}
+
+::view-transition-new(app-content) {
+  animation: 240ms cubic-bezier(0, 0, 0.2, 1) 60ms both vt-fade-in-up;
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* Sin animaciones si el sistema pide reducir el movimiento */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
