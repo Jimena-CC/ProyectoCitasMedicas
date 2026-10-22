@@ -4,13 +4,13 @@ import {
   RiErrorWarningFill,
   RiEyeLine,
   RiEyeOffLine,
-  RiHeartPulseFill,
   RiInformationFill,
   RiLoader4Line,
   RiLock2Line,
   RiUserLine,
 } from '@remixicon/react';
 
+import { BrandLogo } from '@/components/brand-logo';
 import * as Alert from '@/components/ui/alert';
 import * as Button from '@/components/ui/button';
 import * as Hint from '@/components/ui/hint';
@@ -88,10 +88,8 @@ export function LoginPage() {
     <div className='flex min-h-screen items-center justify-center bg-bg-weak-50 px-4 py-10'>
       <div className='w-full max-w-[420px]'>
         <div className='flex flex-col gap-6 rounded-20 bg-bg-white-0 p-8 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200'>
-          <div className='flex flex-col items-center gap-3 text-center'>
-            <div className='flex size-12 items-center justify-center rounded-full bg-primary-base text-text-white-0 shadow-regular-xs'>
-              <RiHeartPulseFill className='size-6' />
-            </div>
+          <div className='flex flex-col items-center gap-5 text-center'>
+            <BrandLogo className='h-auto w-[280px] text-primary-dark' />
             <div className='flex flex-col gap-1'>
               <h1 className='text-title-h5 text-text-strong-950'>MediCitas Anglo</h1>
               <p className='text-paragraph-sm text-text-sub-600'>Backoffice · Ingresa con tu usuario del personal</p>

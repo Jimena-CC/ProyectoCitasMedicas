@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router';
-import { RiExpandUpDownLine, RiHeartPulseFill, RiLogoutBoxRLine } from '@remixicon/react';
+import { RiExpandUpDownLine, RiLogoutBoxRLine } from '@remixicon/react';
 
+import { BrandLogo } from '@/components/brand-logo';
 import * as Avatar from '@/components/ui/avatar';
 import * as Divider from '@/components/ui/divider';
 import * as Dropdown from '@/components/ui/dropdown';
@@ -24,14 +25,9 @@ export function Sidebar() {
 
   return (
     <aside className='flex w-64 shrink-0 flex-col gap-4 border-r border-stroke-soft-200 bg-bg-white-0 px-4 py-5'>
-      <div className='flex items-center gap-3 px-2'>
-        <div className='flex size-9 items-center justify-center rounded-10 bg-primary-base text-text-white-0 shadow-regular-xs'>
-          <RiHeartPulseFill className='size-5' />
-        </div>
-        <div className='min-w-0'>
-          <div className='truncate text-label-sm text-text-strong-950'>MediCitas Anglo</div>
-          <div className='truncate text-paragraph-xs text-text-sub-600'>Backoffice</div>
-        </div>
+      <div className='flex flex-col gap-2 px-2 pt-1'>
+        <BrandLogo className='h-auto w-full text-primary-dark' />
+        <div className='text-paragraph-xs text-text-sub-600'>MediCitas · Backoffice</div>
       </div>
 
       <Divider.Root />

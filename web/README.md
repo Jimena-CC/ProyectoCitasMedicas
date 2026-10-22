@@ -58,6 +58,7 @@ web/
 │   │   └── pages/             # forbidden (403), not-found (404), under-construction, route-error
 │   ├── components/
 │   │   ├── ui/                # componentes oficiales AlignUI (instalados con shadcn, no editar a mano)
+│   │   ├── brand-logo.tsx     # BrandLogo: logo de la Clínica Anglo Americana, toma el color del texto (currentColor)
 │   │   ├── page-header.tsx    # PageHeader: título, descripción, acciones; fija el título de la pestaña
 │   │   ├── card.tsx           # Card y CardHeader (tarjeta blanca estándar)
 │   │   ├── data-table.tsx     # DataTable sobre @tanstack/react-table + Table AlignUI (carga, vacío, error, paginación)
