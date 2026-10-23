@@ -52,7 +52,6 @@ if (¿Paciente registrado?) then (No)
     y registros duplicados
   end note
 else (Sí)
-else (Sí)
 endif
 
 |Paciente|
