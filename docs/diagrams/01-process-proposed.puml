@@ -31,64 +31,85 @@ start
 |Kiosko (JavaFX)|
 -[dashed]->
 :Consultar paciente\nGET /patients?documentType&documentNumber;
+-[dashed]->
+:Consultar paciente\nGET /patients?documentType&documentNumber;
 
 |API MediCitas|
+-[dashed]->
 -[dashed]->
 :Buscar por documento (RF-02);
 
 if (¿Paciente registrado?) then (No)
   |Paciente|
   -[dashed]->
+  -[dashed]->
   :Completar datos personales y de contacto;
   |Kiosko (JavaFX)|
   -[dashed]->
+  -[dashed]->
   :Validar formato (DNI de 8 dígitos, correo, celular);
   |API MediCitas|
+  -[dashed]->
+  :Registrar paciente\nPOST /patients (RF-01);
   -[dashed]->
   :Registrar paciente\nPOST /patients (RF-01);
   if (¿Documento ya existe?) then (Sí)
     :Responder 409 DUPLICATE_DOCUMENT;
     |Kiosko (JavaFX)|
     -[dashed]->
-    :Recuperar el perfil existente;
+    :Recuperar el perfil existente (RF-02);
+  else (No)
+    :Responder 201 con el perfil creado;
   endif
 endif
 
 |Paciente|
 -[dashed]->
+-[dashed]->
 :Elegir aseguradora y plan, o atención particular;
 |API MediCitas|
 -[dashed]->
-:Asociar seguro al paciente (RF-03);
+:Asociar seguro al paciente
+PUT /patients/{id}/insurance (RF-03);
 
 |Paciente|
 -[dashed]->
+-[dashed]->
 :Elegir especialidad y sede;
 |API MediCitas|
+-[dashed]->
 -[dashed]->
 :Listar especialidades activas por sede (RF-04);
 
 repeat
   |Paciente|
   -[dashed]->
+  -[dashed]->
   :Elegir fecha en la franja de 14 días;
   |API MediCitas|
+  -[dashed]->
   -[dashed]->
   :Consultar cupos FREE del rango (RF-05);
   note right: Respuesta ≤ 3 s (RNF-04)
   |Kiosko (JavaFX)|
   -[dashed]->
+  -[dashed]->
   :Mostrar horarios agrupados por médico;
   |Paciente|
+  -[dashed]->
   -[dashed]->
   :Seleccionar horario e indicar motivo de consulta;
   :Confirmar reserva;
   |Kiosko (JavaFX)|
   -[dashed]->
+  -[dashed]->
   :Enviar POST /appointments con Idempotency-Key;
   |API MediCitas|
   -[dashed]->
+  -[dashed]->
   :Abrir transacción;
+  :Verificar que el cupo sea futuro
+y que la cobertura esté vigente;
   :Tomar cupo actualizando su versión (RF-07);
   :Verificar cruce con otra cita del paciente (RF-08);
 repeat while (¿Cupo tomado o cita duplicada? → 409) is (Sí, elegir otro horario)
@@ -97,25 +118,31 @@ repeat while (¿Cupo tomado o cita duplicada? → 409) is (Sí, elegir otro hora
 |API MediCitas|
 :Crear cita BOOKED con código único;
 :Marcar cupo como BOOKED;
-:Registrar evento BOOKING en historial;
-:Programar notificaciones\nCONFIRMATION (inmediata) y REMINDER (24 h antes) (RF-12);
+:Registrar evento BOOKING en appointment_history;
+:Programar notificaciones CONFIRMATION por correo (inmediata)\ny REMINDER por SMS (24 h antes) (RF-11, RF-12);
 :Confirmar transacción y responder 201;
 
 fork
   |Kiosko (JavaFX)|
   -[dashed]->
+  -[dashed]->
   :Mostrar código de cita, médico, sede, fecha y hora;
   |Paciente|
   -[dashed]->
+  -[dashed]->
   :Revisar el resumen de su cita;
+  -[dashed]->
   -[dashed]->
 fork again
   |API MediCitas|
-  :Enviar confirmación al proveedor (RF-11);
+  :Enviar confirmación al proveedor
+tras confirmar la transacción (RF-11);
   |Servicio de Mensajería|
+  -[dashed]->
   -[dashed]->
   :Entregar correo / SMS;
   |API MediCitas|
+  -[dashed]->
   -[dashed]->
   if (¿Proveedor respondió OK?) then (Sí)
     :Notificación SENT (RF-13);
@@ -129,6 +156,7 @@ fork again
 end fork
 
 |Paciente|
+-[dashed]->
 -[dashed]->
 :Recibir confirmación;
 stop

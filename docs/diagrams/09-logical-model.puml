@@ -1,5 +1,5 @@
 @startuml
-title 06 - Modelo lógico - MediCitas Anglo
+title 09 - Modelo lógico - MediCitas Anglo
 
 skinparam shadowing false
 skinparam roundCorner 10
@@ -86,7 +86,7 @@ entity patient {
   * document_number : VARCHAR(12)
   * first_names : VARCHAR(100)
   * last_names : VARCHAR(100)
-  birth_date : DATE
+  * birth_date : DATE
   sex : CHAR(1)
   * phone : VARCHAR(15)
   * email : VARCHAR(120)
@@ -114,6 +114,7 @@ entity slot {
   * end_time : TIME
   room : VARCHAR(20)
   * status : VARCHAR(10)
+  * version : INT
 }
 
 entity appointment {
@@ -123,7 +124,7 @@ entity appointment {
   * patient_id : INT <<FK>>
   * slot_id : INT <<FK>>
   patient_insurance_id : INT <<FK>>
-  visit_reason : VARCHAR(250)
+  * visit_reason : VARCHAR(250)
   * status : VARCHAR(12)
   * booking_channel : VARCHAR(10)
   * idempotency_key : VARCHAR(36)

@@ -1,5 +1,5 @@
 @startuml
-title 07 - Modelo físico - MediCitas Anglo (PostgreSQL 15)
+title 10 - Modelo físico - MediCitas Anglo (PostgreSQL 15)
 
 skinparam shadowing false
 skinparam roundCorner 10
@@ -88,7 +88,7 @@ entity patient {
   * document_number : VARCHAR(12)
   * first_names : VARCHAR(100)
   * last_names : VARCHAR(100)
-  birth_date : DATE
+  * birth_date : DATE
   sex : CHAR(1)
   * phone : VARCHAR(15)
   * email : VARCHAR(120)
@@ -135,7 +135,7 @@ entity appointment {
   * patient_id : BIGINT <<FK>>
   * slot_id : BIGINT <<FK>>
   patient_insurance_id : BIGINT <<FK>>
-  visit_reason : VARCHAR(250)
+  * visit_reason : VARCHAR(250)
   * status : VARCHAR(12) = BOOKED
   * booking_channel : VARCHAR(10)
   * idempotency_key : UUID <<UK>>

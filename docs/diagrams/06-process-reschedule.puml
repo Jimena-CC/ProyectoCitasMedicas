@@ -1,5 +1,5 @@
 @startuml
-title 06 - Proceso propuesto (TO-BE) - Reprogramar una cita desde el Kiosko
+title 06a - Proceso propuesto (TO-BE) - Reprogramar una cita desde el Kiosko
 
 skinparam shadowing false
 skinparam roundCorner 10
@@ -34,15 +34,19 @@ skinparam note {
 start
 :Identificarse con su documento;
 -[#2F5D56,dashed]->
+-[#2F5D56,dashed]->
 
 |Kiosko (JavaFX)|
 :Abrir "Mis citas";
 -[#2F5D56,dashed]->
+-[#2F5D56,dashed]->
 
 |API MediCitas|
 :Listar citas BOOKED futuras\nGET /patients/{id}/appointments;
+:Listar citas BOOKED futuras\nGET /patients/{id}/appointments;
 
 if (¿Tiene citas activas?) then (No)
+  -[#2F5D56,dashed]->
   -[#2F5D56,dashed]->
   |Kiosko (JavaFX)|
   :Ofrecer reservar una nueva cita;
@@ -50,23 +54,36 @@ if (¿Tiene citas activas?) then (No)
 else (Sí)
 endif
 -[#2F5D56,dashed]->
+-[#2F5D56,dashed]->
 
 |Paciente|
 :Seleccionar la cita y elegir "Reprogramar";
 -[#2F5D56,dashed]->
 
+|API MediCitas|
+if (¿La cita está BOOKED y aún no inicia?) then (No)
+  :Responder 422 APPOINTMENT_NOT_MODIFIABLE;
+  -[#2F5D56,dashed]->
+  |Kiosko (JavaFX)|
+  :Mostrar el motivo al paciente;
+  stop
+else (Sí)
+endif
+
 repeat
   |API MediCitas|
-  :Consultar cupos FREE de la misma\nespecialidad y sede (RF-05);
+  :Consultar cupos FREE de la misma\nespecialidad (RF-05);
   -[#2F5D56,dashed]->
   |Paciente|
   :Elegir nuevo horario;
   -[#2F5D56,dashed]->
+  -[#2F5D56,dashed]->
   |Kiosko (JavaFX)|
   :Enviar PATCH /appointments/{id}/reschedule;
   -[#2F5D56,dashed]->
+  -[#2F5D56,dashed]->
   |API MediCitas|
-  :Validar que la cita esté BOOKED\ny que aún no haya iniciado;
+  :Verificar que el cupo nuevo sea distinto, futuro\ny de la misma especialidad (RF-09);
   :Tomar el cupo nuevo actualizando su versión (RF-07);
   :Verificar cruce con otra cita del paciente (RF-08);
 repeat while (¿Cupo tomado o cita duplicada? → 409) is (Sí, elegir otro horario)
@@ -74,17 +91,23 @@ repeat while (¿Cupo tomado o cita duplicada? → 409) is (Sí, elegir otro hora
 
 :Liberar el cupo original (RF-09);
 :Incrementar reschedule_count;
-:Registrar evento RESCHEDULE\ncon cupo anterior y nuevo;
-:Cancelar recordatorio pendiente\ny programar uno para la nueva fecha;
-:Programar notificación RESCHEDULE;
+:Registrar evento RESCHEDULE en appointment_history\ncon cupo anterior y nuevo;
+:Cancelar recordatorio PENDING\ny programar uno para la nueva fecha (SMS);
+:Programar notificación RESCHEDULE por correo;
+:Confirmar transacción y responder 200;
 -[#2F5D56,dashed]->
 
 |Kiosko (JavaFX)|
 :Mostrar la cita con su nueva fecha y hora;
 -[#2F5D56,dashed]->
 
+|API MediCitas|
+:Enviar el aviso al proveedor (RF-11, RF-14);
+-[#2F5D56,dashed]->
+
 |Servicio de Mensajería|
 :Entregar aviso de reprogramación;
+-[#2F5D56,dashed]->
 -[#2F5D56,dashed]->
 
 |Paciente|
