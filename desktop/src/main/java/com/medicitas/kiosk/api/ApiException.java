@@ -8,6 +8,7 @@ import java.util.List;
 public class ApiException extends RuntimeException {
 
     public static final String NO_CONNECTION = "NO_CONNECTION";
+    public static final String PATIENT_NOT_FOUND = "PATIENT_NOT_FOUND";
     public static final String NO_CONNECTION_MESSAGE =
             "No pudimos conectar con el sistema de citas. Inténtalo nuevamente en unos segundos.";
     private static final String GENERIC_MESSAGE =
@@ -48,6 +49,15 @@ public class ApiException extends RuntimeException {
 
     public boolean isNotFound() {
         return status == 404;
+    }
+
+    /**
+     * Indica que la API respondió que el documento no está registrado ({@code PATIENT_NOT_FOUND}).
+     * Un 404 sin ese código (por ejemplo, una URL de la API mal configurada) no cuenta como
+     * "paciente nuevo": se trata como error para no llevar al paciente a un registro que fallará.
+     */
+    public boolean isPatientNotFound() {
+        return status == 404 && PATIENT_NOT_FOUND.equals(code);
     }
 
     /** Conflictos de agenda que obligan a elegir otro horario (RF-07, RF-08). */

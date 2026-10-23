@@ -213,7 +213,7 @@ public class IdentificationScreen extends Screen {
                     ctx.updateNavigation();
                 },
                 failure -> {
-                    if (failure.isNotFound()) {
+                    if (failure.isPatientNotFound()) {
                         ctx.session().patientNotRegistered();
                         ctx.advance();
                     } else {
