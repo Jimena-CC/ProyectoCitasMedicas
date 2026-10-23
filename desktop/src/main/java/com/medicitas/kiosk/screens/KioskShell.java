@@ -278,6 +278,11 @@ public class KioskShell implements KioskContext {
         text.setWrapText(true);
         Button resume = new Button("Sí, continuar");
         resume.getStyleClass().addAll("kiosk-button", "accent");
+        resume.setOnAction(e -> {
+            stopCountdown();
+            closeDialog();
+            inactivity.playFromStart();
+        });
         HBox row = new HBox(20, seconds, new VBox(6, title, text));
         row.setAlignment(Pos.CENTER_LEFT);
         HBox actions = new HBox(resume);
