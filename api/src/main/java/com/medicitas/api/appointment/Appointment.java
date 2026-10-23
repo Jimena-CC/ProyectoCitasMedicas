@@ -94,6 +94,32 @@ public class Appointment {
         this.updatedAt = now;
     }
 
+    // Issue #45: módulos de médico y admisión
+    /**
+     * Registra el resultado de la atención: el paciente fue atendido o no se presentó.
+     * No valida el estado previo ni la fecha; esas reglas viven en {@code DoctorAgendaService}.
+     *
+     * @param outcome {@link AppointmentStatus#ATTENDED} o {@link AppointmentStatus#NO_SHOW}
+     * @param now     instante del registro; queda como {@code updatedAt}
+     * @throws IllegalArgumentException si {@code outcome} no es un resultado de asistencia
+     */
+    public void registerAttendance(AppointmentStatus outcome, Instant now) {
+        if (outcome != AppointmentStatus.ATTENDED && outcome != AppointmentStatus.NO_SHOW) {
+            throw new IllegalArgumentException("El resultado de asistencia debe ser ATTENDED o NO_SHOW: " + outcome);
+        }
+        this.status = outcome;
+        this.updatedAt = now;
+    }
+
+    /**
+     * Indica si la cita ya tiene registrado su resultado de asistencia.
+     *
+     * @return {@code true} si el estado es {@link AppointmentStatus#ATTENDED} o {@link AppointmentStatus#NO_SHOW}
+     */
+    public boolean hasAttendanceRegistered() {
+        return status == AppointmentStatus.ATTENDED || status == AppointmentStatus.NO_SHOW;
+    }
+
     public Long getId() {
         return id;
     }
@@ -140,5 +166,26 @@ public class Appointment {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    // Issue #46: resultado de la atención (usado por los datos de demostración y los reportes)
+
+    /**
+     * Cierra una cita reservada con su resultado: atendida o no asistió.
+     *
+     * @param outcome {@link AppointmentStatus#ATTENDED} o {@link AppointmentStatus#NO_SHOW}
+     * @param now     instante del registro
+     * @throws IllegalArgumentException si el resultado no es atendida ni inasistencia
+     * @throws IllegalStateException    si la cita no está reservada
+     */
+    public void registerOutcome(AppointmentStatus outcome, Instant now) {
+        if (outcome != AppointmentStatus.ATTENDED && outcome != AppointmentStatus.NO_SHOW) {
+            throw new IllegalArgumentException("El resultado de la atención debe ser ATTENDED o NO_SHOW");
+        }
+        if (status != AppointmentStatus.BOOKED) {
+            throw new IllegalStateException("Solo una cita reservada puede registrar su resultado");
+        }
+        this.status = outcome;
+        this.updatedAt = now;
     }
 }

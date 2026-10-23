@@ -58,15 +58,68 @@ endif
 |Personal de Admisión / Central de Citas|
 -[dashed]->
 :Validar cobertura con la aseguradora;
+-[dashed]->
+:Validar cobertura con la aseguradora
+(llamada telefónica o portal del seguro);
+note right
+  <b>Problema:</b> validación manual,
+  lenta y sin registro
+end note
 :Consultar agenda de médicos por sede;
 
 if (¿Hay cupos disponibles?) then (No)
-  :Informar falta de cupos;
+  :Informar falta de cupos de forma verbal;
   |Paciente|
   -[dashed]->
   :Volver a llamar otro día;
   stop
 else (Sí)
+  |Personal de Admisión / Central de Citas|
+  :Ofrecer horarios de forma verbal;
+  |Paciente|
+  -[dashed]->
+  :Elegir horario;
+  |Personal de Admisión / Central de Citas|
+  -[dashed]->
+  :Registrar la cita en la agenda;
+  note right
+    <b>Problema recurrente:</b> doble agendamiento
+    cuando otro operador toma el mismo cupo
+    al mismo tiempo
+  end note
+  :Comunicar fecha, hora y sede de forma verbal;
+  |Paciente|
+  -[dashed]->
+  :Anotar los datos de la cita;
+  note right
+    <b>Problema:</b> no recibe confirmación
+    ni recordatorio escrito → ausentismo
+  end note
+  stop
+endif
+  |Personal de Admisión / Central de Citas|
+  :Ofrecer horarios de forma verbal;
+  |Paciente|
+  -[dashed]->
+  :Elegir horario;
+  |Personal de Admisión / Central de Citas|
+  -[dashed]->
+  :Registrar la cita en la agenda;
+  note right
+    <b>Problema recurrente:</b> doble agendamiento
+    cuando otro operador toma el mismo cupo
+    al mismo tiempo
+  end note
+  :Comunicar fecha, hora y sede de forma verbal;
+  |Paciente|
+  -[dashed]->
+  :Anotar los datos de la cita;
+  note right
+    <b>Problema:</b> no recibe confirmación
+    ni recordatorio escrito → ausentismo
+  end note
+  stop
+endif
   |Personal de Admisión / Central de Citas|
   :Ofrecer horarios de forma verbal;
   |Paciente|

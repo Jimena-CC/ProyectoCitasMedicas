@@ -82,4 +82,33 @@ public class Doctor {
     public boolean isActive() {
         return active;
     }
+
+    // Issue #46: edición desde el panel de administración
+
+    /**
+     * Actualiza los datos editables del médico.
+     *
+     * @param license            número de colegiatura (CMP), único
+     * @param specialistRegistry registro de especialista (RNE), puede ser nulo
+     * @param firstNames         nombres
+     * @param lastNames          apellidos
+     * @param specialty          especialidad que atiende
+     */
+    public void update(String license, String specialistRegistry, String firstNames, String lastNames,
+                       Specialty specialty) {
+        this.license = license;
+        this.specialistRegistry = specialistRegistry;
+        this.firstNames = firstNames;
+        this.lastNames = lastNames;
+        this.specialty = specialty;
+    }
+
+    /**
+     * Activa o desactiva al médico; los cupos de un médico inactivo no se muestran en el kiosko.
+     *
+     * @param active {@code true} para que vuelva a atender
+     */
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 }

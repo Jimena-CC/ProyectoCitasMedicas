@@ -1,6 +1,8 @@
 package com.medicitas.api.schedule;
 
 import com.medicitas.api.catalog.LocationRepository;
+import com.medicitas.api.catalog.LocationSpecialtyRepository;
+import com.medicitas.api.catalog.Specialty;
 import com.medicitas.api.catalog.SpecialtyRepository;
 import com.medicitas.api.common.BusinessException;
 import com.medicitas.api.common.ErrorCodes;
@@ -27,19 +29,24 @@ public class AvailabilityService {
     private final SlotRepository slotRepository;
     private final SpecialtyRepository specialtyRepository;
     private final LocationRepository locationRepository;
+    private final LocationSpecialtyRepository locationSpecialtyRepository;
     private final Clock clock;
 
     public AvailabilityService(SlotRepository slotRepository, SpecialtyRepository specialtyRepository,
-                               LocationRepository locationRepository, Clock clock) {
+                               LocationRepository locationRepository,
+                               LocationSpecialtyRepository locationSpecialtyRepository, Clock clock) {
         this.slotRepository = slotRepository;
         this.specialtyRepository = specialtyRepository;
         this.locationRepository = locationRepository;
+        this.locationSpecialtyRepository = locationSpecialtyRepository;
         this.clock = clock;
     }
 
     /**
      * Cupos libres y futuros de una especialidad en una sede (RF-05). Incluye los días sin cupos
-     * para que el kiosko pinte la franja de fechas completa.
+     * para que el kiosko pinte la franja de fechas completa. Si la especialidad está inactiva o la sede
+     * dejó de atenderla (cambios del administrador, issue #46), responde todos los días sin cupos; los
+     * cupos de médicos inactivos tampoco se muestran.
      */
     @Transactional(readOnly = true)
     public AvailabilityResponse query(Long specialtyId, Long locationId, LocalDate from, LocalDate to) {
@@ -49,15 +56,16 @@ public class AvailabilityService {
         if (ChronoUnit.DAYS.between(from, to) + 1 > MAX_DAYS) {
             throw BusinessException.invalidData("to", "Puedes consultar como máximo 14 días a la vez.");
         }
-        if (!specialtyRepository.existsById(specialtyId)) {
-            throw BusinessException.notFound(ErrorCodes.RESOURCE_NOT_FOUND, "La especialidad seleccionada no existe.");
-        }
+        Specialty specialty = specialtyRepository.findById(specialtyId)
+                .orElseThrow(() -> BusinessException.notFound(ErrorCodes.RESOURCE_NOT_FOUND,
+                        "La especialidad seleccionada no existe."));
         if (!locationRepository.existsById(locationId)) {
             throw BusinessException.notFound(ErrorCodes.RESOURCE_NOT_FOUND, "La sede seleccionada no existe.");
         }
 
         LocalDateTime now = LocalDateTime.now(clock);
-        Map<LocalDate, List<SlotResponse>> slotsByDate = slotRepository
+        boolean offered = specialty.isActive() && locationSpecialtyRepository.isOffered(locationId, specialtyId);
+        Map<LocalDate, List<SlotResponse>> slotsByDate = !offered ? Map.of() : slotRepository
                 .findBySpecialtyLocationAndRange(specialtyId, locationId, SlotStatus.FREE, from, to).stream()
                 .filter(slot -> slot.getStart().isAfter(now))
                 .collect(Collectors.groupingBy(Slot::getDate,

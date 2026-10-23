@@ -35,6 +35,28 @@ public class BusinessException extends RuntimeException {
         return new BusinessException(UNPROCESSABLE, code, message, List.of());
     }
 
+    /**
+     * Error {@code 401}: no hay sesión o las credenciales no son válidas.
+     *
+     * @param code    código del contrato, por ejemplo {@link ErrorCodes#UNAUTHORIZED}
+     * @param message mensaje para el usuario
+     * @return la excepción
+     */
+    public static BusinessException unauthorized(String code, String message) {
+        return new BusinessException(HttpStatus.UNAUTHORIZED, code, message, List.of());
+    }
+
+    /**
+     * Error {@code 403}: hay sesión pero el usuario no puede realizar la acción.
+     *
+     * @param code    código del contrato, por ejemplo {@link ErrorCodes#FORBIDDEN}
+     * @param message mensaje para el usuario
+     * @return la excepción
+     */
+    public static BusinessException forbidden(String code, String message) {
+        return new BusinessException(HttpStatus.FORBIDDEN, code, message, List.of());
+    }
+
     public static BusinessException invalidData(String field, String message) {
         return new BusinessException(HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_DATA, message,
                 List.of(new ErrorResponse.FieldError(field, message)));

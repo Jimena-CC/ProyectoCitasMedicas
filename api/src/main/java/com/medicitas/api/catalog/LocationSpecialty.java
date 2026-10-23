@@ -57,6 +57,17 @@ public class LocationSpecialty {
         return active;
     }
 
+    // Issue #46: edición desde el panel de administración
+
+    /**
+     * Activa o desactiva la atención de la especialidad en la sede sin borrar la relación.
+     *
+     * @param active {@code true} si la sede atiende la especialidad
+     */
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     @Embeddable
     public static class Id implements Serializable {
 

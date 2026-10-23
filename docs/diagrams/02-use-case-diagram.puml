@@ -7,6 +7,9 @@ skinparam shadowing false
 skinparam roundCorner 10
 skinparam defaultFontName "Helvetica"
 skinparam defaultFontSize 12
+skinparam nodesep 10
+skinparam ranksep 60
+skinparam packageStyle rectangle
 
 skinparam actor {
   BorderColor #2F5D56
@@ -26,40 +29,72 @@ skinparam package {
   BorderStyle dashed
 }
 
-rectangle "MediCitas Anglo" {
-
-  package "Fase 1 - Autoatención" {
-    usecase "Registrar paciente" as UC01
-    usecase "Identificar paciente" as UC02
-    usecase "Asociar aseguradora" as UC03
-    usecase "Consultar especialidades" as UC04
-    usecase "Consultar disponibilidad" as UC05
-    usecase "Reservar cita" as UC06
-    usecase "Reprogramar cita" as UC07
-    usecase "Anular cita" as UC08
-  }
-
-  package "Fase 2 - Gestión Interna" {
-    usecase "Gestionar citas" as UC11
-    usecase "Validar aseguradora" as UC12
-    usecase "Consultar agenda" as UC13
-    usecase "Registrar asistencia" as UC14
-    usecase "Gestionar usuarios" as UC15
-    usecase "Revisar auditoría" as UC16
-  }
-
-  package "Notificaciones" {
-    usecase "Enviar confirmación" as UC09
-    usecase "Enviar recordatorio" as UC10
-  }
+skinparam legend {
+  BackgroundColor #FFF8E6
+  BorderColor #D9B45A
+  FontColor #3D3321
 }
 
-actor Paciente
+' ---------------------------------------------------------------
+' Actores (los internos usan el Backoffice web; el Paciente, el Kiosco)
+' ---------------------------------------------------------------
+actor Paciente as Paciente
 actor "Personal de Admisión" as Admision
-actor Médico
-actor Administrador
+actor Médico as Medico
+actor Administrador as Admin
 actor "Servicio de Mensajería" as Mensajeria
 
+' ---------------------------------------------------------------
+' Casos de uso
+' ---------------------------------------------------------------
+package "Fase 1 - Autoatención (Kiosco)" {
+  usecase "CU-001\nRegistrar paciente" as UC01
+  usecase "CU-002\nIdentificar paciente" as UC02
+  usecase "CU-003\nAsociar aseguradora" as UC03
+  usecase "CU-004\nConsultar especialidades" as UC04
+  usecase "CU-005\nConsultar disponibilidad" as UC05
+  usecase "CU-006\nReservar cita" as UC06
+  usecase "CU-007\nReprogramar cita" as UC07
+  usecase "CU-008\nAnular cita" as UC08
+}
+
+package "Notificaciones" {
+  usecase "CU-009\nEnviar confirmación" as UC09
+  usecase "CU-010\nEnviar recordatorio" as UC10
+}
+
+package "Fase 2 - Backoffice web: Admisión" {
+  usecase "CU-016\nBuscar paciente" as UC16
+  usecase "CU-017\nValidar aseguradora" as UC17
+  usecase "CU-018\nAgendar cita en ventanilla" as UC18
+  usecase "CU-019\nReprogramar cita\nen ventanilla" as UC19
+  usecase "CU-020\nAnular cita en ventanilla" as UC20
+}
+
+package "Fase 2 - Backoffice web: Seguridad y auditoría" {
+  usecase "CU-011\nIniciar sesión" as UC11
+  usecase "CU-012\nCerrar sesión" as UC12
+  usecase "CU-013\nRegistrar auditoría" as UC13
+}
+
+package "Fase 2 - Backoffice web: Médico" {
+  usecase "CU-014\nConsultar agenda del día" as UC14
+  usecase "CU-015\nRegistrar asistencia\no inasistencia" as UC15
+}
+
+package "Fase 2 - Backoffice web: Administración" {
+  usecase "CU-021\nGestionar usuarios" as UC21
+  usecase "CU-022\nGestionar médicos" as UC22
+  usecase "CU-023\nGestionar especialidades" as UC23
+  usecase "CU-024\nGestionar agendas\ny horarios" as UC24
+  usecase "CU-025\nRevisar auditoría" as UC25
+  usecase "CU-026\nGenerar reportes" as UC26
+  usecase "CU-027\nExportar reportes" as UC27
+}
+
+' ---------------------------------------------------------------
+' Paciente (Fase 1, Kiosco)
+' ---------------------------------------------------------------
 Paciente --> UC01
 Paciente --> UC02
 Paciente --> UC03
@@ -69,19 +104,74 @@ Paciente --> UC06
 Paciente --> UC07
 Paciente --> UC08
 
+UC06 ..> UC05 : <<include>>
+UC07 ..> UC05 : <<include>>
 UC06 ..> UC09 : <<include>>
 UC06 ..> UC10 : <<include>>
+UC07 ..> UC09 : <<include>>
+UC07 ..> UC10 : <<include>>
+UC08 ..> UC09 : <<include>>
 
-Admision --> UC11
+UC09 --> Mensajeria
+UC10 --> Mensajeria
+
+' ---------------------------------------------------------------
+' Personal de Admisión (Fase 2, Backoffice web)
+' ---------------------------------------------------------------
+Admision --> UC16
+Admision --> UC18
+Admision --> UC19
+Admision --> UC20
 Admision --> UC12
 
-Médico --> UC13
-Médico --> UC14
+UC16 ..> UC11 : <<include>>
+UC18 ..> UC16 : <<include>>
+UC19 ..> UC16 : <<include>>
+UC20 ..> UC16 : <<include>>
+UC17 ..> UC18 : <<extend>>
+UC18 ..> UC13 : <<include>>
+UC19 ..> UC13 : <<include>>
+UC20 ..> UC13 : <<include>>
 
-Administrador --> UC15
-Administrador --> UC16
+' ---------------------------------------------------------------
+' Médico (Fase 2, Backoffice web)
+' ---------------------------------------------------------------
+Medico --> UC14
+Medico --> UC15
+Medico --> UC12
 
-UC09 -- Mensajeria
-UC10 -- Mensajeria
+UC14 ..> UC11 : <<include>>
+UC15 ..> UC14 : <<include>>
+UC15 ..> UC13 : <<include>>
+
+' ---------------------------------------------------------------
+' Administrador (Fase 2, Backoffice web)
+' ---------------------------------------------------------------
+Admin --> UC21
+Admin --> UC22
+Admin --> UC23
+Admin --> UC24
+Admin --> UC25
+Admin --> UC26
+Admin --> UC27
+Admin --> UC12
+
+UC21 ..> UC11 : <<include>>
+UC21 ..> UC13 : <<include>>
+UC22 ..> UC13 : <<include>>
+UC23 ..> UC13 : <<include>>
+UC24 ..> UC13 : <<include>>
+UC27 ..> UC26 : <<extend>>
+
+legend right
+  <b>Convenciones</b>
+  Todo caso de uso del Backoffice web (CU-012 a CU-027) incluye
+  <b>CU-011 Iniciar sesión</b>: se dibuja una sola flecha <<include>>
+  por actor para mantener el diagrama legible.
+  <b>CU-013 Registrar auditoría</b> escribe en audit_log quién hizo
+  qué y cuándo (Ley 29733).
+  CU-018, CU-019 y CU-020 generan las mismas notificaciones
+  (CU-009 y CU-010) que CU-006, CU-007 y CU-008.
+endlegend
 
 @enduml

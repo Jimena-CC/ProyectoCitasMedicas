@@ -56,4 +56,35 @@ public interface SlotRepository extends JpaRepository<Slot, Long> {
 
     @Query("select s.status from Slot s where s.id = :slotId")
     SlotStatus findStatusById(@Param("slotId") Long slotId);
+
+    // Issue #46: agenda del administrador y reportes de ocupación
+
+    /**
+     * Cupos de un médico en un rango de fechas, en cualquier estado, con médico y sede cargados.
+     *
+     * @param doctorId id del médico
+     * @param from     primera fecha (inclusive)
+     * @param to       última fecha (inclusive)
+     * @return los cupos ordenados por fecha y hora
+     */
+    @Query("""
+            select s from Slot s
+            join fetch s.doctor d join fetch d.specialty join fetch s.location
+            where d.id = :doctorId and s.date between :from and :to
+            order by s.date, s.startTime""")
+    List<Slot> findByDoctorAndRange(@Param("doctorId") Long doctorId, @Param("from") LocalDate from,
+                                    @Param("to") LocalDate to);
+
+    /**
+     * Todos los cupos de un rango de fechas, en cualquier estado, con médico, especialidad y sede cargados.
+     *
+     * @param from primera fecha (inclusive)
+     * @param to   última fecha (inclusive)
+     * @return los cupos del rango
+     */
+    @Query("""
+            select s from Slot s
+            join fetch s.doctor d join fetch d.specialty join fetch s.location
+            where s.date between :from and :to""")
+    List<Slot> findWithDetailByRange(@Param("from") LocalDate from, @Param("to") LocalDate to);
 }
