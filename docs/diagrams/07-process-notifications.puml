@@ -28,6 +28,9 @@ skinparam note {
 |Servicio de Mensajería|
 
 |Tarea programada (API)|
+|Servicio de Mensajería|
+
+|Tarea programada (API)|
 start
 if (¿Disparador?) then (Reserva, reprogramación o anulación\nrecién confirmada)
   :Recibir los ids de las notificaciones\ninmediatas tras confirmar la transacción;
@@ -42,8 +45,11 @@ while (¿Quedan notificaciones por procesar?) is (Sí)
   else (Sí)
     :Armar mensaje con código, médico,\nsede, fecha y hora de la cita;
     -[#2F5D56,dashed]->
+    :Armar mensaje con código, médico,\nsede, fecha y hora de la cita;
+    -[#2F5D56,dashed]->
     |Servicio de Mensajería|
     :Recibir solicitud de envío (correo / SMS);
+    -[#2F5D56,dashed]->
     -[#2F5D56,dashed]->
     |Tarea programada (API)|
     if (¿Respuesta exitosa?) then (Sí)

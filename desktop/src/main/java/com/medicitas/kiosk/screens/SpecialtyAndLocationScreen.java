@@ -131,6 +131,12 @@ public class SpecialtyAndLocationScreen extends Screen {
     }
 
     private void renderLocations() {
+        if (loadedLocations.isEmpty()) {
+            segmented.getChildren().clear();
+            address.setText("");
+            ctx.showInfo("Por ahora no hay sedes disponibles para reservar desde el kiosko. Acércate a Admisión.");
+            return;
+        }
         rendering = true;
         segmented.getChildren().clear();
         locations.getToggles().clear();

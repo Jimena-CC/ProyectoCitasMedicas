@@ -1,6 +1,5 @@
 @startuml
 title 08 - Modelo conceptual - MediCitas Anglo
-
 skinparam shadowing false
 skinparam roundCorner 10
 skinparam defaultFontName "Helvetica"

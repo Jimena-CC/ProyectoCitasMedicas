@@ -116,6 +116,7 @@ public class DateAndTimeScreen extends Screen {
                 return s.getSlotDate();
             }
             s.scheduleConflict();
+            ctx.showInfo("El horario que habías elegido ya no está disponible. Elige otro horario.");
         }
         return days.stream().filter(d -> d.freeSlots() > 0).map(Dtos.AvailableDay::date).findFirst().orElse(null);
     }
