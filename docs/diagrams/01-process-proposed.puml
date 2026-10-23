@@ -36,16 +36,13 @@ start
 
 |API MediCitas|
 -[dashed]->
--[dashed]->
 :Buscar por documento (RF-02);
 
 if (¿Paciente registrado?) then (No)
   |Paciente|
   -[dashed]->
-  -[dashed]->
   :Completar datos personales y de contacto;
   |Kiosko (JavaFX)|
-  -[dashed]->
   -[dashed]->
   :Validar formato (DNI de 8 dígitos, correo, celular);
   |API MediCitas|
@@ -65,47 +62,37 @@ endif
 
 |Paciente|
 -[dashed]->
--[dashed]->
 :Elegir aseguradora y plan, o atención particular;
 |API MediCitas|
 -[dashed]->
-:Asociar seguro al paciente
-PUT /patients/{id}/insurance (RF-03);
+:Asociar seguro al paciente (RF-03);
 
 |Paciente|
 -[dashed]->
--[dashed]->
 :Elegir especialidad y sede;
 |API MediCitas|
--[dashed]->
 -[dashed]->
 :Listar especialidades activas por sede (RF-04);
 
 repeat
   |Paciente|
   -[dashed]->
-  -[dashed]->
   :Elegir fecha en la franja de 14 días;
   |API MediCitas|
-  -[dashed]->
   -[dashed]->
   :Consultar cupos FREE del rango (RF-05);
   note right: Respuesta ≤ 3 s (RNF-04)
   |Kiosko (JavaFX)|
   -[dashed]->
-  -[dashed]->
   :Mostrar horarios agrupados por médico;
   |Paciente|
-  -[dashed]->
   -[dashed]->
   :Seleccionar horario e indicar motivo de consulta;
   :Confirmar reserva;
   |Kiosko (JavaFX)|
   -[dashed]->
-  -[dashed]->
   :Enviar POST /appointments con Idempotency-Key;
   |API MediCitas|
-  -[dashed]->
   -[dashed]->
   :Abrir transacción;
   :Verificar que el cupo sea futuro
@@ -125,13 +112,10 @@ repeat while (¿Cupo tomado o cita duplicada? → 409) is (Sí, elegir otro hora
 fork
   |Kiosko (JavaFX)|
   -[dashed]->
-  -[dashed]->
   :Mostrar código de cita, médico, sede, fecha y hora;
   |Paciente|
   -[dashed]->
-  -[dashed]->
   :Revisar el resumen de su cita;
-  -[dashed]->
   -[dashed]->
 fork again
   |API MediCitas|
@@ -139,10 +123,8 @@ fork again
 tras confirmar la transacción (RF-11);
   |Servicio de Mensajería|
   -[dashed]->
-  -[dashed]->
   :Entregar correo / SMS;
   |API MediCitas|
-  -[dashed]->
   -[dashed]->
   if (¿Proveedor respondió OK?) then (Sí)
     :Notificación SENT (RF-13);
@@ -156,7 +138,6 @@ tras confirmar la transacción (RF-11);
 end fork
 
 |Paciente|
--[dashed]->
 -[dashed]->
 :Recibir confirmación;
 stop

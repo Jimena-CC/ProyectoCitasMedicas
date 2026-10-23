@@ -30,6 +30,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/${POSTGRES_DB:-citas_medicas_db}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgrespassword}
+      # Clave HMAC de los tokens JWT (mínimo 32 caracteres). Obligatoria: define SECURITY_JWT_SECRET en un
+      # archivo .env junto a este compose o en el entorno; sin ella `docker compose up` se detiene con este aviso.
+      SECURITY_JWT_SECRET: ${SECURITY_JWT_SECRET:?Define SECURITY_JWT_SECRET (mínimo 32 caracteres) en .env o en el entorno}
     depends_on:
       postgres-db:
         condition: service_healthy

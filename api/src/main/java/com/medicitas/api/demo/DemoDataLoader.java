@@ -33,16 +33,21 @@ import com.medicitas.api.patient.PatientRepository;
 import com.medicitas.api.schedule.Slot;
 import com.medicitas.api.schedule.SlotRepository;
 import com.medicitas.api.schedule.SlotStatus;
+import com.medicitas.api.security.AppUser;
+import com.medicitas.api.security.AppUserRepository;
+import com.medicitas.api.security.UserRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.Duration;
@@ -52,6 +57,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -61,6 +67,8 @@ import java.util.UUID;
  * las dos sedes de la clínica, 12 especialidades, médicos y pacientes ficticios, aseguradoras con planes y
  * copagos inventados, y 14 días de agenda (lunes a sábado, 07:00 a 13:00, cupos de 20 minutos) con cerca del
  * 30 % de cupos ya ocupados. Los nombres, CMP, RUC y copagos no corresponden a personas ni contratos reales.
+ * También crea los usuarios del personal: {@code admin}, {@code admision} y un {@code dr.<apellido>} por médico
+ * (credenciales en api/README.md).
  */
 @Component
 public class DemoDataLoader implements ApplicationRunner {
@@ -76,6 +84,14 @@ public class DemoDataLoader implements ApplicationRunner {
     static final String DNI_LUCIA = "45871236";
     static final String DNI_DIEGO = "70123456";
     static final String LUCIA_APPOINTMENT_CODE = "MCA-7K2Q9";
+
+    /** Usuarios de demostración por perfil; las contraseñas son públicas y solo valen para la demo. */
+    public static final String ADMIN_USERNAME = "admin";
+    public static final String ADMIN_PASSWORD = "admin123";
+    public static final String FRONT_DESK_USERNAME = "admision";
+    public static final String FRONT_DESK_PASSWORD = "admision123";
+    public static final String DOCTOR_USERNAME_PREFIX = "dr.";
+    public static final String DOCTOR_PASSWORD = "doctor123";
 
     private static final String[][] SPECIALTIES = {
             {"Cardiología", "Evaluación y control del corazón, la presión arterial y el ritmo cardiaco."},
@@ -140,6 +156,8 @@ public class DemoDataLoader implements ApplicationRunner {
     private final AppointmentRepository appointmentRepository;
     private final AppointmentHistoryRepository appointmentHistoryRepository;
     private final NotificationRepository notificationRepository;
+    private final AppUserRepository appUserRepository;
+    private final PasswordEncoder passwordEncoder;
     private final Clock clock;
 
     public DemoDataLoader(@Value("${clinic.demo-data:false}") boolean enabled,
@@ -149,7 +167,8 @@ public class DemoDataLoader implements ApplicationRunner {
                           PatientRepository patientRepository, PatientInsuranceRepository patientInsuranceRepository,
                           SlotRepository slotRepository, AppointmentRepository appointmentRepository,
                           AppointmentHistoryRepository appointmentHistoryRepository,
-                          NotificationRepository notificationRepository, Clock clock) {
+                          NotificationRepository notificationRepository, AppUserRepository appUserRepository,
+                          PasswordEncoder passwordEncoder, Clock clock) {
         this.enabled = enabled;
         this.locationRepository = locationRepository;
         this.specialtyRepository = specialtyRepository;
@@ -163,9 +182,18 @@ public class DemoDataLoader implements ApplicationRunner {
         this.appointmentRepository = appointmentRepository;
         this.appointmentHistoryRepository = appointmentHistoryRepository;
         this.notificationRepository = notificationRepository;
+        this.appUserRepository = appUserRepository;
+        this.passwordEncoder = passwordEncoder;
         this.clock = clock;
     }
 
+    /**
+     * Carga los datos de demostración si la base está vacía. Si la base ya tiene datos pero ningún usuario
+     * (por ejemplo, un volumen de PostgreSQL creado antes de existir {@code app_user}), crea solo los usuarios
+     * del personal para que alguien pueda iniciar sesión; el resto de datos no se toca.
+     *
+     * @param args argumentos de arranque (no se usan)
+     */
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
@@ -173,7 +201,12 @@ public class DemoDataLoader implements ApplicationRunner {
             return;
         }
         if (locationRepository.count() > 0) {
-            logger.info("La base ya contiene datos; no se cargan datos de demostración.");
+            if (appUserRepository.count() == 0) {
+                createUsers(doctorRepository.findAll());
+                logger.info("La base ya contenía datos pero ningún usuario; se crearon los usuarios de demostración.");
+            } else {
+                logger.info("La base ya contiene datos; no se cargan datos de demostración.");
+            }
             return;
         }
         Instant now = Instant.now(clock);
@@ -202,6 +235,7 @@ public class DemoDataLoader implements ApplicationRunner {
                     String.format("%05d", 10200 + i * 317), demo.firstNames(), demo.lastNames(),
                     specialties.get(demo.specialty()))));
         }
+        AppUser frontDesk = createUsers(doctors);
 
         // Aseguradoras con convenio mencionadas en la especificación; RUC, planes y copagos son ficticios.
         InsurancePlan redMedica = createInsurer("Rímac Seguros", "20999999001",
@@ -268,11 +302,11 @@ public class DemoDataLoader implements ApplicationRunner {
                 code = AppointmentCodeGenerator.compose(generator);
             } while (!usedCodes.add(code));
             Appointment appointment = new Appointment(code, fillers.get(patientIndex), slots.get(i), null,
-                    "Consulta programada por la central de citas", BookingChannel.FRONT_DESK,
+                    "Consulta programada en ventanilla", BookingChannel.FRONT_DESK,
                     UUID.nameUUIDFromBytes(("demo-slot-" + i).getBytes(StandardCharsets.UTF_8)), now);
             appointments.add(appointment);
             history.add(AppointmentHistory.record(appointment, AppointmentEvent.BOOKING, null,
-                    AppointmentStatus.BOOKED, null, slots.get(i), null, now));
+                    AppointmentStatus.BOOKED, null, slots.get(i), frontDesk, null, now));
         }
 
         Appointment luciaAppointment = new Appointment(LUCIA_APPOINTMENT_CODE, lucia, luciaSlot, luciaInsurance,
@@ -280,7 +314,7 @@ public class DemoDataLoader implements ApplicationRunner {
                 UUID.nameUUIDFromBytes("demo-appointment-lucia".getBytes(StandardCharsets.UTF_8)), now);
         appointments.add(luciaAppointment);
         history.add(AppointmentHistory.record(luciaAppointment, AppointmentEvent.BOOKING, null,
-                AppointmentStatus.BOOKED, null, luciaSlot, null, now));
+                AppointmentStatus.BOOKED, null, luciaSlot, null, null, now));
         appointmentRepository.saveAll(appointments);
         appointmentHistoryRepository.saveAll(history);
 
@@ -292,10 +326,48 @@ public class DemoDataLoader implements ApplicationRunner {
                 luciaSlot.startAt(clock.getZone()).minus(Duration.ofHours(24)));
         notificationRepository.saveAll(List.of(confirmation, reminder));
 
+        // Issue #46: citas pasadas ya cerradas para que los reportes de demostración tengan cifras
+        createPastAppointmentsForReports(doctors, fillers, sanIsidro, laMolina, frontDesk, today, generator, usedCodes);
+
         logger.info("Datos de demostración cargados: 2 sedes, {} especialidades, {} médicos, {} cupos ({} ocupados). "
-                        + "Pacientes demo: DNI {} (Rímac · Red Médica, cita {}) y DNI {} (particular).",
+                        + "Pacientes demo: DNI {} (Rímac · Red Médica, cita {}) y DNI {} (particular). "
+                        + "Usuarios: {} / {} (ADMIN), {} / {} (FRONT_DESK) y {}<apellido> / {} (DOCTOR).",
                 specialties.size(), doctors.size(), slots.size(), appointments.size(), DNI_LUCIA,
-                LUCIA_APPOINTMENT_CODE, DNI_DIEGO);
+                LUCIA_APPOINTMENT_CODE, DNI_DIEGO, ADMIN_USERNAME, ADMIN_PASSWORD, FRONT_DESK_USERNAME,
+                FRONT_DESK_PASSWORD, DOCTOR_USERNAME_PREFIX, DOCTOR_PASSWORD);
+    }
+
+    /**
+     * Crea los usuarios del personal: un administrador, uno de admisión y un médico por cada doctor,
+     * con usuario {@code dr.<primer apellido sin tildes>}.
+     *
+     * @param doctors médicos de demostración ya guardados
+     * @return el usuario de admisión, responsable de las citas de la central de citas
+     */
+    private AppUser createUsers(List<Doctor> doctors) {
+        List<AppUser> users = new ArrayList<>();
+        users.add(new AppUser(ADMIN_USERNAME, passwordEncoder.encode(ADMIN_PASSWORD), UserRole.ADMIN, null));
+        AppUser frontDesk = new AppUser(FRONT_DESK_USERNAME, passwordEncoder.encode(FRONT_DESK_PASSWORD),
+                UserRole.FRONT_DESK, null);
+        users.add(frontDesk);
+        String doctorHash = passwordEncoder.encode(DOCTOR_PASSWORD);
+        for (Doctor doctor : doctors) {
+            users.add(new AppUser(doctorUsername(doctor), doctorHash, UserRole.DOCTOR, doctor));
+        }
+        appUserRepository.saveAll(users);
+        return frontDesk;
+    }
+
+    /**
+     * Nombre de usuario de un médico: {@code dr.} más su primer apellido en minúsculas y sin tildes.
+     *
+     * @param doctor médico
+     * @return el nombre de usuario, por ejemplo {@code dr.benavides}
+     */
+    public static String doctorUsername(Doctor doctor) {
+        String firstLastName = doctor.getLastNames().trim().split("\\s+")[0];
+        String plain = Normalizer.normalize(firstLastName, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        return DOCTOR_USERNAME_PREFIX + plain.toLowerCase(Locale.ROOT);
     }
 
     private List<InsurancePlan> createInsurer(String name, String ruc, String plan1, String copay1,
@@ -304,6 +376,114 @@ public class DemoDataLoader implements ApplicationRunner {
         return insurancePlanRepository.saveAll(List.of(
                 new InsurancePlan(insurer, plan1, new BigDecimal(copay1)),
                 new InsurancePlan(insurer, plan2, new BigDecimal(copay2))));
+    }
+
+    // Issue #46: agenda pasada con resultado para los reportes
+
+    /** Posiciones en {@link #DOCTORS} con agenda pasada: cuatro médicos de San Isidro y dos de La Molina. */
+    private static final int[] PAST_AGENDA_DOCTORS = {0, 1, 2, 3, 12, 13};
+    private static final int PAST_AGENDA_DAYS = 14;
+    private static final LocalTime PAST_FIRST_HOUR = LocalTime.of(8, 0);
+    private static final int PAST_SLOTS_PER_DAY = 6;
+    /** Citas por médico que quedan reservadas (sin asistencia registrada) en el último día pasado. */
+    private static final int PAST_PENDING_PER_DOCTOR = 2;
+
+    /**
+     * Crea, para seis médicos y los 14 días anteriores a hoy (sin domingos), seis cupos diarios de 08:00 a 10:00
+     * con citas ya cerradas en un patrón determinista: la mitad atendidas, una quinta parte no asistidas, una
+     * décima parte anuladas y el resto cupos que quedaron libres. En el último de esos días, las dos primeras
+     * citas de cada médico siguen reservadas, sin asistencia registrada, para demostrar el registro tardío.
+     * Así los reportes de citas, inasistencia y ocupación muestran cifras distintas de cero en la demo.
+     * Las citas del futuro no se tocan.
+     *
+     * @param doctors   médicos de demostración ya guardados
+     * @param fillers   pacientes de relleno
+     * @param sanIsidro sede San Isidro
+     * @param laMolina  sede La Molina
+     * @param frontDesk usuario de admisión que figura como responsable de las reservas
+     * @param today     fecha de hoy en la zona de la clínica
+     * @param generator generador de códigos de cita
+     * @param usedCodes códigos ya asignados, para no repetirlos
+     */
+    private void createPastAppointmentsForReports(List<Doctor> doctors, List<Patient> fillers, Location sanIsidro,
+                                                  Location laMolina, AppUser frontDesk, LocalDate today,
+                                                  Random generator, Set<String> usedCodes) {
+        List<LocalDate> pastDays = today.minusDays(PAST_AGENDA_DAYS).datesUntil(today)
+                .filter(date -> date.getDayOfWeek() != DayOfWeek.SUNDAY)
+                .toList();
+        List<Slot> slots = new ArrayList<>();
+        List<Appointment> appointments = new ArrayList<>();
+        List<AppointmentHistory> history = new ArrayList<>();
+        int sequence = 0;
+        for (int ordinal = 0; ordinal < PAST_AGENDA_DOCTORS.length; ordinal++) {
+            int m = PAST_AGENDA_DOCTORS[ordinal];
+            Doctor doctor = doctors.get(m);
+            AppUser doctorUser = appUserRepository.findByUsernameIgnoreCase(doctorUsername(doctor)).orElse(null);
+            Location location = DOCTORS.get(m).sanIsidro() ? sanIsidro : laMolina;
+            String room = "Consultorio " + (DOCTORS.get(m).sanIsidro() ? 201 + m : 101 + m);
+            int pendingOnLastDay = 0;
+            for (int d = 0; d < pastDays.size(); d++) {
+                for (int s = 0; s < PAST_SLOTS_PER_DAY; s++) {
+                    LocalTime start = PAST_FIRST_HOUR.plusMinutes((long) s * MINUTES_PER_SLOT);
+                    Slot slot = new Slot(doctor, location, pastDays.get(d), start, start.plusMinutes(MINUTES_PER_SLOT), room);
+                    slots.add(slot);
+                    int pattern = (m * 5 + d * 3 + s * 7) % 10;
+                    AppointmentStatus outcome = pattern < 5 ? AppointmentStatus.ATTENDED
+                            : pattern < 7 ? AppointmentStatus.NO_SHOW
+                            : pattern == 7 ? AppointmentStatus.CANCELLED : null;
+                    if (outcome == null) {
+                        continue;
+                    }
+                    if (outcome != AppointmentStatus.CANCELLED) {
+                        slot.setStatus(SlotStatus.BOOKED);
+                    }
+                    // En el último día pasado, las primeras citas de cada médico quedan sin cerrar para poder
+                    // mostrar el registro tardío de asistencia.
+                    boolean pending = d == pastDays.size() - 1 && outcome != AppointmentStatus.CANCELLED
+                            && pendingOnLastDay < PAST_PENDING_PER_DOCTOR;
+                    if (pending) {
+                        pendingOnLastDay++;
+                    }
+                    Instant bookedAt = pastDays.get(d).minusDays(3).atTime(10, 0).atZone(clock.getZone()).toInstant();
+                    Instant closedAt = outcome == AppointmentStatus.CANCELLED
+                            ? slot.startAt(clock.getZone()).minus(Duration.ofHours(26))
+                            : slot.startAt(clock.getZone()).plus(Duration.ofMinutes(25));
+                    String code;
+                    do {
+                        code = AppointmentCodeGenerator.compose(generator);
+                    } while (!usedCodes.add(code));
+                    // Un paciente distinto por médico en cada horario: nunca dos citas del mismo paciente a la misma hora.
+                    Patient patient = fillers.get((ordinal + PAST_AGENDA_DOCTORS.length * (d * PAST_SLOTS_PER_DAY + s))
+                            % FILLER_PATIENTS);
+                    Appointment appointment = new Appointment(code, patient, slot, null,
+                            "Consulta programada en ventanilla", BookingChannel.FRONT_DESK,
+                            UUID.nameUUIDFromBytes(("demo-past-slot-" + sequence++).getBytes(StandardCharsets.UTF_8)),
+                            bookedAt);
+                    history.add(AppointmentHistory.record(appointment, AppointmentEvent.BOOKING, null,
+                            AppointmentStatus.BOOKED, null, slot, frontDesk, null, bookedAt));
+                    if (pending) {
+                        appointments.add(appointment);
+                        continue;
+                    }
+                    if (outcome == AppointmentStatus.CANCELLED) {
+                        appointment.cancel(closedAt);
+                        history.add(AppointmentHistory.record(appointment, AppointmentEvent.CANCELLATION,
+                                AppointmentStatus.BOOKED, AppointmentStatus.CANCELLED, slot, null, frontDesk,
+                                "El paciente avisó que no podrá asistir", closedAt));
+                    } else {
+                        appointment.registerOutcome(outcome, closedAt);
+                        history.add(AppointmentHistory.record(appointment, AppointmentEvent.ATTENDANCE,
+                                AppointmentStatus.BOOKED, outcome, slot, slot, doctorUser, null, closedAt));
+                    }
+                    appointments.add(appointment);
+                }
+            }
+        }
+        slotRepository.saveAll(slots);
+        appointmentRepository.saveAll(appointments);
+        appointmentHistoryRepository.saveAll(history);
+        logger.info("Agenda pasada de demostración: {} cupos y {} citas cerradas de {} médicos en los últimos {} días.",
+                slots.size(), appointments.size(), PAST_AGENDA_DOCTORS.length, PAST_AGENDA_DAYS);
     }
 
     private List<Patient> createFillerPatients(Instant now) {

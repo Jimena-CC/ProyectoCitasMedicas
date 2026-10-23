@@ -5,10 +5,11 @@ Stack tecnológico del **ProyectoCitasMedicas**. Documenta las herramientas de d
 > Issue #4. Alimenta la propuesta de soluciones del issue #5.
 
 ```
-Desktop (JavaFX) --HTTP/JSON--> API REST (Spring Boot) --JPA/Hibernate--> PostgreSQL
+Desktop (JavaFX) ------HTTP/JSON------> API REST (Spring Boot) --JPA/Hibernate--> PostgreSQL
+Backoffice Web (React) -HTTP/JSON+JWT-^
 ```
 
-Java en ambos módulos, con dos proyectos Maven independientes que no comparten dependencias.
+Java en el kiosko y en la API, con dos proyectos Maven independientes que no comparten dependencias. El Backoffice Web (`/web`) es un tercer módulo en TypeScript (sección 8).
 
 ---
 
@@ -130,4 +131,26 @@ Detectados al contrastar este documento con el estado actual de `develop`:
 
 ---
 
-*Versiones verificadas en Maven Central el 31 de agosto de 2026.*
+## 8. Backoffice Web (`/web`)
+
+Aplicación web del personal (Admisión, Médico y Administración), construida como SPA separada que consume la API con JWT. La comparación con Thymeleaf y la arquitectura están en [`web-frontend-decision.md`](web-frontend-decision.md).
+
+| Herramienta | Versión | Uso |
+| :--- | :--- | :--- |
+| **Node.js** | 22 (LTS) | Entorno de construcción y servidor de desarrollo. |
+| **React** | 19 | Interfaz por componentes. |
+| **Vite** | 8 | Servidor de desarrollo y compilación a sitio estático (`dist/`). |
+| **TypeScript** | 6 | Tipos estrictos; el cliente de la API refleja el contrato REST. |
+| **Tailwind CSS** | 4 | Utilidades de estilo; expone los tokens de diseño de AlignUI. |
+| **AlignUI** | registro shadcn | Componentes oficiales (tablas, formularios, modales, badges, toasts) con iconos Remix Icon. |
+| **React Router** | 7 | Rutas por rol en español (`/ventanilla`, `/agenda`, `/administracion`). |
+| **TanStack Query** | 5 | Caché y estado de las peticiones a la API. |
+| **TanStack Table** | 8 | Lógica de tablas (orden, paginación) sobre la tabla de AlignUI. |
+| **date-fns** | 3 | Fechas y horas en español. |
+| **oxlint** | 1 | Lint rápido incluido en la plantilla de Vite. |
+
+Se verifica en CI con `npm run lint`, `npm run typecheck` y `npm run build` (`.github/workflows/web-ci.yml`).
+
+---
+
+*Versiones verificadas en Maven Central el 31 de agosto de 2026; las del Backoffice Web, en npm el 20 de octubre de 2026.*

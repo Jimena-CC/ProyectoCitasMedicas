@@ -1,12 +1,14 @@
 package com.medicitas.api;
 
 import com.jayway.jsonpath.JsonPath;
+import com.medicitas.api.demo.DemoDataLoader;
 import com.medicitas.api.schedule.Slot;
 import com.medicitas.api.schedule.SlotRepository;
 import com.medicitas.api.schedule.SlotStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -31,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Base de las pruebas de integración: todas comparten un contexto con la base H2 y los datos de demostración.
  * Cada prueba registra sus propios pacientes y usa cupos que ninguna otra prueba tomó.
+ * Los endpoints del personal se prueban con {@link #loginAs(String, String)} y {@link #bearer(String)}.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -63,13 +66,66 @@ public abstract class ApiIntegrationTestSupport {
     }
 
     protected ResultActions book(long patientId, long slotId, UUID idempotencyKey) throws Exception {
+        return book(patientId, slotId, idempotencyKey, null);
+    }
+
+    /**
+     * Reserva un cupo; con {@code token} la reserva se atribuye al usuario del personal (canal FRONT_DESK).
+     *
+     * @param patientId      paciente
+     * @param slotId         cupo libre
+     * @param idempotencyKey clave del intento
+     * @param token          JWT del personal o {@code null} para simular el kiosko
+     * @return la respuesta para encadenar aserciones
+     */
+    protected ResultActions book(long patientId, long slotId, UUID idempotencyKey, String token) throws Exception {
         String body = """
                 {"patientId":%d,"slotId":%d,"visitReason":"Dolor de cabeza frecuente"}"""
                 .formatted(patientId, slotId);
+        HttpHeaders headers = token == null ? new HttpHeaders() : bearer(token);
         return mockMvc.perform(post("/api/v1/appointments")
+                .headers(headers)
                 .header("Idempotency-Key", idempotencyKey.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body));
+    }
+
+    /**
+     * Inicia sesión por la API y devuelve el token JWT.
+     *
+     * @param username usuario de demostración, por ejemplo {@link DemoDataLoader#ADMIN_USERNAME}
+     * @param password su contraseña
+     * @return el token para la cabecera {@code Authorization}
+     */
+    protected String loginAs(String username, String password) throws Exception {
+        String body = """
+                {"username":"%s","password":"%s"}""".formatted(username, password);
+        MvcResult result = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andReturn();
+        return JsonPath.read(result.getResponse().getContentAsString(StandardCharsets.UTF_8), "$.token");
+    }
+
+    protected String loginAsAdmin() throws Exception {
+        return loginAs(DemoDataLoader.ADMIN_USERNAME, DemoDataLoader.ADMIN_PASSWORD);
+    }
+
+    protected String loginAsFrontDesk() throws Exception {
+        return loginAs(DemoDataLoader.FRONT_DESK_USERNAME, DemoDataLoader.FRONT_DESK_PASSWORD);
+    }
+
+    /**
+     * Cabecera {@code Authorization} con el token.
+     *
+     * @param token JWT devuelto por {@link #loginAs(String, String)}
+     * @return la cabecera lista para {@code .headers(...)}
+     */
+    protected static HttpHeaders bearer(String token) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        return headers;
     }
 
     protected static long readId(MvcResult result) throws Exception {

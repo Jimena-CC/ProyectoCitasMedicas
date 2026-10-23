@@ -13,6 +13,7 @@ Bienvenido al repositorio oficial del **ProyectoCitasMedicas**. Este documento e
   - **Lenguaje Principal:** Java
   - **Backend (API):** Java Spring Boot
   - **Cliente Desktop (App):** Java (JavaFX / Swing)
+  - **Backoffice Web:** React 19 + Vite + TypeScript + Tailwind CSS v4 + AlignUI
   - **Base de Datos:** PostgreSQL
   - **Control de Versiones:** Git & GitHub
 
@@ -35,15 +36,21 @@ Bienvenido al repositorio oficial del **ProyectoCitasMedicas**. Este documento e
 El sistema sigue una arquitectura de n-capas distribuida:
 
 ```
-+------------------------+             +------------------------+             +------------------------+
-|  Aplicativo Escritorio | HTTP / REST |      API Backend       |    JDBC     | Base de Datos PostgreSQL|
-|     (JavaFX / Swing)   | ----------> |  (Spring Boot / Java)  | ----------> |       (PostgreSQL)     |
-+------------------------+             +------------------------+             +------------------------+
++------------------------+
+|  Kiosko de Escritorio  | HTTP / REST
+|       (JavaFX)         | -----------+
++------------------------+            |      +------------------------+             +------------------------+
+                                      +----> |      API Backend       |    JDBC     | Base de Datos PostgreSQL|
++------------------------+            |      |  (Spring Boot / Java)  | ----------> |       (PostgreSQL)     |
+|    Backoffice Web      | HTTP / REST|      +------------------------+             +------------------------+
+|  (React, navegador)    | -----------+
++------------------------+   + JWT
 ```
 
-1. **Desktop Client (`/desktop`):** Consume la API RESTful mediante peticiones HTTP (JSON). No tiene acceso directo a la base de datos.
-2. **API Backend (`/api`):** Expone endpoints REST, procesa la lógica de negocio, valida datos y gestiona la seguridad.
-3. **Base de Datos:** Instancia de PostgreSQL gestionada por la API mediante JPA/Hibernate o JDBC.
+1. **Desktop Client (`/desktop`):** Kiosko de autoatención para pacientes. Consume la API RESTful mediante peticiones HTTP (JSON). No tiene acceso directo a la base de datos.
+2. **Backoffice Web (`/web`):** Aplicación web para el personal (Admisión, Médico y Administración). Es una SPA en React que consume la misma API con un token JWT según el rol. Decisión técnica en [`docs/web-frontend-decision.md`](docs/web-frontend-decision.md).
+3. **API Backend (`/api`):** Expone endpoints REST, procesa la lógica de negocio, valida datos y gestiona la seguridad (JWT, roles, auditoría).
+4. **Base de Datos:** Instancia de PostgreSQL gestionada por la API mediante JPA/Hibernate.
 
 ---
 
@@ -54,7 +61,10 @@ Ambos scripts compilan la primera vez y luego arrancan **una sola JVM** por mód
 ```bash
 ./scripts/run-api.sh        # API en http://localhost:8080/api/v1 (base en memoria con datos de demostración)
 ./scripts/run-kiosk.sh      # Kiosko conectado a esa API
+./scripts/run-web.sh        # Backoffice Web en http://localhost:5173 (instala dependencias si faltan; requiere Node 22+)
 ```
+
+En Windows existen los equivalentes `scripts\run-api.bat`, `scripts\run-kiosk.bat` y `scripts\run-web.bat`.
 
 Opciones útiles del kiosko:
 
@@ -65,6 +75,8 @@ Opciones útiles del kiosko:
 | `--build` | Fuerza recompilar antes de arrancar. |
 
 Documentos de prueba: **45871236** (Lucía Paredes, con seguro Rímac y una cita reservada) y **70123456** (Diego Salazar, atención particular).
+
+Usuarios del Backoffice Web (datos de demostración): `admin` / `admin123` (Administrador), `admision` / `admision123` (Admisión) y `dr.benavides` / `doctor123` (Médico). Más detalles en [`web/README.md`](web/README.md).
 
 Para levantar la base de datos PostgreSQL real en lugar de la base en memoria: `docker compose up`.
 
@@ -81,10 +93,12 @@ ProyectoCitasMedicas/
 │   ├── PULL_REQUEST_TEMPLATE.md
 │   └── workflows/
 │       ├── api-ci.yml
-│       └── desktop-ci.yml
+│       ├── desktop-ci.yml
+│       └── web-ci.yml
 ├── docs/
 │   ├── README.md
 │   ├── api-contract.md
+│   ├── web-frontend-decision.md
 │   ├── database/
 │   │   └── initial_schema.sql
 │   ├── diagrams/
@@ -104,6 +118,18 @@ ProyectoCitasMedicas/
 │   └── src/
 │       ├── main/java/com/medicitas/kiosk/
 │       └── test/java/com/medicitas/kiosk/
+├── web/
+│   ├── README.md
+│   ├── package.json
+│   └── src/
+│       ├── app/            # router, layout y navegación por rol
+│       ├── components/     # componentes compartidos y AlignUI (ui/)
+│       ├── features/       # auth, admission, doctor, admin
+│       └── lib/            # cliente tipado de la API, sesión, formateadores
+├── scripts/
+│   ├── run-api.sh / .bat
+│   ├── run-kiosk.sh / .bat
+│   └── run-web.sh / .bat
 ├── .gitignore
 └── README.md
 ```
@@ -128,6 +154,11 @@ ProyectoCitasMedicas/
 
 - **Propósito:** Proyecto Java autónomo con la interfaz gráfica de usuario (GUI) para la gestión de citas médicas.
 - **`desktop/README.md`:** Explica los requisitos de ejecución (JRE/JDK), configuración para conectar la app a la API (`api.url`), compilación del ejecutable `.jar` y guías de la interfaz.
+
+#### E. Directorio Backoffice Web (`/web`)
+
+- **Propósito:** Aplicación web del personal (Admisión, Médico y Administración) en React + Vite + TypeScript con el sistema de diseño AlignUI. Consume la API con JWT y navega según el rol.
+- **`web/README.md`:** Explica los requisitos (Node 22+), comandos (`npm run dev`, `build`, `lint`, `typecheck`), variables (`VITE_API_URL`), estructura por feature, cómo agregar componentes AlignUI y las credenciales de demostración.
 
 ---
 
@@ -186,7 +217,7 @@ Queda **estrictamente prohibido** hacer `commit` o `push` directo en la rama `ma
 
 A través de **GitHub Actions**, se ejecutarán los siguientes flujos de trabajo ante cada `push` o `Pull Request` hacia `develop` o `main`:
 
-- **Compilación:** Verificación de que los módulos Java (`api` y `desktop`) compilen sin errores.
+- **Compilación:** Verificación de que los módulos Java (`api` y `desktop`) compilen sin errores, y que el módulo `web` pase lint, verificación de tipos y compilación (`web-ci.yml`).
 - **Pruebas Automatizadas:** Ejecución de pruebas unitarias (JUnit / Mockito).
 - **Análisis Estático de Código:** Verificación de formato y buenas prácticas (Checkstyle / SpotBugs).
 - **Verificación de BD:** Validación de scripts SQL de PostgreSQL.

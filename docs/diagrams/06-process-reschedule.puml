@@ -34,26 +34,21 @@ skinparam note {
 start
 :Identificarse con su documento;
 -[#2F5D56,dashed]->
--[#2F5D56,dashed]->
 
 |Kiosko (JavaFX)|
 :Abrir "Mis citas";
 -[#2F5D56,dashed]->
--[#2F5D56,dashed]->
 
 |API MediCitas|
 :Listar citas BOOKED futuras\nGET /patients/{id}/appointments;
-:Listar citas BOOKED futuras\nGET /patients/{id}/appointments;
 
 if (¿Tiene citas activas?) then (No)
-  -[#2F5D56,dashed]->
   -[#2F5D56,dashed]->
   |Kiosko (JavaFX)|
   :Ofrecer reservar una nueva cita;
   stop
 else (Sí)
 endif
--[#2F5D56,dashed]->
 -[#2F5D56,dashed]->
 
 |Paciente|
@@ -77,10 +72,8 @@ repeat
   |Paciente|
   :Elegir nuevo horario;
   -[#2F5D56,dashed]->
-  -[#2F5D56,dashed]->
   |Kiosko (JavaFX)|
   :Enviar PATCH /appointments/{id}/reschedule;
-  -[#2F5D56,dashed]->
   -[#2F5D56,dashed]->
   |API MediCitas|
   :Verificar que el cupo nuevo sea distinto, futuro\ny de la misma especialidad (RF-09);
@@ -107,7 +100,6 @@ repeat while (¿Cupo tomado o cita duplicada? → 409) is (Sí, elegir otro hora
 
 |Servicio de Mensajería|
 :Entregar aviso de reprogramación;
--[#2F5D56,dashed]->
 -[#2F5D56,dashed]->
 
 |Paciente|

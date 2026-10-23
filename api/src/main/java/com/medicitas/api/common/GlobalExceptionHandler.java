@@ -6,6 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
@@ -39,6 +42,26 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusiness(BusinessException ex) {
         return build(ex.getStatus(), ex.getCode(), ex.getMessage(), ex.getFields());
+    }
+
+    /**
+     * Ruta protegida sin token (o con un token vencido o manipulado): {@code 401}.
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthenticated(AuthenticationException ex) {
+        String message = ex instanceof InvalidBearerTokenException
+                ? "Tu sesión no es válida o ya venció. Vuelve a iniciar sesión."
+                : "Debes iniciar sesión para continuar.";
+        return build(HttpStatus.UNAUTHORIZED, ErrorCodes.UNAUTHORIZED, message, List.of());
+    }
+
+    /**
+     * Usuario autenticado sin el rol que exige la ruta: {@code 403}.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+        return build(HttpStatus.FORBIDDEN, ErrorCodes.FORBIDDEN, "No tienes permiso para realizar esta acción.",
+                List.of());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

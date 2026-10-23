@@ -57,6 +57,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Levantar API + Postgres
+        env:
+          # Clave de prueba para el CI; en producción se define en .env o en el entorno
+          SECURITY_JWT_SECRET: ci-clave-de-prueba-solo-para-integracion-2026
         run: docker compose up -d --build --wait
 
       - name: Verificar que la API responde (healthcheck real)
