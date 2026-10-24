@@ -1,58 +1,88 @@
-# ==========================================
-# Archivos de Compilación de Java y Build
-# ==========================================
-target/
-build/
-.gradle/
-out/
-bin/
+# =====================================================================
+# 1. PROYECTOS JAVA (API y Desktop en subcarpetas)
+# =====================================================================
+api/target/
+api/.mvn/wrapper/maven-wrapper.jar
+desktop/target/
+desktop/build/
 *.class
 *.jar
 *.war
 *.ear
 
-# ==========================================
-# Configuración de Entornos e IDEs
-# ==========================================
+# =====================================================================
+# 2. PROYECTO WEB (React / Vite / Node.js en subcarpeta /web)
+# =====================================================================
+web/node_modules/
+web/dist/
+web/dist-ssr/
+web/*.local
+
+# Logs específicos del entorno web
+web/logs/
+web/*.log
+web/npm-debug.log*
+web/yarn-debug.log*
+web/yarn-error.log*
+web/pnpm-debug.log*
+web/lerna-debug.log*
+
+# =====================================================================
+# 3. CONFIGURACIÓN DE ENTORNOS E IDES (Globales y por subcarpetas)
+# =====================================================================
 # IntelliJ IDEA
 .idea/
 *.iml
 *.iws
 *.ipr
 
-# Eclipse
+# Eclipse / STS (Spring Tool Suite) (Aplicado a raíz y subcarpetas)
 .apt_generated
 .classpath
 .factorypath
 .project
 .settings/
+.springBeans
+.sts4-cache
+api/.settings/
+desktop/.settings/
 
 # NetBeans
 /nbproject/private/
-/build/
+/nbbuild/
 /nbdist/
 .nb-gradle/
 
-# Visual Studio Code
-.vscode/
+# Visual Studio Code (Global y para web)
+.vscode/*
+!.vscode/extensions.json
+web/.vscode/*
+!web/.vscode/extensions.json
 
-# ==========================================
-# Logs y Archivos OS
-# ==========================================
+# =====================================================================
+# 4. LOGS GENERALES Y ARCHIVOS DEL SISTEMA OPERATIVO
+# =====================================================================
 *.log
 .DS_Store
 Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# ==========================================
-# Variables de Entorno y Credenciales
-# ==========================================
+# =====================================================================
+# 5. VARIABLES DE ENTORNO Y CREDENCIALES (Sensibles)
+# =====================================================================
 .env
-application-local.properties
-application-local.yml
+web/.env
+api/src/main/resources/application-local.properties
+api/src/main/resources/application-local.yml
+desktop/src/main/resources/application-local.properties
 
-# ==========================================
-# Base de Datos (PostgreSQL dumps / data local)
-# ==========================================
+# =====================================================================
+# 6. BASES DE DATOS Y BACKUPS LOCALES (PostgreSQL)
+# =====================================================================
 *.sql.bak
 *.dump
 data-pg/

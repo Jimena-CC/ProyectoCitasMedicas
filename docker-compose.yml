@@ -30,12 +30,30 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/${POSTGRES_DB:-citas_medicas_db}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgrespassword}
-      # Clave HMAC de los tokens JWT (mínimo 32 caracteres). Obligatoria: define SECURITY_JWT_SECRET en un
-      # archivo .env junto a este compose o en el entorno; sin ella `docker compose up` se detiene con este aviso.
-      SECURITY_JWT_SECRET: ${SECURITY_JWT_SECRET:?Define SECURITY_JWT_SECRET (mínimo 32 caracteres) en .env o en el entorno}
+      
+      # AQUÍ ESTÁN LAS VARIABLES QUE LEE TU application.properties:
+      SECURITY_JWT_SECRET: ${SECURITY_JWT_SECRET:?Define SECURITY_JWT_SECRET en el .env}
+      SECURITY_JWT_EXPIRATION_MINUTES: ${SECURITY_JWT_EXPIRATION_MINUTES:-480}
+      SECURITY_CORS_ALLOWED_ORIGINS: ${SECURITY_CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+      SECURITY_AUDIT_TRUST_FORWARDED_FOR: ${SECURITY_AUDIT_TRUST_FORWARDED_FOR:-false}
+      
     depends_on:
       postgres-db:
         condition: service_healthy
+
+  web-frontend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:8080/api/v1}
+        - VITE_IDLE_MINUTES=${VITE_IDLE_MINUTES:-30}
+    container_name: citas_web
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - api-service
 
 volumes:
   postgres_data:
