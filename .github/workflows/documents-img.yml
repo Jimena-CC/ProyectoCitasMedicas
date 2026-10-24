@@ -5,7 +5,7 @@ on:
     branches:
       - develop
     paths:
-      - 'docs/diagrams/**/*.puml'
+      - "docs/diagrams/**/*.puml"
   workflow_dispatch:
 
 jobs:
@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout del repositorio
@@ -26,16 +27,78 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y plantuml graphviz
 
-      - name: Generar imágenes en docs/diagrams/img/
+      - name: Generar imágenes y validar sintaxis con feedback detallado
+        id: render
         run: |
-          mkdir -p docs/diagrams/img
-          plantuml -tsvg -o img "docs/diagrams/**/*.puml"
-          plantuml -tpng -o img "docs/diagrams/**/*.puml"
+          echo "=================================================="
+          echo "Iniciando renderizado y validación de diagramas..."
+          echo "=================================================="
+
+          HAS_ERROR=0
+          ERROR_LOG=""
+
+          while IFS=read -r puml_file; do
+            dir_name=$(dirname "$puml_file")
+            img_dir="$dir_name/img"
+            
+            mkdir -p "$img_dir"
+            
+            echo "--------------------------------------------------"
+            echo " Procesando archivo: $puml_file"
+            echo "--------------------------------------------------"
+            
+            # Capturar la salida de error combinada de SVG y PNG
+            output=$(plantuml -tsvg -tpng -o "$(realpath "$img_dir")" "$puml_file" 2>&1)
+            exit_code=$?
+            
+            if [ $exit_code -ne 0 ]; then
+              echo "¡ERROR en el archivo: $puml_file!"
+              echo "$output"
+              
+              # Acumular el error en una variable con formato Markdown para el comentario
+              ERROR_LOG="${ERROR_LOG}###  Error en \`${puml_file}\`%0A\`\`\`text%0A${output}%0A\`\`\`%0A%0A"
+              HAS_ERROR=1
+            else
+              echo " Éxito: $puml_file renderizado correctamente."
+            fi
+            
+          done < <(find docs/diagrams -name "*.puml")
+
+          # Guardar el log de errores en una variable de entorno de GitHub Actions (usando EOF para multilínea seguro)
+          {
+            echo "error_body<<EOF"
+            echo -e "$ERROR_LOG"
+            echo "EOF"
+          } >> $GITHUB_ENV
+
+          if [ $HAS_ERROR -ne 0 ]; then
+            echo " El workflow ha fallado debido a errores de sintaxis en PlantUML."
+            exit 1
+          fi
+
+          echo "=================================================="
+          echo "¡Todos los diagramas se renderizaron con éxito!"
+          echo "=================================================="
+
+      - name: Comentar en el PR si hubo un fallo
+        uses: actions/github-script@v6
+        if: failure() && steps.render.outcome == 'failure'
+        with:
+          script: |
+            const errorDetails = process.env.error_body || 'No se pudieron detallar los errores.';
+            const commentBody = `##  Falló la validación de diagramas PlantUML\n\nHola @${context.payload.pull_request.user.login}, el workflow detectó errores de sintaxis o renderizado en los siguientes archivos:\n\n${errorDetails}\nPor favor, corrige estos errores en tu rama para poder actualizar las imágenes automáticamente.`;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            });
 
       - name: Hacer Commit y Push a la rama origen del PR
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/diagrams/img/
+          git add docs/diagrams/
           git status
-          git diff-index --quiet HEAD || (git commit -m "chore(docs): actualizar imágenes en docs/diagrams/img/" && git push)
+          git diff-index --quiet HEAD || (git commit -m "chore(docs): actualizar imágenes de diagramas en sus respectivas carpetas img/" && git push)
