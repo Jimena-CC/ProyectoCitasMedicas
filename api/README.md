@@ -2,7 +2,7 @@
 
 API en **Spring Boot 4.1.1 / Java 21** que atiende al Kiosko de Autoatención: identificación y registro de pacientes, catálogos, disponibilidad de cupos y reserva, reprogramación y anulación de citas con sus notificaciones. Incluye el módulo de seguridad del personal (admisión, médicos y administración) con JWT, el registro de auditoría y el panel de administración (usuarios, catálogo, agendas, auditoría y reportes).
 
-El contrato completo (endpoints, JSON y códigos de error) está en [`docs/api-contract.md`](../docs/api-contract.md) y el modelo de datos en [`docs/diagrams/03-entity-relationship-diagram.puml`](../docs/diagrams/03-entity-relationship-diagram.puml).
+El contrato completo (endpoints, JSON y códigos de error) está en [`docs/api-contract.md`](../docs/api-contract.md) y el modelo de datos en [`docs/diagrams/physical-model/physical-model.puml`](../docs/diagrams/physical-model/physical-model.puml).
 
 ## Requisitos
 

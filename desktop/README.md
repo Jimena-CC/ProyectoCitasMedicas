@@ -109,7 +109,7 @@ desktop/src/main/java/com/medicitas/kiosk
                               PostgreSQL
 ```
 
-El mismo diagrama, en PlantUML, está en [`docs/diagrams/13-kiosk-api-layer.puml`](../docs/diagrams/13-kiosk-api-layer.puml).
+El mismo diagrama, en PlantUML, está en [`docs/diagrams/processes/proposed/07-kiosk-api-layer.puml`](../docs/diagrams/processes/proposed/07-kiosk-api-layer.puml).
 
 ### Cómo llega `ApiClient` a las pantallas
 
