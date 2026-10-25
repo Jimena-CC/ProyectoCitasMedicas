@@ -29,18 +29,18 @@ Los `.puml` generan sus PNG y SVG en `diagrams/img/` automáticamente al abrir u
 
 | Archivo | Contenido |
 | :--- | :--- |
-| `01-process-current.puml` | Proceso actual (AS-IS) de reserva en ventanilla o central, con los problemas identificados. |
-| `01-process-proposed.puml` | Proceso propuesto (TO-BE) de reserva en el Kiosko, con reintentos ante cupo tomado o cita duplicada. |
-| `02-use-case-diagram.puml` | Casos de uso por fase con identificadores CU-001 a CU-027, incluidos los del Backoffice web (Admisión, Médico y Administrador). |
+| `processes/current/01-current-process.puml` | Proceso actual (AS-IS) de reserva en ventanilla o central, con los problemas identificados. |
+| `processes/proposed/01-proposed-main-process.puml` | Proceso propuesto (TO-BE) de reserva en el Kiosko, con reintentos ante cupo tomado o cita duplicada. |
+| `use-cases/use-case-diagram.puml` | Casos de uso por fase con identificadores CU-001 a CU-027, incluidos los del Backoffice web (Admisión, Médico y Administrador). |
 | `03-entity-relationship-diagram.puml` | Modelo de datos en PostgreSQL, columna por columna con `V1__init_schema.sql`: catálogo, pacientes y seguros, agenda y citas, notificaciones, seguridad y auditoría. |
-| `04-class-diagram.puml` | Diagrama de clases: entidades, servicios y controladores reales de la API (Fase 1) y las clases nuevas del Backoffice (Fase 2). |
-| `05-architecture-diagram.puml` | Arquitectura de componentes. |
-| `06-process-reschedule.puml` | Proceso TO-BE (06a) para reprogramar una cita desde el Kiosco, con reintento ante cupo tomado. |
-| `06-process-cancellation.puml` | Proceso TO-BE (06b) para anular una cita desde el Kiosco y liberar su cupo. |
-| `07-process-notifications.puml` | Proceso TO-BE de envío de confirmaciones y recordatorios (envío inmediato tras la transacción y tarea programada) con reintentos. |
-| `08-conceptual-model.puml` | Modelo conceptual de datos. |
-| `09-logical-model.puml` | Modelo lógico de datos. |
-| `10-physical-model.puml` | Modelo físico de datos (PostgreSQL 15). |
-| `11-process-doctor-attendance.puml` | Proceso TO-BE del Médico en el Backoffice web: inicio de sesión, agenda del día, registro de asistencia o inasistencia, historial y auditoría. |
-| `12-process-front-desk-booking.puml` | Proceso TO-BE de agendamiento en ventanilla por el Personal de Admisión: búsqueda de paciente, validación de aseguradora, reserva con canal FRONT_DESK y auditoría. |
-| `13-kiosk-api-layer.puml` | Capa de conexión a la API del Kiosko: paquetes `app`, `screens`, `ui`, `api` y `dev`, y por qué `ApiClient` equivale a la "clase de conexión a base de datos". |
+| `architecture/class-diagram.puml` | Diagrama de clases: entidades, servicios y controladores reales de la API (Fase 1) y las clases nuevas del Backoffice (Fase 2). |
+| `architecture/architecture-diagram.puml` | Arquitectura de componentes. |
+| `processes/proposed/03-process-reschedule.puml` | Proceso TO-BE (06a) para reprogramar una cita desde el Kiosco, con reintento ante cupo tomado. |
+| `processes/proposed/02-process-cancellation.puml` | Proceso TO-BE (06b) para anular una cita desde el Kiosco y liberar su cupo. |
+| `processes/proposed/04-process-notifications.puml` | Proceso TO-BE de envío de confirmaciones y recordatorios (envío inmediato tras la transacción y tarea programada) con reintentos. |
+| `conceptual-model/conceptual-model.puml` | Modelo conceptual de datos. |
+| `logical-model/logical-model.puml` | Modelo lógico de datos. |
+| `physical-model/physical-model.puml` | Modelo físico de datos (PostgreSQL 15). |
+| `processes/proposed/05-process-doctor-attendance.puml` | Proceso TO-BE del Médico en el Backoffice web: inicio de sesión, agenda del día, registro de asistencia o inasistencia, historial y auditoría. |
+| `processes/proposed/06-process-front-desk-booking.puml` | Proceso TO-BE de agendamiento en ventanilla por el Personal de Admisión: búsqueda de paciente, validación de aseguradora, reserva con canal FRONT_DESK y auditoría. |
+| `processes/proposed/07-kiosk-api-layer.puml` | Capa de conexión a la API del Kiosko: paquetes `app`, `screens`, `ui`, `api` y `dev`, y por qué `ApiClient` equivale a la "clase de conexión a base de datos". |
