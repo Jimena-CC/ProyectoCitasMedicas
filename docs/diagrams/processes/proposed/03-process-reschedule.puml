@@ -1,5 +1,5 @@
 @startuml
-title 06a - Proceso propuesto (TO-BE) - Reprogramar una cita desde el Kiosko
+title 03 - Proceso propuesto (TO-BE) - Reprogramar una cita desde el Kiosko
 
 skinparam shadowing false
 skinparam roundCorner 10

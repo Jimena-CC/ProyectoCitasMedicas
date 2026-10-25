@@ -1,5 +1,5 @@
 @startuml
-title 10 - Modelo físico (Diagrama Entidad-Relación) - MediCitas Anglo (PostgreSQL 15)
+title Modelo físico (Diagrama Entidad-Relación) - MediCitas Anglo (PostgreSQL 15)
 
 ' ---------------------------------------------------------------
 ' Convenciones

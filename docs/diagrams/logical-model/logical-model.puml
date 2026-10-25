@@ -1,5 +1,5 @@
 @startuml
-title 09 - Modelo lógico - MediCitas Anglo
+title Modelo lógico - MediCitas Anglo
 
 skinparam shadowing false
 skinparam roundCorner 10

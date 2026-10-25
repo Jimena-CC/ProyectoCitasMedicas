@@ -1,5 +1,5 @@
 @startuml
-title 07 - Proceso propuesto (TO-BE) - Envío de confirmaciones y recordatorios
+title 04 - Proceso propuesto (TO-BE) - Envío de confirmaciones y recordatorios
 
 skinparam shadowing false
 skinparam roundCorner 10

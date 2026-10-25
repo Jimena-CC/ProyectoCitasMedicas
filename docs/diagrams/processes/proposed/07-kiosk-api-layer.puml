@@ -1,5 +1,5 @@
 @startuml
-title 13 - Capa de conexión a la API del Kiosko - MediCitas Anglo
+title 07 - Capa de conexión a la API del Kiosko - MediCitas Anglo
 
 skinparam componentStyle rectangle
 skinparam shadowing false

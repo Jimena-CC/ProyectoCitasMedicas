@@ -1,5 +1,5 @@
 @startuml
-title 11 - Proceso propuesto (TO-BE) - Atención del Médico: agenda del día y registro de asistencia
+title 05 - Proceso propuesto (TO-BE) - Atención del Médico: agenda del día y registro de asistencia
 
 skinparam shadowing false
 skinparam roundCorner 10

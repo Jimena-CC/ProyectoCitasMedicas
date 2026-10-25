@@ -1,5 +1,5 @@
 @startuml
-title 05 - Diagrama de Arquitectura de Componentes - MediCitas Anglo
+title Diagrama de Arquitectura de Componentes - MediCitas Anglo
 
 skinparam componentStyle rectangle
 skinparam shadowing false
