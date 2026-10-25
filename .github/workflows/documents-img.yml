@@ -37,7 +37,7 @@ jobs:
           HAS_ERROR=0
           ERROR_LOG=""
 
-          while IFS=read -r puml_file; do
+          while IFS= read -r puml_file; do
             dir_name=$(dirname "$puml_file")
             img_dir="$dir_name/img"
             
