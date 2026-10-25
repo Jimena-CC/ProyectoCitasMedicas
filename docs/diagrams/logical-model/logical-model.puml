@@ -197,6 +197,7 @@ patient ||--o{ appointment : requests
 patient_insurance |o--o{ appointment : "pays for"
 slot ||--o{ appointment : "is taken by"
 appointment ||--|{ appointment_history : records
+slot |o--o{ appointment_history : "previous / new slot"
 appointment ||--o{ notification : triggers
 doctor |o--o| app_user : "signs in as"
 app_user |o--o{ audit_log : performs
