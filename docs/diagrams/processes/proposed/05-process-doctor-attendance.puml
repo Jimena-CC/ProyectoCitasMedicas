@@ -1,0 +1,118 @@
+@startuml
+title 05 - Proceso propuesto (TO-BE) - Atención del Médico: agenda del día y registro de asistencia
+
+skinparam shadowing false
+skinparam roundCorner 10
+skinparam defaultFontName "Helvetica"
+skinparam defaultFontSize 12
+skinparam ArrowColor #2F5D56
+skinparam SwimlaneBorderColor #A9C4BD
+skinparam SwimlaneTitleFontColor #0C6E5F
+skinparam SwimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #13917D
+  FontColor #17302B
+  DiamondBackgroundColor #E3F4EF
+  DiamondBorderColor #13917D
+  StartColor #0C6E5F
+  EndColor #0C6E5F
+}
+skinparam note {
+  BackgroundColor #FFF8E6
+  BorderColor #D9B45A
+  FontColor #3D3321
+}
+
+' Orden de los carriles
+|Médico|
+|Backoffice web (React)|
+|API MediCitas|
+
+|Médico|
+start
+:Ingresar usuario y contraseña (CU-011);
+-[#2F5D56,dashed]->
+
+|Backoffice web (React)|
+:Enviar POST /auth/login;
+-[#2F5D56,dashed]->
+
+|API MediCitas|
+:Buscar app_user activo y comparar\nla contraseña con el hash BCrypt (RF-15);
+if (¿Credenciales válidas?) then (No)
+  :Registrar LOGIN_FAILED en audit_log;
+  :Responder 401 INVALID_CREDENTIALS;
+  -[#2F5D56,dashed]->
+  |Backoffice web (React)|
+  :Mostrar "Usuario o contraseña incorrectos";
+  stop
+else (Sí)
+endif
+|API MediCitas|
+:Emitir token JWT con rol DOCTOR\ny actualizar last_access;
+:Registrar LOGIN en audit_log (CU-013);
+-[#2F5D56,dashed]->
+
+|Backoffice web (React)|
+:Guardar el token y abrir "Agenda del día";
+:Enviar GET /doctor/agenda?date=hoy\ncon el token en Authorization;
+-[#2F5D56,dashed]->
+
+|API MediCitas|
+:Validar token y rol DOCTOR (RF-17, RF-18);
+:Obtener doctor_id del usuario (app_user.doctor_id);
+:Listar las citas del día del médico\nordenadas por hora, con paciente, sede\ny consultorio (RF-21);
+note right: Respuesta ≤ 2 s (RNF-14)
+-[#2F5D56,dashed]->
+
+|Backoffice web (React)|
+:Mostrar la agenda con el estado de cada cita\n(BOOKED, ATTENDED, NO_SHOW, CANCELLED);
+if (¿Hay citas BOOKED para hoy?) then (No)
+  :Mostrar "No tienes citas pendientes para hoy";
+  stop
+else (Sí)
+endif
+
+repeat
+  |Médico|
+  :Seleccionar la cita del paciente;
+  if (¿El paciente se presentó?) then (Sí)
+    :Elegir "Asistió";
+  else (No)
+    :Elegir "No asistió";
+  endif
+  -[#2F5D56,dashed]->
+  |Backoffice web (React)|
+  :Pedir confirmación y enviar\nPATCH /doctor/appointments/{id}/attendance\n{ "status": "ATTENDED" | "NO_SHOW" } (CU-015);
+  -[#2F5D56,dashed]->
+  |API MediCitas|
+  if (¿La cita está BOOKED, es de hoy\ny pertenece al médico?) then (No)
+    :Responder 422 APPOINTMENT_NOT_MODIFIABLE;
+    -[#2F5D56,dashed]->
+    |Backoffice web (React)|
+    :Mostrar el motivo y refrescar la agenda;
+  else (Sí)
+    |API MediCitas|
+    :Abrir transacción;
+    :Cambiar el estado de la cita a\nATTENDED o NO_SHOW (RF-22);
+    :Registrar evento ATTENDANCE en appointment_history\ncon previous_status, new_status y user_id;
+    :Cancelar recordatorios PENDING de la cita;
+    :Registrar ATTENDANCE_REGISTERED en audit_log (CU-013);
+    :Confirmar transacción y responder 200;
+    -[#2F5D56,dashed]->
+    |Backoffice web (React)|
+    :Actualizar la fila de la agenda\ncon el nuevo estado;
+  endif
+  -[#2F5D56,dashed]->
+  |Médico|
+repeat while (¿Quedan citas BOOKED en la agenda?) is (Sí)
+->No;
+
+:Cerrar sesión al terminar el turno (CU-012);
+-[#2F5D56,dashed]->
+|API MediCitas|
+:Invalidar el token y registrar LOGOUT en audit_log;
+stop
+
+@enduml
