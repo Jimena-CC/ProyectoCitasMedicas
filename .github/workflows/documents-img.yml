@@ -48,7 +48,7 @@ jobs:
             echo "--------------------------------------------------"
             
             # Capturar la salida de error combinada de SVG y PNG
-            output=$(plantuml -tsvg -tpng -o "$(realpath "$img_dir")" "$puml_file" 2>&1)
+            output=$(plantuml -tsvg -o "$(realpath "$img_dir")" "$puml_file" 2>&1 && plantuml -tpng -o "$(realpath "$img_dir")" "$puml_file" 2>&1)
             exit_code=$?
             
             if [ $exit_code -ne 0 ]; then
