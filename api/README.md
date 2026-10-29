@@ -92,7 +92,7 @@ Los prefijos del kiosko se abren completos porque el paciente nunca inicia sesi�
 
 Respuestas de error, con el mismo formato `ErrorResponse` del contrato: `401 UNAUTHORIZED` sin token, con token vencido, manipulado o emitido por otro sistema (se valida la firma, la vigencia y el emisor `medicitas-api`), `403 FORBIDDEN` con un rol que no corresponde, `401 INVALID_CREDENTIALS` si el usuario o la contraseña no coinciden (sin decir cuál) y `403 USER_INACTIVE` si el usuario fue desactivado. El estado y el rol del usuario se comprueban en **cada petición con token**, no solo al iniciar sesión: la autoridad `ROLE_<rol>` se construye con el rol guardado en `app_user` (el claim `role` del token es solo informativo), así que desactivar a un usuario o cambiarle el rol surte efecto de inmediato aunque su token no haya vencido.
 
-**Administración (issue #46).** El rol `ADMIN` gestiona bajo `/api/v1/admin/**` los usuarios (alta, perfil, médico vinculado, estado y contraseña; un administrador no puede desactivarse a sí mismo), las especialidades con sus sedes y médicos (lo que se desactiva deja de verse en el kiosko), la agenda de cada médico (generación de cupos sin duplicados y bloqueo de cupos libres), la consulta paginada de la auditoría y los reportes de citas por estado, tasa de inasistencia y ocupación, exportables a CSV. El detalle de cada endpoint está en las secciones 7 y 8 del [contrato](../docs/api-contract.md).
+**Administración (issue #46).** El rol `ADMIN` gestiona bajo `/api/v1/admin/**` los usuarios (alta, perfil, médico vinculado, estado y contraseña; un administrador no puede desactivarse a sí mismo), las especialidades con sus sedes y médicos (lo que se desactiva deja de verse en el kiosko), la agenda de cada médico (generación de cupos sin duplicados y bloqueo de cupos libres), la consulta paginada de la auditoría y los reportes de citas por estado, tasa de inasistencia y ocupación, exportables a CSV y a Excel. El detalle de cada endpoint está en las secciones 7 y 8 del [contrato](../docs/api-contract.md).
 
 **Auditoría.** Cada reserva, reprogramación y anulación escribe una fila en `audit_log` (`APPOINTMENT_BOOKED`, `APPOINTMENT_RESCHEDULED`, `APPOINTMENT_CANCELLED`) con el usuario responsable, la IP de origen y un detalle legible en español, sin nombres técnicos (por ejemplo «Cita MCA-7K2Q9 reservada en el cupo 12 (2026-10-21 09:00, Carla Benavides Ortiz) para el paciente 5 desde el kiosko»); cuando actúa el paciente desde el kiosko el usuario queda en nulo. El inicio de sesión también se audita (`USER_LOGGED_IN`), igual que cada cambio del panel de administración (`USER_*`, `SPECIALTY_*`, `DOCTOR_*`, `SLOTS_GENERATED`, `SLOT_BLOCKED`, `SLOT_UNBLOCKED`). Las mismas operaciones guardan en `appointment_history` el usuario del personal que las realizó, y una reserva hecha con token se registra con canal `FRONT_DESK`.
 
@@ -135,7 +135,7 @@ Base: `/api/v1`. Resumen; el detalle está en el [contrato](../docs/api-contract
 | PATCH | `/admin/slots/{id}/block`, `/admin/slots/{id}/unblock` | Bloquear un cupo libre / desbloquearlo (`ADMIN`) |
 | GET | `/admin/audit?entity&action&userId&from&to&page&size` | Auditoría paginada (`ADMIN`) |
 | GET | `/admin/reports/appointments`, `/no-show-rate`, `/occupancy` (`?from&to`) | Citas por estado, tasa de inasistencia y ocupación (`ADMIN`) |
-| GET | `/admin/reports/export?report&from&to` | Descargar un reporte en CSV UTF-8 (`ADMIN`) |
+| GET | `/admin/reports/export?report&from&to&format` | Descargar un reporte en CSV UTF-8 (por defecto) o Excel con `format=xlsx` (`ADMIN`) |
 
 ## Configuración
 
@@ -179,6 +179,7 @@ Ejemplo: `./mvnw spring-boot:run -Dspring-boot.run.arguments=--messaging.simulat
   - ventanilla (`FrontDeskApiTest`): búsqueda y registro de pacientes, validación de aseguradora vigente/suspendida/vencida/sin seguro, reserva con canal `FRONT_DESK` auditada con el usuario `admision`, cupo tomado (409) y cita duplicada (409), reprogramación y anulación con motivo obligatorio (400 sin motivo), `DOCTOR` recibe 403 y `ADMIN` sí opera.
   - administración (`AdminUsersApiTest`, `AdminCatalogApiTest`, `AdminSlotsApiTest`, `AdminAuditApiTest`): usuarios, especialidades y médicos con su reflejo en el kiosko, generación y bloqueo de cupos, consulta de auditoría, y 403 para los demás roles;
   - reportes (`ReportApiTest`): cifras exactas sobre citas con estados conocidos y exportación CSV.
+  - exportación a Excel (`ReportXlsxApiTest`, `ReportServiceXlsxTest`, `XlsxWriterTest`): libro válido por reporte, mismas filas que el CSV, texto nunca como fórmula y permisos.
 - **Unitarias de médico y admisión** (`DoctorAgendaServiceTest`, `FrontDeskServiceTest`, Mockito): reglas de fecha, estado y pertenencia de la cita; validez de coberturas; delegación en los servicios del kiosko.
 - **Unitarias de administración y reportes** (`SlotGenerationServiceTest`, `ReportServiceTest`): cálculo de horarios sin duplicados y reglas de generación; citas por estado, tasa de inasistencia, ocupación, redondeo de tasas y CSV.
 - **Esquema PostgreSQL** (`PostgresSchemaTest`): levanta un PostgreSQL 15 embebido, sin Docker, ejecuta `initial_schema.sql` y arranca la API con `ddl-auto=validate` y los datos de demostración.
@@ -195,7 +196,7 @@ com.medicitas.api
 ├── demo          Datos de demostración (incluye los usuarios por rol)
 ├── notification  Notificaciones, proveedor de mensajería simulado y tarea programada
 ├── patient       Paciente y seguro
-├── report        Reportes de citas, inasistencia y ocupación con exportación CSV
+├── report        Reportes de citas, inasistencia y ocupación con exportación CSV y Excel (Apache POI)
 ├── schedule      Cupo y consulta de disponibilidad
 ├── security      Usuarios y roles, login con JWT, reglas de acceso y usuario actual
 ├── doctor        Agenda del día y registro de asistencia del médico (Issue #45)

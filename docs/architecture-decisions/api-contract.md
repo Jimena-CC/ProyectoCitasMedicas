@@ -644,7 +644,7 @@ Una fila por especialidad y sede: `slotsTotal` son los cupos generados en el ran
 }
 ```
 
-### `GET /admin/reports/export?report=appointments|no-show-rate|occupancy&from&to`
+### `GET /admin/reports/export?report=appointments|no-show-rate|occupancy&from&to[&format=csv|xlsx][&specialtyId][&locationId]`
 
 Descarga el reporte como CSV (`Content-Type: text/csv;charset=UTF-8`, `Content-Disposition: attachment; filename="reporte-citas_2026-10-01_2026-10-31.csv"`; prefijos `reporte-citas`, `reporte-inasistencia`, `reporte-ocupacion`). El archivo empieza con el BOM UTF-8 (para que Excel reconozca las tildes), separa con coma, termina cada línea con CRLF y entrecomilla solo los valores con comas o comillas. Un `report` desconocido → `400 INVALID_DATA`.
 
@@ -656,6 +656,10 @@ Total,Todas,12,180,21,37,250
 ```
 
 Cabeceras de los otros dos: `especialidad,atendidas,inasistencias,tasa_inasistencia` (última fila `Total`) y `especialidad,sede,cupos,cupos_bloqueados,cupos_ocupados,tasa_ocupacion` (última fila `Total,Todas`).
+
+**Formato.** `format` es opcional: `csv` (por defecto, igual que antes) o `xlsx` (sin distinguir mayúsculas). Con `xlsx` la respuesta es un libro de Excel generado con Apache POI (`Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`, mismo nombre de archivo con extensión `.xlsx`): una hoja con las mismas filas y cifras que el CSV, cabecera en negrita y fija, enteros y tasas como números (las tasas con 4 decimales). Todo texto va como celda de texto, nunca como fórmula. Cualquier otro valor de `format` responde `400 INVALID_DATA` en el campo `format`.
+
+`specialtyId` y `locationId` son opcionales, se aplican solo al reporte `appointments` (en ambos formatos) y responden `404 RESOURCE_NOT_FOUND` si la especialidad o la sede no existen.
 
 ### Códigos de error de las secciones 9 y 10
 

@@ -31,6 +31,10 @@
 		<springdoc.version>3.1.0</springdoc.version>
 		<embedded-postgres.version>2.1.0</embedded-postgres.version>
 		<embedded-postgres-binaries.version>15.13.0</embedded-postgres-binaries.version>
+		<!-- Librerías de apoyo a la codificación -->
+		<guava.version>33.4.8-jre</guava.version>
+		<commons-lang3.version>3.18.0</commons-lang3.version>
+		<poi.version>5.4.1</poi.version>
 	</properties>
 
 	<dependencyManagement>
@@ -72,6 +76,29 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
+
+		<!-- Librerías de apoyo: Guava (precondiciones, colecciones inmutables, cronómetro), Apache Commons Lang
+		     (validación y limpieza de texto), Apache POI (exportación de reportes a Excel) y Logback (registro) -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${guava.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>${commons-lang3.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>${poi.version}</version>
+		</dependency>
+		<!-- Spring Boot ya lo trae por spring-boot-starter-logging; se declara para dejarlo explícito (versión gestionada por Boot) -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
 		</dependency>
 
 		<dependency>

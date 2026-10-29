@@ -16,6 +16,7 @@ import { EmptyState } from '@/components/empty-state';
 import { LoadingState } from '@/components/loading-state';
 import { appointmentsCsv, appointmentsCsvFilename } from '@/features/admin/reports/appointments-csv';
 import { ExportCsvButton } from '@/features/admin/reports/components/export-csv-button';
+import { ExportXlsxButton } from '@/features/admin/reports/components/export-xlsx-button';
 import { ReportError } from '@/features/admin/reports/components/report-error';
 import { StatCard } from '@/features/admin/reports/components/stat-card';
 import { StatusBarChart } from '@/features/admin/reports/components/status-bar-chart';
@@ -78,13 +79,18 @@ export function AppointmentsTab({ filters }: { filters: ReportFilterValues }) {
 
   const report = query.data;
   const { totals } = report;
-  // La exportación de la API no filtra por especialidad ni sede: con esos filtros el CSV se arma aquí (RF-36).
+  // Con filtros de especialidad o sede el CSV se arma aquí (RF-36); el Excel los envía a la API, que los aplica.
   const specialtyName = filters.specialtyId === null ? null : (report.bySpecialty.find((row) => row.specialtyId === filters.specialtyId)?.specialtyName ?? `especialidad ${filters.specialtyId}`);
   const locationName = filters.locationId === null ? null : (report.byLocation.find((row) => row.locationId === filters.locationId)?.locationName ?? `sede ${filters.locationId}`);
   const filterNames = [specialtyName, locationName].filter((name): name is string => name !== null);
   const localFile =
     filterNames.length > 0 ? () => ({ content: appointmentsCsv(report, filterNames.join(' · ')), filename: appointmentsCsvFilename(range, filterNames) }) : undefined;
-  const exportButton = <ExportCsvButton kind='appointments' range={range} localFile={localFile} disabled={totals.total === 0} />;
+  const exportButton = (
+    <div className='flex flex-wrap items-center gap-2'>
+      <ExportCsvButton kind='appointments' range={range} localFile={localFile} disabled={totals.total === 0} />
+      <ExportXlsxButton kind='appointments' range={range} filters={{ specialtyId: filters.specialtyId, locationId: filters.locationId }} disabled={totals.total === 0} />
+    </div>
+  );
 
   if (totals.total === 0) {
     return (
