@@ -36,6 +36,17 @@ export function exportCsv(report: ReportKind, range: ReportRange): Promise<BlobR
   return http.blob('/admin/reports/export', { report, ...range });
 }
 
+/** Filtros opcionales del reporte de citas que la API aplica al exportar a Excel. */
+export interface ExportFilters {
+  specialtyId?: number | null;
+  locationId?: number | null;
+}
+
+/** GET /admin/reports/export?format=xlsx — Excel (.xlsx). Devuelve el Blob y el nombre sugerido. */
+export function exportXlsx(report: ReportKind, range: ReportRange, filters: ExportFilters = {}): Promise<BlobResult> {
+  return http.blob('/admin/reports/export', { report, ...range, format: 'xlsx', specialtyId: filters.specialtyId, locationId: filters.locationId });
+}
+
 /** Descarga el CSV directamente en el navegador. */
 export async function downloadCsv(report: ReportKind, range: ReportRange): Promise<void> {
   const result = await exportCsv(report, range);
@@ -47,5 +58,6 @@ export const reportsApi = {
   getNoShowRateReport,
   getOccupancyReport,
   exportCsv,
+  exportXlsx,
   downloadCsv,
 };

@@ -1,13 +1,16 @@
 package com.medicitas.api.report;
 
+import com.medicitas.api.common.BusinessException;
 import com.medicitas.api.report.ReportDtos.AppointmentsReport;
 import com.medicitas.api.report.ReportDtos.CsvFile;
 import com.medicitas.api.report.ReportDtos.NoShowRateReport;
 import com.medicitas.api.report.ReportDtos.OccupancyReport;
+import com.medicitas.api.report.ReportDtos.XlsxFile;
 import com.medicitas.api.security.ClinicSecurityScheme;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -20,18 +23,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Locale;
 
 /**
  * Reportes del administrador (CU-025 a CU-027, RF-24 a RF-26). Solo rol {@code ADMIN}.
  */
 @RestController
 @RequestMapping("/api/v1/admin/reports")
-@Tag(name = "Administración - Reportes", description = "Citas por estado, inasistencia y ocupación, con exportación CSV")
+@Tag(name = "Administración - Reportes", description = "Citas por estado, inasistencia y ocupación, con exportación CSV y Excel")
 @SecurityRequirement(name = ClinicSecurityScheme.BEARER)
 public class ReportController {
 
     /** Tipo de contenido de la exportación: CSV en UTF-8. */
     static final MediaType TEXT_CSV = new MediaType("text", "csv", StandardCharsets.UTF_8);
+
+    /** Tipo de contenido de la exportación a Excel ({@code .xlsx}). */
+    static final MediaType APPLICATION_XLSX =
+            MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
     private final ReportService reportService;
 
@@ -89,24 +97,42 @@ public class ReportController {
     }
 
     /**
-     * Descarga un reporte en CSV (UTF-8 con BOM, separador coma).
+     * Descarga un reporte en CSV (UTF-8 con BOM, separador coma) o en Excel ({@code .xlsx}).
      *
-     * @param report {@code appointments}, {@code no-show-rate} u {@code occupancy}
-     * @param from   primera fecha (inclusive)
-     * @param to     última fecha (inclusive)
+     * @param report      {@code appointments}, {@code no-show-rate} u {@code occupancy}
+     * @param from        primera fecha (inclusive)
+     * @param to          última fecha (inclusive)
+     * @param format      {@code csv} (por defecto) o {@code xlsx}
+     * @param specialtyId limita el reporte de citas a una especialidad, opcional
+     * @param locationId  limita el reporte de citas a una sede, opcional
      * @return el archivo como adjunto
      */
     @GetMapping("/export")
-    @Operation(summary = "Exportar un reporte a CSV")
+    @Operation(summary = "Exportar un reporte a CSV (por defecto) o a Excel con format=xlsx")
     public ResponseEntity<byte[]> export(
             @RequestParam String report,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-        CsvFile file = reportService.exportCsv(report, from, to);
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(defaultValue = "csv") String format,
+            @RequestParam(required = false) Long specialtyId,
+            @RequestParam(required = false) Long locationId) {
+        String requested = StringUtils.trimToEmpty(format).toLowerCase(Locale.ROOT);
+        if ("csv".equals(requested)) {
+            CsvFile file = reportService.exportCsv(report, from, to, specialtyId, locationId);
+            return attachment(TEXT_CSV, file.fileName(), file.content());
+        }
+        if ("xlsx".equals(requested)) {
+            XlsxFile file = reportService.exportXlsx(report, from, to, specialtyId, locationId);
+            return attachment(APPLICATION_XLSX, file.fileName(), file.content());
+        }
+        throw BusinessException.invalidData("format", "El formato debe ser csv o xlsx.");
+    }
+
+    private static ResponseEntity<byte[]> attachment(MediaType type, String fileName, byte[] content) {
         return ResponseEntity.ok()
-                .contentType(TEXT_CSV)
+                .contentType(type)
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        ContentDisposition.attachment().filename(file.fileName()).build().toString())
-                .body(file.content());
+                        ContentDisposition.attachment().filename(fileName).build().toString())
+                .body(content);
     }
 }

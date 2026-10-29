@@ -8,6 +8,7 @@ import { DataTable } from '@/components/data-table';
 import { EmptyState } from '@/components/empty-state';
 import { LoadingState } from '@/components/loading-state';
 import { ExportCsvButton } from '@/features/admin/reports/components/export-csv-button';
+import { ExportXlsxButton } from '@/features/admin/reports/components/export-xlsx-button';
 import { RateBar } from '@/features/admin/reports/components/rate-bar';
 import { ReportError } from '@/features/admin/reports/components/report-error';
 import { occupancyColor } from '@/features/admin/reports/report-range';
@@ -44,7 +45,12 @@ export function OccupancyTab({ range }: { range: ReportRange }) {
   if (query.isError) return <ReportError error={query.error} onRetry={() => void query.refetch()} />;
 
   const report = query.data;
-  const exportButton = <ExportCsvButton kind='occupancy' range={range} disabled={report.total.slotsTotal === 0} />;
+  const exportButton = (
+    <div className='flex flex-wrap items-center gap-2'>
+      <ExportCsvButton kind='occupancy' range={range} disabled={report.total.slotsTotal === 0} />
+      <ExportXlsxButton kind='occupancy' range={range} disabled={report.total.slotsTotal === 0} />
+    </div>
+  );
 
   if (report.total.slotsTotal === 0) {
     return (
