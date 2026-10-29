@@ -113,7 +113,7 @@ link NotificationChannel to NotificationStatus--><!--MD5=[2403463e30a3614a2b1ae7
 link NotificationStatus to UserRole--><!--MD5=[66d87141e3c39a9e51de004f567f30d0]
 link AppointmentHistory to AuthController--><!--MD5=[ef302da0a9e45a98b7ad05672165b73c]
 link Notification to FrontDeskController--><!--MD5=[4cc5048437488e195b69e79fe697f9f2]
-link AuditLog to AdminController--><rect fill="#FFF8E6" height="74.0234" rx="5" ry="5" style="stroke: #D9B45A; stroke-width: 1.0;" width="354" x="3847" y="2154.8047"/><text fill="#3D3321" font-family="Helvetica" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="54" x="3853" y="2170.0151">Leyenda</text><text fill="#3D3321" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="295" x="3853" y="2182.8198">Borde azul: clases existentes en el código (Fase 1).</text><text fill="#3D3321" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="342" x="3853" y="2195.6245">Borde rojo &lt;&lt;Fase 2&gt;&gt;: clases nuevas del Backoffice web.</text><text fill="#3D3321" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="297" x="3853" y="2208.4292">Los controladores listan sus endpoints bajo /api/v1;</text><text fill="#3D3321" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="314" x="3853" y="2221.2339">los del Backoffice exigen token JWT y rol (RF-17, RF-18).</text><!--MD5=[2af02a8f8eaeafdf5bc7af951c198871]
+link AuditLog to AdminController--><rect fill="#FFF8E6" height="74.0234" rx="5" ry="5" style="stroke: #D9B45A; stroke-width: 1.0;" width="354" x="3847" y="2154.8047"/><text fill="#3D3321" font-family="Helvetica" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="54" x="3853" y="2170.0151">Leyenda</text><text fill="#3D3321" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="295" x="3853" y="2182.8198">Borde azul: clases existentes en el código (Fase 1).</text><text fill="#3D3321" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="342" x="3853" y="2195.6245">Borde rojo &lt;&lt;Fase 2&gt;&gt;: clases nuevas del Backoffice web.</text><text fill="#3D3321" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="297" x="3853" y="2208.4292">Los controladores listan sus endpoints bajo /api/v1;</text><text fill="#3D3321" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="314" x="3853" y="2221.2339">los del Backoffice exigen token JWT y rol (RF-17, RF-18).</text><!--MD5=[a08687eb1f7e30f44805918dd0b804ea]
 @startuml
 title Diagrama de Clases - MediCitas Anglo
 
@@ -594,7 +594,7 @@ PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
 (GPL source distribution)
 Java Runtime: OpenJDK Runtime Environment
 JVM: OpenJDK 64-Bit Server VM
-Java Version: 25.0.4.1+1-LTS
+Java Version: 25.0.5+8-LTS
 Operating System: Linux
 Default Encoding: UTF-8
 Language: en
