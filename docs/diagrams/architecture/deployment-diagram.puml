@@ -1,0 +1,92 @@
+@startuml
+title Diagrama de Despliegue - MediCitas Anglo (9.4 Plan de Despliegue)
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultTextAlignment center
+skinparam roundCorner 8
+skinparam ArrowColor #374151
+
+skinparam node {
+  BackgroundColor #FFFFFF
+  BorderColor #4B5563
+}
+skinparam artifact {
+  BackgroundColor #F9FAFB
+  BorderColor #2563EB
+}
+skinparam database {
+  BackgroundColor #EFF6FF
+  BorderColor #1D4ED8
+}
+
+' ========================================================
+' DISPOSITIVOS CLIENTES
+' ========================================================
+node "Estación Kiosko\n<<device>>" as KIOSK_DEV {
+  node "Sistema Operativo Windows 10/11\n<<execution environment>>" as WIN_OS {
+    artifact "MediCitas Kiosko.exe\n<<artifact>>\n(Instalador jpackage / JRE 21)" as KIOSK_EXE
+    component "Cliente Kiosko Autoservicio\n(JavaFX 21 + HttpClient JDK 21)" as KIOSK_APP
+    KIOSK_EXE ..> KIOSK_APP : <<manifest>>
+  }
+}
+
+node "Estación de Trabajo Personal\n<<device>>" as STAFF_DEV {
+  node "Navegador Web (Chrome / Edge / Firefox)\n<<execution environment>>" as BROWSER {
+    artifact "Cliente Web Backoffice\n<<artifact>>\n(SPA React 19 + TypeScript)" as WEB_SPA
+  }
+}
+
+' ========================================================
+' SERVIDOR DE APLICACIONES
+' ========================================================
+node "Servidor de Aplicaciones (Linux Host)\n<<device>>" as SERVER_DEV {
+
+  node "Docker Engine / Docker Compose\n<<execution environment>>" as DOCKER_ENGINE {
+
+    node "Contenedor: web-frontend\n<<execution environment>>\n(Puerto host 3000 -> 80)" as CONT_WEB {
+      artifact "Servidor Nginx 1.25 Alpine\n<<artifact>>" as NGINX_ART
+      artifact "Archivos Estáticos (/usr/share/nginx/html)\n<<artifact>>" as DIST_ART
+      NGINX_ART ..> DIST_ART : sirve
+    }
+
+    node "Contenedor: api-service\n<<execution environment>>\n(Puerto host 8080 -> 8080)" as CONT_API {
+      node "Eclipse Temurin JRE 21 Alpine\n<<execution environment>>" as JRE_ENV {
+        artifact "app.jar\n<<artifact>>\n(Spring Boot 3.4 REST API)" as API_JAR
+      }
+    }
+
+    node "Contenedor: postgres-db\n<<execution environment>>\n(Puerto host 5432 -> 5432)" as CONT_DB {
+      database "PostgreSQL 15 Alpine\n<<database system>>" as PG_SGBD {
+        database "citas_medicas_db" as DB_NAME
+      }
+    }
+  }
+
+  node "Sistema de Archivos del Host\n<<device>>" as STORAGE_HOST {
+    artifact "Volumen Docker: postgres_data\n<<file system>>\n(/var/lib/postgresql/data)" as VOL_DATA
+  }
+}
+
+' ========================================================
+' RUTAS DE COMUNICACIÓN Y PROTOCOLOS
+' ========================================================
+KIOSK_DEV -- SERVER_DEV : <<protocol: HTTP/JSON>>\nTCP :8080\n(Endpoints de autoatención)
+
+STAFF_DEV -- SERVER_DEV : <<protocol: HTTP>>\nTCP :3000\n(Descarga de la SPA web)
+
+STAFF_DEV -- SERVER_DEV : <<protocol: HTTP/JSON>>\nTCP :8080\n(API REST con JWT y CORS)
+
+CONT_API -- CONT_DB : <<protocol: JDBC/TCP>>\nTCP :5432\n(depends_on: service_healthy)
+
+CONT_DB -- VOL_DATA : <<bind mount>>\n(Persistencia en disco)
+
+legend bottom
+  == Especificación de Despliegue Real ==
+  • **Servidor Central:** Docker Compose orquesta 3 contenedores sobre una red tipo bridge interna.
+  • **Persistencia:** Volumen `postgres_data` montado en el contenedor de PostgreSQL para preservar los datos.
+  • **Kiosko Autoservicio:** PC Windows ejecutando el binario nativo empaquetado con `jpackage`.
+  • **Personal de Admisión / Médicos:** Acceso por navegador web a la SPA (puerto 3000) y llamadas asíncronas a la API (puerto 8080).
+endlegend
+
+@enduml

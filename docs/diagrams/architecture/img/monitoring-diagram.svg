@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="771px" preserveAspectRatio="none" style="width:1389px;height:771px;" version="1.1" viewBox="0 0 1389 771" width="1389px" zoomAndPan="magnify"><defs/><g><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="225" x="585.5" y="11.1387">Plan de Monitoreo - MediCitas Anglo</text><!--MD5=[d676b61de7b9c9579c4db37bce0c5876]
+cluster API - Spring Boot--><polygon fill="#F4F7FC" points="22,362.1588,146,362.1588,153,382.1275,566,382.1275,566,670.5288,22,670.5288,22,362.1588" style="stroke: #B6C9E4; stroke-width: 1.5;"/><line style="stroke: #B6C9E4; stroke-width: 1.5;" x1="22" x2="153" y1="382.1275" y2="382.1275"/><text fill="#0B4FB0" font-family="Helvetica" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="118" x="26" y="375.2974">API - Spring Boot</text><!--MD5=[a40026ea2245e455f9d7fbc14c3f3a6b]
+cluster Base de datos - PostgreSQL--><polygon fill="#F4F7FC" points="891,554.0888,1095,554.0888,1102,574.0575,1354,574.0575,1354,675.0288,891,675.0288,891,554.0888" style="stroke: #B6C9E4; stroke-width: 1.5;"/><line style="stroke: #B6C9E4; stroke-width: 1.5;" x1="891" x2="1102" y1="574.0575" y2="574.0575"/><text fill="#0B4FB0" font-family="Helvetica" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="198" x="895" y="567.2274">Base de datos - PostgreSQL</text><!--MD5=[42591781c74864aa6bd8b9830e23a81c]
+cluster Docker--><polygon fill="#F4F7FC" points="590,376.1288,645,376.1288,652,396.0975,1009,396.0975,1009,474.0888,590,474.0888,590,376.1288" style="stroke: #B6C9E4; stroke-width: 1.5;"/><line style="stroke: #B6C9E4; stroke-width: 1.5;" x1="590" x2="652" y1="396.0975" y2="396.0975"/><text fill="#0B4FB0" font-family="Helvetica" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="49" x="594" y="389.2674">Docker</text><!--MD5=[2849873afadce0ee9016555ac1534993]
+cluster GitHub Actions--><polygon fill="#F4F7FC" points="820,38.2487,930,38.2487,937,58.2175,1012,58.2175,1012,150.1888,820,150.1888,820,38.2487" style="stroke: #B6C9E4; stroke-width: 1.5;"/><line style="stroke: #B6C9E4; stroke-width: 1.5;" x1="820" x2="937" y1="58.2175" y2="58.2175"/><text fill="#0B4FB0" font-family="Helvetica" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="104" x="824" y="51.3874">GitHub Actions</text><!--MD5=[dd6d9d8e233033dde7a134263565a474]
+entity HEALTH--><rect fill="#FFFFFF" height="47.9375" style="stroke: #1069E5; stroke-width: 1.5;" width="122" x="38" y="417.1388"/><rect fill="#FFFFFF" height="5" style="stroke: #1069E5; stroke-width: 1.5;" width="10" x="33" y="422.1388"/><rect fill="#FFFFFF" height="5" style="stroke: #1069E5; stroke-width: 1.5;" width="10" x="33" y="455.0763"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="54" x="48" y="438.2774">Actuator</text><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="102" x="48" y="452.2462">/actuator/health</text><!--MD5=[0e4c61fdc428bfd212df6da00e620717]
+entity LOGS--><rect fill="#FFFFFF" height="47.9375" style="stroke: #1069E5; stroke-width: 1.5;" width="151" x="351.5" y="606.5888"/><rect fill="#FFFFFF" height="5" style="stroke: #1069E5; stroke-width: 1.5;" width="10" x="346.5" y="611.5888"/><rect fill="#FFFFFF" height="5" style="stroke: #1069E5; stroke-width: 1.5;" width="10" x="346.5" y="644.5263"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="131" x="361.5" y="627.7274">Logs de la aplicación</text><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="42" x="361.5" y="641.6962">(SLF4J)</text><!--MD5=[938ead9c671cde8e0813fee3e0ff0b93]
+entity ERR--><rect fill="#FFFFFF" height="47.9375" style="stroke: #1069E5; stroke-width: 1.5;" width="183" x="194.5" y="417.1388"/><rect fill="#FFFFFF" height="5" style="stroke: #1069E5; stroke-width: 1.5;" width="10" x="189.5" y="422.1388"/><rect fill="#FFFFFF" height="5" style="stroke: #1069E5; stroke-width: 1.5;" width="10" x="189.5" y="455.0763"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="163" x="204.5" y="438.2774">Manejo central de errores</text><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="154" x="204.5" y="452.2462">sin stack trace al cliente</text><!--MD5=[b8ea3e7a9f2214d4173d9a5d1f8a4f0f]
+entity JOB--><rect fill="#FFFFFF" height="61.9063" style="stroke: #1069E5; stroke-width: 1.5;" width="137" x="412.5" y="410.1588"/><rect fill="#FFFFFF" height="5" style="stroke: #1069E5; stroke-width: 1.5;" width="10" x="407.5" y="415.1588"/><rect fill="#FFFFFF" height="5" style="stroke: #1069E5; stroke-width: 1.5;" width="10" x="407.5" y="462.065"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="117" x="422.5" y="431.2974">Tarea programada</text><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="107" x="422.5" y="445.2662">de notificaciones</text><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="92" x="422.5" y="459.2349">con reintentos</text><!--MD5=[0e1c0c5557d40d9313e6bfb4a7302173]
+entity AUDIT--><path d="M1152,612.0888 C1152,602.0888 1245,602.0888 1245,602.0888 C1245,602.0888 1338,602.0888 1338,612.0888 L1338,649.0263 C1338,659.0263 1245,659.0263 1245,659.0263 C1245,659.0263 1152,659.0263 1152,649.0263 L1152,612.0888 " fill="#E4EEFD" style="stroke: #1069E5; stroke-width: 1.5;"/><path d="M1152,612.0888 C1152,622.0888 1245,622.0888 1245,622.0888 C1245,622.0888 1338,622.0888 1338,612.0888 " fill="none" style="stroke: #1069E5; stroke-width: 1.5;"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="57" x="1162" y="637.2274">audit_log</text><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="166" x="1162" y="651.1962">acción, usuario, fecha e IP</text><!--MD5=[f5155e6437bc1fad9ab2dc89ab775ca7]
+entity NOTIF--><path d="M907,612.0888 C907,602.0888 1012,602.0888 1012,602.0888 C1012,602.0888 1117,602.0888 1117,612.0888 L1117,649.0263 C1117,659.0263 1012,659.0263 1012,659.0263 C1012,659.0263 907,659.0263 907,649.0263 L907,612.0888 " fill="#E4EEFD" style="stroke: #1069E5; stroke-width: 1.5;"/><path d="M907,612.0888 C907,622.0888 1012,622.0888 1012,622.0888 C1012,622.0888 1117,622.0888 1117,612.0888 " fill="none" style="stroke: #1069E5; stroke-width: 1.5;"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="70" x="917" y="637.2274">notification</text><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="190" x="917" y="651.1962">estado, intentos y error_detail</text><!--MD5=[327c8c86365136e1aab024cfc8c97729]
+entity DHC--><rect fill="#FFFFFF" height="33.9688" style="stroke: #1069E5; stroke-width: 1.5;" width="198" x="606" y="424.1288"/><rect fill="#FFFFFF" height="5" style="stroke: #1069E5; stroke-width: 1.5;" width="10" x="601" y="429.1288"/><rect fill="#FFFFFF" height="5" style="stroke: #1069E5; stroke-width: 1.5;" width="10" x="601" y="448.0975"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="178" x="616" y="445.2674">Healthcheck del contenedor</text><!--MD5=[4583860dc4b042f452e3b020da0c0064]
+entity DLOGS--><rect fill="#FFFFFF" height="33.9688" style="stroke: #1069E5; stroke-width: 1.5;" width="154" x="839" y="424.1288"/><rect fill="#FFFFFF" height="5" style="stroke: #1069E5; stroke-width: 1.5;" width="10" x="834" y="429.1288"/><rect fill="#FFFFFF" height="5" style="stroke: #1069E5; stroke-width: 1.5;" width="10" x="834" y="448.0975"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="134" x="849" y="445.2674">docker compose logs</text><!--MD5=[8335abc75fd0625246f531945d8c0471]
+entity CI--><rect fill="#FFFFFF" height="47.9375" style="stroke: #1069E5; stroke-width: 1.5;" width="160" x="836" y="86.2487"/><rect fill="#FFFFFF" height="5" style="stroke: #1069E5; stroke-width: 1.5;" width="10" x="831" y="91.2487"/><rect fill="#FFFFFF" height="5" style="stroke: #1069E5; stroke-width: 1.5;" width="10" x="831" y="124.1862"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="140" x="846" y="107.3874">Pruebas y compilación</text><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="100" x="846" y="121.3562">en cada cambio</text><!--MD5=[ba188e4ceffebbe07bfd2fa707094214]
+entity TI--><ellipse cx="916" cy="234.6888" fill="#FEFECE" rx="8" ry="8" style="stroke: #A80036; stroke-width: 1.5;"/><path d="M916,242.6888 L916,269.6888 M903,250.6888 L929,250.6888 M916,269.6888 L903,284.6888 M916,269.6888 L929,284.6888 " fill="none" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="121" x="855.5" y="298.3274">Administrador de TI</text><!--MD5=[5bb58f447e60c14e9d23282c6a4405f4]
+entity ADM--><ellipse cx="1096" cy="412.6288" fill="#FEFECE" rx="8" ry="8" style="stroke: #A80036; stroke-width: 1.5;"/><path d="M1096,420.6288 L1096,447.6288 M1083,428.6288 L1109,428.6288 M1096,447.6288 L1083,462.6288 M1096,447.6288 L1109,462.6288 " fill="none" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="135" x="1028.5" y="476.2674">Personal de Admisión</text><path d="M1112.5,722.0288 L1112.5,759.9663 A0,0 0 0 0 1112.5,759.9663 L1377.5,759.9663 A0,0 0 0 0 1377.5,759.9663 L1377.5,732.0288 L1367.5,722.0288 L1249,722.0288 L1245,659.4888 L1241,722.0288 L1112.5,722.0288 A0,0 0 0 0 1112.5,722.0288 " fill="#FFF8E6" style="stroke: #D9B45A; stroke-width: 1.0;"/><path d="M1367.5,722.0288 L1367.5,732.0288 L1377.5,732.0288 L1367.5,722.0288 " fill="#FFF8E6" style="stroke: #D9B45A; stroke-width: 1.0;"/><text fill="#3D3321" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="204" x="1118.5" y="738.1674">Ley N.° 29733: queda registrado</text><text fill="#3D3321" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="244" x="1118.5" y="752.1362">quién hizo cada acción y desde dónde.</text><!--MD5=[d4e60440085e65ecf28895d926470f3c]
+link DHC to HEALTH--><path d="M685.06,423.8788 C659.5,403.0388 612.86,369.1088 566,355.8888 C482.8,332.4188 256.11,321.0588 177,355.8888 C151.22,367.2488 130.25,391.7888 116.57,411.6388 " fill="none" id="DHC-&gt;HEALTH" style="stroke: #374151; stroke-width: 1.0;"/><polygon fill="#374151" points="113.92,415.5788,122.253,410.3289,116.7034,411.4251,115.6072,405.8755,113.92,415.5788" style="stroke: #374151; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="54" x="365" y="343.2974">consulta</text><!--MD5=[bf4aea2876803adce9fbefaab74df4d0]
+link ERR to LOGS--><path d="M303.57,465.4688 C329.5,499.9388 377.94,564.3388 405.8,601.3788 " fill="none" id="ERR-&gt;LOGS" style="stroke: #374151; stroke-width: 1.0;"/><polygon fill="#374151" points="408.52,604.9888,406.32,595.3888,405.52,600.9888,399.92,600.1888,408.52,604.9888" style="stroke: #374151; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="49" x="357.5" y="528.2274">registra</text><!--MD5=[381b45e07eb9355b8efedcddd233a4e7]
+link LOGS to DLOGS--><path d="M498.35,606.1788 C551.51,588.4088 625.72,562.8788 690,538.0888 C749.46,515.1688 763.35,507.0087 822,482.0888 C838.28,475.1788 856.15,467.5788 871.89,460.8788 " fill="none" id="LOGS-&gt;DLOGS" style="stroke: #374151; stroke-width: 1.0;"/><polygon fill="#374151" points="876.19,459.0488,866.3424,458.8916,871.5891,461.0063,869.4744,466.253,876.19,459.0488" style="stroke: #374151; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="108" x="759.49" y="528.2274">se consultan con</text><!--MD5=[ce06d9450a3529017e50d31cfb22bf29]
+link JOB to NOTIF--><path d="M493.79,472.4188 C504.53,494.1188 522,522.2088 546,538.0888 C560.83,547.9088 767.28,586.0288 900.37,609.8488 " fill="none" id="JOB-&gt;NOTIF" style="stroke: #374151; stroke-width: 1.0;"/><polygon fill="#374151" points="905.16,610.7088,897.0122,605.1758,900.2393,609.8219,895.5932,613.049,905.16,610.7088" style="stroke: #374151; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="103" x="562.5" y="521.2274">actualiza estado</text><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="134" x="547" y="535.1962">y número de intentos</text><!--MD5=[270bf436e4c6b1304f85bf8f22ca72a3]
+link TI to DLOGS--><path d="M916,301.4788 C916,336.7388 916,388.4788 916,417.7488 " fill="none" id="TI-&gt;DLOGS" style="stroke: #374151; stroke-width: 1.0;"/><polygon fill="#374151" points="916,422.4788,920,413.4788,916,417.4788,912,413.4788,916,422.4788" style="stroke: #374151; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="87" x="917" y="343.2974">revisa errores</text><!--MD5=[33d2a8322e79a435b278d47cc53e1d7f]
+link TI to HEALTH--><path d="M855.36,265.8388 C737.11,270.0488 467.97,284.3788 247,331.1588 C214.96,337.9388 204.47,336.3288 177,354.1588 C153.67,369.2988 132.82,393.0988 118.56,411.8188 " fill="none" id="TI-&gt;HEALTH" style="stroke: #374151; stroke-width: 1.0;"/><polygon fill="#374151" points="115.63,415.7388,124.23,410.9387,118.63,411.7388,117.83,406.1387,115.63,415.7388" style="stroke: #374151; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="107" x="248" y="343.2974">verifica el estado</text><!--MD5=[3bbae19353dfaa4d7e4916b73df63b8f]
+link TI to AUDIT--><path d="M976.98,268.2288 C1037.5,275.5988 1128.57,296.2588 1181,354.1588 C1242.71,422.2988 1248.38,538.1388 1246.98,595.4088 " fill="none" id="TI-&gt;AUDIT" style="stroke: #374151; stroke-width: 1.0;"/><polygon fill="#374151" points="1246.84,600.2588,1251.0961,591.377,1246.9832,595.2608,1243.0994,591.1479,1246.84,600.2588" style="stroke: #374151; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="125" x="1238.72" y="445.7474">investiga incidentes</text><!--MD5=[3df309c68429e0a589b003ad068a781f]
+link ADM to NOTIF--><path d="M1079.2,479.5888 C1064.01,513.4888 1041.85,562.9588 1027.18,595.6888 " fill="none" id="ADM-&gt;NOTIF" style="stroke: #374151; stroke-width: 1.0;"/><polygon fill="#374151" points="1025.15,600.2188,1032.4815,593.6424,1027.1953,595.6562,1025.1815,590.3699,1025.15,600.2188" style="stroke: #374151; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="76" x="1094.49" y="521.2274">consulta las</text><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="135" x="1064.99" y="535.1962">notificaciones fallidas</text><!--MD5=[23dfe85c92deeb0c7012fbf49bccf0ff]
+link CI to TI--><path d="M916,134.4788 C916,156.7587 916,190.9388 916,218.3388 " fill="none" id="CI-&gt;TI" style="stroke: #374151; stroke-width: 1.0;"/><polygon fill="#374151" points="916,223.2687,920,214.2687,916,218.2687,912,214.2687,916,223.2687" style="stroke: #374151; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="84" x="946" y="178.3274">avisa si fallan</text><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="142" x="917" y="192.2962">pruebas o compilación</text><!--MD5=[14962512f364548fc02fcd046a08a249]
+@startuml
+title Plan de Monitoreo - MediCitas Anglo
+
+skinparam shadowing false
+skinparam defaultFontName "Helvetica"
+skinparam defaultFontSize 12
+skinparam ArrowColor #374151
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #1069E5
+}
+skinparam database {
+  BackgroundColor #E4EEFD
+  BorderColor #1069E5
+}
+skinparam package {
+  BackgroundColor #F4F7FC
+  BorderColor #B6C9E4
+  FontColor #0B4FB0
+  FontStyle bold
+}
+skinparam note {
+  BackgroundColor #FFF8E6
+  BorderColor #D9B45A
+  FontColor #3D3321
+}
+
+actor "Administrador de TI" as TI
+actor "Personal de Admisión" as ADM
+
+package "API - Spring Boot" {
+  component "Actuator\n/actuator/health" as HEALTH
+  component "Logs de la aplicación\n(SLF4J)" as LOGS
+  component "Manejo central de errores\nsin stack trace al cliente" as ERR
+  component "Tarea programada\nde notificaciones\ncon reintentos" as JOB
+}
+
+package "Base de datos - PostgreSQL" {
+  database "audit_log\nacción, usuario, fecha e IP" as AUDIT
+  database "notification\nestado, intentos y error_detail" as NOTIF
+}
+
+package "Docker" {
+  component "Healthcheck del contenedor" as DHC
+  component "docker compose logs" as DLOGS
+}
+
+package "GitHub Actions" {
+  component "Pruebas y compilación\nen cada cambio" as CI
+}
+
+DHC - -> HEALTH : consulta
+ERR - -> LOGS : registra
+LOGS - -> DLOGS : se consultan con
+JOB - -> NOTIF : actualiza estado\ny número de intentos
+
+TI - -> DLOGS : revisa errores
+TI - -> HEALTH : verifica el estado
+TI - -> AUDIT : investiga incidentes
+ADM - -> NOTIF : consulta las\nnotificaciones fallidas
+CI - -> TI : avisa si fallan\npruebas o compilación
+
+note bottom of AUDIT
+  Ley N.° 29733: queda registrado
+  quién hizo cada acción y desde dónde.
+end note
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 25.0.5+8-LTS
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: null
+--></g></svg>

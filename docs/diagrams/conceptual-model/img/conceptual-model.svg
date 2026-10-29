@@ -25,7 +25,7 @@ link Usuario to Medico--><path d="M1121.625,305.4512 C1028.6875,315.4199 827.187
 link Usuario to Auditoria--><path d="M1177.6719,317.0762 C1199.6875,356.873 1256.3594,459.3574 1278.4688,499.3418 " fill="none" id="Usuario-Auditoria" style="stroke: #5A6E69; stroke-width: 1.5625;"/><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="62.5" x="1233.25" y="414.4178">realiza</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="37.5" x="1135.135" y="348.7663">0..1</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="34.375" x="1230.6566" y="482.0594">0..*</text><!--MD5=[b45203015c0b6ea5b4f1e7e6fed69e4c]
 link Usuario to HistorialCita--><path d="M1161.1875,317.2324 C1145.5156,352.5762 1110.9375,439.2324 1110.9375,515.6699 C1110.9375,515.6699 1110.9375,515.6699 1110.9375,952.2949 C1110.9375,1025.7168 1110.9375,1113.3887 1110.9375,1148.7949 " fill="none" id="Usuario-HistorialCita" style="stroke: #5A6E69; stroke-width: 1.5625;"/><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="81.25" x="1112.5" y="742.3553">modifica</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="37.5" x="1072.3781" y="329.3757">0..1</text><text fill="#000000" font-family="Helvetica" font-size="18.75" lengthAdjust="spacingAndGlyphs" textLength="34.375" x="995.7812" y="1131.3897">0..*</text><!--MD5=[79b68242b1cf7066fb153b3ac937481a]
 link PlanSeguro to N1--><path d="M379.8906,317.0762 C392.3125,348.0918 419.9687,417.1855 439.1406,465.1074 " fill="none" id="PlanSeguro-N1" style="stroke: #5A6E69; stroke-width: 1.5625; stroke-dasharray: 7.0,7.0;"/><!--MD5=[9b31825bf66d182d3cfc33f42b082c69]
-link Especialidad to N1--><path d="M640,317.0762 C611.7969,348.0918 548.9531,417.1855 505.375,465.1074 " fill="none" id="Especialidad-N1" style="stroke: #5A6E69; stroke-width: 1.5625; stroke-dasharray: 7.0,7.0;"/><!--MD5=[175e037e2c41f0b2d6a6a6bca5a0b01c]
+link Especialidad to N1--><path d="M640,317.0762 C611.7969,348.0918 548.9531,417.1855 505.375,465.1074 " fill="none" id="Especialidad-N1" style="stroke: #5A6E69; stroke-width: 1.5625; stroke-dasharray: 7.0,7.0;"/><!--MD5=[68bf338a6c28a6696a70dac04c8f542c]
 @startuml
 title Modelo conceptual - MediCitas Anglo
 skinparam shadowing false
@@ -91,7 +91,7 @@ PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
 (GPL source distribution)
 Java Runtime: OpenJDK Runtime Environment
 JVM: OpenJDK 64-Bit Server VM
-Java Version: 25.0.4.1+1-LTS
+Java Version: 25.0.5+8-LTS
 Operating System: Linux
 Default Encoding: UTF-8
 Language: en
