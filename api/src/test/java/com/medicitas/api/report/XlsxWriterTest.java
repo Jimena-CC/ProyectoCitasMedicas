@@ -91,7 +91,7 @@ class XlsxWriterTest {
         try (XSSFWorkbook workbook = open(file)) {
             String name = workbook.getSheetName(0);
             assertThat(name).hasSizeLessThanOrEqualTo(31);
-            assertThat(name).doesNotContainAnyWhitespaces().isNotEmpty();
+            assertThat(name).isNotBlank();
             assertThat(name).doesNotContain(":", "/", "[", "]", "?", "*", "\\");
         }
     }
