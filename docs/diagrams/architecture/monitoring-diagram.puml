@@ -1,0 +1,68 @@
+@startuml
+title Plan de Monitoreo - MediCitas Anglo
+
+skinparam shadowing false
+skinparam defaultFontName "Helvetica"
+skinparam defaultFontSize 12
+skinparam ArrowColor #374151
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #1069E5
+}
+skinparam database {
+  BackgroundColor #E4EEFD
+  BorderColor #1069E5
+}
+skinparam package {
+  BackgroundColor #F4F7FC
+  BorderColor #B6C9E4
+  FontColor #0B4FB0
+  FontStyle bold
+}
+skinparam note {
+  BackgroundColor #FFF8E6
+  BorderColor #D9B45A
+  FontColor #3D3321
+}
+
+actor "Administrador de TI" as TI
+actor "Personal de Admisión" as ADM
+
+package "API - Spring Boot" {
+  component "Actuator\n/actuator/health" as HEALTH
+  component "Logs de la aplicación\n(SLF4J)" as LOGS
+  component "Manejo central de errores\nsin stack trace al cliente" as ERR
+  component "Tarea programada\nde notificaciones\ncon reintentos" as JOB
+}
+
+package "Base de datos - PostgreSQL" {
+  database "audit_log\nacción, usuario, fecha e IP" as AUDIT
+  database "notification\nestado, intentos y error_detail" as NOTIF
+}
+
+package "Docker" {
+  component "Healthcheck del contenedor" as DHC
+  component "docker compose logs" as DLOGS
+}
+
+package "GitHub Actions" {
+  component "Pruebas y compilación\nen cada cambio" as CI
+}
+
+DHC --> HEALTH : consulta
+ERR --> LOGS : registra
+LOGS --> DLOGS : se consultan con
+JOB --> NOTIF : actualiza estado\ny número de intentos
+
+TI --> DLOGS : revisa errores
+TI --> HEALTH : verifica el estado
+TI --> AUDIT : investiga incidentes
+ADM --> NOTIF : consulta las\nnotificaciones fallidas
+CI --> TI : avisa si fallan\npruebas o compilación
+
+note bottom of AUDIT
+  Ley N.° 29733: queda registrado
+  quién hizo cada acción y desde dónde.
+end note
+
+@enduml
