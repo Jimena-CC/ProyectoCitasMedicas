@@ -7,6 +7,7 @@ import com.medicitas.api.common.ErrorCodes;
 import com.medicitas.api.security.AuthDtos.LoginRequest;
 import com.medicitas.api.security.AuthDtos.LoginResponse;
 import com.medicitas.api.security.AuthDtos.UserInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -114,7 +115,7 @@ public class AuthService {
      */
     static String safeForLog(String username) {
         String clean = username.replaceAll("\\p{Cntrl}", "_");
-        return clean.length() > MAX_USERNAME_LENGTH ? clean.substring(0, MAX_USERNAME_LENGTH) : clean;
+        return StringUtils.left(clean, MAX_USERNAME_LENGTH);
     }
 
     /**

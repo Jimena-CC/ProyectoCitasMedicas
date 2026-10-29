@@ -8,6 +8,7 @@ import { DataTable } from '@/components/data-table';
 import { EmptyState } from '@/components/empty-state';
 import { LoadingState } from '@/components/loading-state';
 import { ExportCsvButton } from '@/features/admin/reports/components/export-csv-button';
+import { ExportXlsxButton } from '@/features/admin/reports/components/export-xlsx-button';
 import { RateBar } from '@/features/admin/reports/components/rate-bar';
 import { ReportError } from '@/features/admin/reports/components/report-error';
 import { noShowColor } from '@/features/admin/reports/report-range';
@@ -54,7 +55,12 @@ export function NoShowTab({ range }: { range: ReportRange }) {
 
   const report = query.data;
   const registered = report.total.attended + report.total.noShow;
-  const exportButton = <ExportCsvButton kind='no-show-rate' range={range} disabled={registered === 0} />;
+  const exportButton = (
+    <div className='flex flex-wrap items-center gap-2'>
+      <ExportCsvButton kind='no-show-rate' range={range} disabled={registered === 0} />
+      <ExportXlsxButton kind='no-show-rate' range={range} disabled={registered === 0} />
+    </div>
+  );
 
   if (registered === 0) {
     return (

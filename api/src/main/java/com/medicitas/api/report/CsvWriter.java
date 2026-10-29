@@ -9,7 +9,7 @@ import java.util.Locale;
  * Escritor CSV mínimo para los reportes: separador coma, saltos {@code \r\n}, UTF-8 con BOM para que Excel
  * reconozca las tildes, y comillas solo en los campos que las necesitan.
  */
-final class CsvWriter {
+final class CsvWriter implements TabularWriter {
 
     /** Marca de orden de bytes UTF-8 que Excel usa para detectar la codificación. */
     static final String BOM = "﻿";
@@ -24,7 +24,8 @@ final class CsvWriter {
      * @param values celdas de la fila
      * @return este escritor, para encadenar
      */
-    CsvWriter row(Object... values) {
+    @Override
+    public CsvWriter row(Object... values) {
         StringBuilder line = new StringBuilder();
         for (int i = 0; i < values.length; i++) {
             if (i > 0) {
@@ -41,7 +42,8 @@ final class CsvWriter {
      *
      * @return los bytes UTF-8 con BOM y una línea por fila
      */
-    byte[] toBytes() {
+    @Override
+    public byte[] toBytes() {
         return (BOM + String.join(LINE_SEPARATOR, lines) + LINE_SEPARATOR).getBytes(StandardCharsets.UTF_8);
     }
 

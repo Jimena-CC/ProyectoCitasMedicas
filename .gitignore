@@ -2,6 +2,7 @@
 # 1. PROYECTOS JAVA (API y Desktop en subcarpetas)
 # =====================================================================
 api/target/
+api/logs/
 api/.mvn/wrapper/maven-wrapper.jar
 desktop/target/
 desktop/build/

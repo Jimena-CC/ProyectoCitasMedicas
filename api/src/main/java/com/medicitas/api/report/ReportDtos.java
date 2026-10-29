@@ -210,4 +210,13 @@ public final class ReportDtos {
      */
     public record CsvFile(String fileName, byte[] content) {
     }
+
+    /**
+     * Reporte exportado a Excel.
+     *
+     * @param fileName nombre sugerido, por ejemplo {@code reporte-citas_2026-10-01_2026-10-31.xlsx}
+     * @param content  bytes del libro {@code .xlsx}
+     */
+    public record XlsxFile(String fileName, byte[] content) {
+    }
 }

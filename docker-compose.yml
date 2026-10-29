@@ -31,7 +31,6 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgrespassword}
       
-      # AQUÍ ESTÁN LAS VARIABLES QUE LEE TU application.properties:
       SECURITY_JWT_SECRET: ${SECURITY_JWT_SECRET:?Define SECURITY_JWT_SECRET en el .env}
       SECURITY_JWT_EXPIRATION_MINUTES: ${SECURITY_JWT_EXPIRATION_MINUTES:-480}
       SECURITY_CORS_ALLOWED_ORIGINS: ${SECURITY_CORS_ALLOWED_ORIGINS:-http://localhost:3000}
@@ -54,6 +53,18 @@ services:
       - "3000:80"
     depends_on:
       - api-service
+
+  adminer:
+    image: adminer:latest
+    container_name: citas_adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres-db
+    depends_on:
+      postgres-db:
+        condition: service_healthy
 
 volumes:
   postgres_data:

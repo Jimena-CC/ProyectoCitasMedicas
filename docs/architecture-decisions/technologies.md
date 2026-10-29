@@ -49,7 +49,10 @@ La interfaz se construye **en código Java**, no con archivos FXML. Se evita as�
 | **MapStruct** | 1.6.3 | api | Conversión entidad ↔ DTO. Evita exponer entidades de BD en los endpoints. |
 | **Jackson** | 2.22.2 | desktop | Conversión JSON ↔ objetos Java. En la API ya viene con Spring Web. |
 | **HttpClient (JDK)** | Nativo | desktop | Consumo de la API. Al ser parte de la biblioteca estándar no añade dependencias. |
-| **SLF4J + Logback** | Gestionada por el BOM | api | Registro de eventos. Sustituye el uso de `System.out.println`. |
+| **SLF4J + Logback** | Gestionada por el BOM | api | Registro de eventos. Configurado en `api/src/main/resources/logback-spring.xml`: consola siempre y, con el perfil `postgres`, archivo rotativo diario y por tamaño en `logs/` (14 días). Sin contraseñas, tokens ni datos de salud en los mensajes. |
+| **Google Guava** | 33.4.8-jre | api | `Preconditions` para validar argumentos, `Sets.immutableEnumSet` para conjuntos inmutables y `Stopwatch` para medir y registrar la generación de reportes. |
+| **Apache Commons Lang** | 3.18.0 | api | `StringUtils` y `Validate` para normalizar y validar texto (nombre de usuario en los logs, parámetros de los reportes, títulos de hoja). |
+| **Apache POI** | 5.4.1 (`poi-ooxml`) | api | Exporta los reportes del administrador a Excel (`.xlsx`). El texto se escribe siempre como texto, nunca como fórmula. |
 | **springdoc-openapi** | 3.1.0 | api | Genera la especificación OpenAPI y sirve Swagger UI. Ver sección 3. |
 
 ---

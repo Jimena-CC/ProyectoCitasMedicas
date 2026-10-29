@@ -1,5 +1,7 @@
 package com.medicitas.api.report;
 
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Sets;
 import com.medicitas.api.appointment.AppointmentRepository;
 import com.medicitas.api.appointment.AppointmentStatus;
 import com.medicitas.api.catalog.LocationRepository;
@@ -19,8 +21,12 @@ import com.medicitas.api.report.ReportDtos.OccupancyTotals;
 import com.medicitas.api.report.ReportDtos.SlotFact;
 import com.medicitas.api.report.ReportDtos.SpecialtyStatusRow;
 import com.medicitas.api.report.ReportDtos.StatusTotals;
+import com.medicitas.api.report.ReportDtos.XlsxFile;
 import com.medicitas.api.schedule.SlotRepository;
 import com.medicitas.api.schedule.SlotStatus;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,12 +56,14 @@ import java.util.function.Function;
 @Service
 public class ReportService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ReportService.class);
+
     /** Máximo de días que abarca un reporte (un año, incluido el bisiesto). */
     public static final int MAX_RANGE_DAYS = 366;
 
     /** Estados de cita que ocupan un cupo: reservada, atendida o no asistida. */
     static final Set<AppointmentStatus> OCCUPYING_STATUSES =
-            Set.of(AppointmentStatus.BOOKED, AppointmentStatus.ATTENDED, AppointmentStatus.NO_SHOW);
+            Sets.immutableEnumSet(AppointmentStatus.BOOKED, AppointmentStatus.ATTENDED, AppointmentStatus.NO_SHOW);
 
     private static final int RATE_SCALE = 4;
 
@@ -99,7 +107,7 @@ public class ReportService {
          */
         public static ReportKind fromParam(String value) {
             for (ReportKind kind : values()) {
-                if (kind.param.equalsIgnoreCase(value == null ? "" : value.trim())) {
+                if (kind.param.equalsIgnoreCase(StringUtils.trimToEmpty(value))) {
                     return kind;
                 }
             }
@@ -188,13 +196,55 @@ public class ReportService {
      */
     @Transactional(readOnly = true)
     public CsvFile exportCsv(String report, LocalDate from, LocalDate to) {
+        return exportCsv(report, from, to, null, null);
+    }
+
+    /**
+     * Exporta un reporte a CSV aplicando, en el reporte de citas, los mismos filtros de la pantalla.
+     *
+     * @param report      {@code appointments}, {@code no-show-rate} u {@code occupancy}
+     * @param from        primera fecha (inclusive)
+     * @param to          última fecha (inclusive)
+     * @param specialtyId limita el reporte de citas a una especialidad, opcional (los otros reportes lo ignoran)
+     * @param locationId  limita el reporte de citas a una sede, opcional (los otros reportes lo ignoran)
+     * @return el archivo con su nombre sugerido
+     * @throws BusinessException {@code 400 INVALID_DATA} si el reporte o el rango no son válidos,
+     *                           {@code 404 RESOURCE_NOT_FOUND} si la especialidad o la sede no existen
+     */
+    @Transactional(readOnly = true)
+    public CsvFile exportCsv(String report, LocalDate from, LocalDate to, Long specialtyId, Long locationId) {
         ReportKind kind = ReportKind.fromParam(report);
         byte[] content = switch (kind) {
-            case APPOINTMENTS -> toCsv(appointments(from, to, null, null));
+            case APPOINTMENTS -> toCsv(appointments(from, to, specialtyId, locationId));
             case NO_SHOW_RATE -> toCsv(noShowRate(from, to));
             case OCCUPANCY -> toCsv(occupancy(from, to));
         };
         return new CsvFile(kind.filePrefix + "_" + from + "_" + to + ".csv", content);
+    }
+
+    /**
+     * Exporta un reporte a Excel ({@code .xlsx}, Apache POI) con las mismas cifras que su versión JSON y CSV.
+     *
+     * @param report      {@code appointments}, {@code no-show-rate} u {@code occupancy}
+     * @param from        primera fecha (inclusive)
+     * @param to          última fecha (inclusive)
+     * @param specialtyId limita el reporte de citas a una especialidad, opcional (los otros reportes lo ignoran)
+     * @param locationId  limita el reporte de citas a una sede, opcional (los otros reportes lo ignoran)
+     * @return el archivo con su nombre sugerido
+     * @throws BusinessException {@code 400 INVALID_DATA} si el reporte o el rango no son válidos,
+     *                           {@code 404 RESOURCE_NOT_FOUND} si la especialidad o la sede no existen
+     */
+    @Transactional(readOnly = true)
+    public XlsxFile exportXlsx(String report, LocalDate from, LocalDate to, Long specialtyId, Long locationId) {
+        ReportKind kind = ReportKind.fromParam(report);
+        Stopwatch timer = Stopwatch.createStarted();
+        byte[] content = switch (kind) {
+            case APPOINTMENTS -> toXlsx(appointments(from, to, specialtyId, locationId));
+            case NO_SHOW_RATE -> toXlsx(noShowRate(from, to));
+            case OCCUPANCY -> toXlsx(occupancy(from, to));
+        };
+        logger.info("Reporte {} exportado a Excel: {} bytes en {}", kind.param(), content.length, timer.stop());
+        return new XlsxFile(kind.filePrefix + "_" + from + "_" + to + ".xlsx", content);
     }
 
     /**
@@ -360,16 +410,7 @@ public class ReportService {
      * @return el archivo
      */
     static byte[] toCsv(AppointmentsReport report) {
-        CsvWriter csv = new CsvWriter()
-                .row("grupo", "nombre", "reservadas", "atendidas", "anuladas", "inasistencias", "total");
-        for (SpecialtyStatusRow row : report.bySpecialty()) {
-            appendTotals(csv, "Especialidad", row.specialtyName(), row.totals());
-        }
-        for (LocationStatusRow row : report.byLocation()) {
-            appendTotals(csv, "Sede", row.locationName(), row.totals());
-        }
-        appendTotals(csv, "Total", "Todas", report.totals());
-        return csv.toBytes();
+        return fill(new CsvWriter(), report).toBytes();
     }
 
     /**
@@ -379,12 +420,7 @@ public class ReportService {
      * @return el archivo
      */
     static byte[] toCsv(NoShowRateReport report) {
-        CsvWriter csv = new CsvWriter().row("especialidad", "atendidas", "inasistencias", "tasa_inasistencia");
-        for (NoShowRow row : report.bySpecialty()) {
-            csv.row(row.specialtyName(), row.attended(), row.noShow(), row.rate());
-        }
-        csv.row("Total", report.total().attended(), report.total().noShow(), report.total().rate());
-        return csv.toBytes();
+        return fill(new CsvWriter(), report).toBytes();
     }
 
     /**
@@ -394,19 +430,73 @@ public class ReportService {
      * @return el archivo
      */
     static byte[] toCsv(OccupancyReport report) {
-        CsvWriter csv = new CsvWriter()
-                .row("especialidad", "sede", "cupos", "cupos_bloqueados", "cupos_ocupados", "tasa_ocupacion");
-        for (OccupancyRow row : report.rows()) {
-            csv.row(row.specialtyName(), row.locationName(), row.slotsTotal(), row.slotsBlocked(), row.slotsBooked(),
-                    row.rate());
-        }
-        csv.row("Total", "Todas", report.total().slotsTotal(), report.total().slotsBlocked(),
-                report.total().slotsBooked(), report.total().rate());
-        return csv.toBytes();
+        return fill(new CsvWriter(), report).toBytes();
     }
 
-    private static void appendTotals(CsvWriter csv, String group, String name, StatusTotals totals) {
-        csv.row(group, name, totals.booked(), totals.attended(), totals.cancelled(), totals.noShow(), totals.total());
+    /**
+     * Excel del reporte de citas: las mismas filas que el CSV.
+     *
+     * @param report reporte calculado
+     * @return el libro {@code .xlsx}
+     */
+    static byte[] toXlsx(AppointmentsReport report) {
+        return fill(new XlsxWriter("Citas por estado"), report).toBytes();
+    }
+
+    /**
+     * Excel de la tasa de inasistencia: las mismas filas que el CSV.
+     *
+     * @param report reporte calculado
+     * @return el libro {@code .xlsx}
+     */
+    static byte[] toXlsx(NoShowRateReport report) {
+        return fill(new XlsxWriter("Tasa de inasistencia"), report).toBytes();
+    }
+
+    /**
+     * Excel de la ocupación: las mismas filas que el CSV.
+     *
+     * @param report reporte calculado
+     * @return el libro {@code .xlsx}
+     */
+    static byte[] toXlsx(OccupancyReport report) {
+        return fill(new XlsxWriter("Ocupación"), report).toBytes();
+    }
+
+    private static TabularWriter fill(TabularWriter table, AppointmentsReport report) {
+        table.row("grupo", "nombre", "reservadas", "atendidas", "anuladas", "inasistencias", "total");
+        for (SpecialtyStatusRow row : report.bySpecialty()) {
+            appendTotals(table, "Especialidad", row.specialtyName(), row.totals());
+        }
+        for (LocationStatusRow row : report.byLocation()) {
+            appendTotals(table, "Sede", row.locationName(), row.totals());
+        }
+        appendTotals(table, "Total", "Todas", report.totals());
+        return table;
+    }
+
+    private static TabularWriter fill(TabularWriter table, NoShowRateReport report) {
+        table.row("especialidad", "atendidas", "inasistencias", "tasa_inasistencia");
+        for (NoShowRow row : report.bySpecialty()) {
+            table.row(row.specialtyName(), row.attended(), row.noShow(), row.rate());
+        }
+        table.row("Total", report.total().attended(), report.total().noShow(), report.total().rate());
+        return table;
+    }
+
+    private static TabularWriter fill(TabularWriter table, OccupancyReport report) {
+        table.row("especialidad", "sede", "cupos", "cupos_bloqueados", "cupos_ocupados", "tasa_ocupacion");
+        for (OccupancyRow row : report.rows()) {
+            table.row(row.specialtyName(), row.locationName(), row.slotsTotal(), row.slotsBlocked(),
+                    row.slotsBooked(), row.rate());
+        }
+        table.row("Total", "Todas", report.total().slotsTotal(), report.total().slotsBlocked(),
+                report.total().slotsBooked(), report.total().rate());
+        return table;
+    }
+
+    private static void appendTotals(TabularWriter table, String group, String name, StatusTotals totals) {
+        table.row(group, name, totals.booked(), totals.attended(), totals.cancelled(), totals.noShow(), totals.total());
     }
 
     /** Clave de orden por nombre y, a igual nombre, por id. */
